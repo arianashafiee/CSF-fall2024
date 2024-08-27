@@ -16,6 +16,8 @@ class BigInt {
 private:
   // TODO: add fields
   std::string num;
+  bool neg;
+  
 public:
   //! Default constructor.
   //! The initialized BigInt value should be equal to 0.

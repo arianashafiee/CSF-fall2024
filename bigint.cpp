@@ -37,6 +37,7 @@ BigInt &BigInt::operator=(const BigInt &rhs)
 bool BigInt::is_negative() const
 {
   // TODO: implement MS1
+  return neg;
 }
 
 uint64_t BigInt::get_bits(unsigned index) const
