@@ -95,13 +95,24 @@ std::string BigInt::to_hex() const {
     }
 
     const std::vector<uint64_t>& bit_vector = get_bit_vector();
+    bool leading = true; // Flag to skip leading zeros
 
     for (std::vector<uint64_t>::const_reverse_iterator it = bit_vector.rbegin(); it != bit_vector.rend(); ++it) {
-        oss << std::hex << std::setw(16) << std::setfill('0') << *it;
+        if (leading) {
+            if (*it == 0) {
+                continue; // Skip leading zero groups
+            } else {
+                oss << std::hex << std::hex << *it;
+                leading = false; // Stop skipping after first non-zero group
+            }
+        } else {
+            oss << std::hex << std::setw(16) << std::setfill('0') << *it;
+        }
     }
 
     return oss.str();
 }
+
 
 bool BigInt::is_zero() const {
     return bits.size() == 1 && bits[0] == 0;
