@@ -47,40 +47,39 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
     return bits;
 }
 
-BigInt BigInt::operator+(const BigInt &rhs) const
-{
+BigInt BigInt::operator+(const BigInt &rhs) const {
+    // TODO: implement
+    return BigInt(); // Placeholder return
 }
 
 BigInt BigInt::operator-(const BigInt &rhs) const {
-  // TODO: implement
-
+    // TODO: implement
+    return BigInt(); // Placeholder return
 }
 
-
-
-bool BigInt::is_bit_set(unsigned n) const
-{
-  // TODO: implement
+bool BigInt::is_bit_set(unsigned n) const {
+    // TODO: implement
+    return false; // Placeholder return
 }
 
-BigInt BigInt::operator<<(unsigned n) const
-{
-  // TODO: implement
+BigInt BigInt::operator<<(unsigned n) const {
+    // TODO: implement
+    return BigInt(); // Placeholder return
 }
 
-BigInt BigInt::operator*(const BigInt &rhs) const
-{
-  // TODO: implement
+BigInt BigInt::operator*(const BigInt &rhs) const {
+    // TODO: implement
+    return BigInt(); // Placeholder return
 }
 
-BigInt BigInt::operator/(const BigInt &rhs) const
-{
-  // TODO: implement
+BigInt BigInt::operator/(const BigInt &rhs) const {
+    // TODO: implement
+    return BigInt(); // Placeholder return
 }
 
-int BigInt::compare(const BigInt &rhs) const
-{
-  // TODO: implement
+int BigInt::compare(const BigInt &rhs) const {
+    // TODO: implement
+    return 0; // Placeholder return
 }
 
 std::string BigInt::to_hex() const {
