@@ -1,5 +1,6 @@
 CXX = g++
-CXXFLAGS = -g -Wall -std=c++17 -Wno-return-type
+CXXFLAGS = -g -Wall -std=c++17 
+# -Wno-return-type
 # edit out -Wno-return-type before submission
 #just included to ignore warnings about missing return statements for m2 functions
 CC = gcc
