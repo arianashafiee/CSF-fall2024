@@ -21,7 +21,7 @@ private:
    static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs);
 
 public:
-   bool is_zero() const;
+   //bool is_zero() const;
 
   //! Default constructor.
   //! The initialized BigInt value should be equal to 0.

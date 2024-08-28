@@ -86,10 +86,10 @@ int BigInt::compare(const BigInt &rhs) const
 std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
-    if (is_zero()) {
+   /* if (is_zero()) {
         return "0";
     }
-
+*/
     if (is_negative()) {
         oss << "-";
     }
@@ -103,10 +103,10 @@ std::string BigInt::to_hex() const {
     return oss.str();
 }
 
-bool BigInt::is_zero() const {
+/*bool BigInt::is_zero() const {
     return bits.size() == 1 && bits[0] == 0;
 }
-
+*/
 std::string BigInt::to_dec() const
 {
   // TODO: implement
