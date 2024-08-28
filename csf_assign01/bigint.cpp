@@ -1,5 +1,8 @@
 #include <cassert>
 #include "bigint.h"
+#include <sstream>   // For std::ostringstream
+#include <iomanip>   // For std::setw, std::setfill, std::hex
+#include <ios>
 
 BigInt::BigInt() : bits(1, 0), negative(false) {}
 
