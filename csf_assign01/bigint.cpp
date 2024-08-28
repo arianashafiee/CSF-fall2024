@@ -57,6 +57,13 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
     return BigInt(); // Placeholder return
 }
 
+BigInt BigInt::operator-() const {
+    BigInt result;
+    result.bits = this->bits;  // Copy the bits
+    result.negative = !this->negative;  // Toggle the sign
+    return result;
+}
+
 bool BigInt::is_bit_set(unsigned n) const {
     // TODO: implement
     return false; // Placeholder return
