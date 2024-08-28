@@ -1,6 +1,7 @@
 CXX = g++
-CXXFLAGS = -g -Wall -std=c++17
-
+CXXFLAGS = -g -Wall -std=c++17 -Wno-return-type
+# edit out -Wno-return-type before submission
+#just included to ignore warnings about missing return statements for m2 functions
 CC = gcc
 CFLAGS = -g -Wall -std=gnu11
 
@@ -11,10 +12,10 @@ C_SRCS = tctest.c
 C_OBJS = $(C_SRCS:.c=.o)
 
 %.o : %.cpp
-	$(CXX) $(CXXFLAGS) -c $*.cpp -o $*.o
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 %.o : %.c
-	$(CC) $(CFLAGS) -c $*.c -o $*.o
+	$(CC) $(CFLAGS) -c $< -o $@
 
 bigint_tests : $(CXX_OBJS) $(C_OBJS)
 	$(CXX) -o $@ $(CXX_OBJS) $(C_OBJS)

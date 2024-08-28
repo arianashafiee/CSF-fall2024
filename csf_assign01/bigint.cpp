@@ -1,5 +1,8 @@
 #include <cassert>
 #include "bigint.h"
+#include <sstream>   // For std::ostringstream
+#include <iomanip>   // For std::setw, std::setfill, std::hex
+#include <ios>
 
 BigInt::BigInt() : bits(1, 0), negative(false) {}
 
@@ -46,48 +49,38 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
 
 BigInt BigInt::operator+(const BigInt &rhs) const
 {
-  return BigInt result;
 }
 
 BigInt BigInt::operator-(const BigInt &rhs) const {
   // TODO: implement
-  return BigInt result;
+
 }
 
-BigInt BigInt::operator-() const {
-  return BigInt(bits, !negative);
-}
+
 
 bool BigInt::is_bit_set(unsigned n) const
 {
   // TODO: implement
-    return BigInt result;
 }
 
 BigInt BigInt::operator<<(unsigned n) const
 {
   // TODO: implement
-    return BigInt result;
 }
 
 BigInt BigInt::operator*(const BigInt &rhs) const
 {
   // TODO: implement
-    return BigInt result;
-
 }
 
 BigInt BigInt::operator/(const BigInt &rhs) const
 {
   // TODO: implement
-    return BigInt result;
-
 }
 
 int BigInt::compare(const BigInt &rhs) const
 {
   // TODO: implement
-    return 0;
 }
 
 std::string BigInt::to_hex() const {
@@ -117,5 +110,4 @@ bool BigInt::is_zero() const {
 std::string BigInt::to_dec() const
 {
   // TODO: implement
-  return "placeholder to supress warnings";
 }
