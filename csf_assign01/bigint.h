@@ -16,12 +16,13 @@ class BigInt {
 private:
    std::vector<uint64_t> bits;
    bool negative;
-
    static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs);
    static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs);
    static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs);
 
 public:
+   bool is_zero() const;
+
   //! Default constructor.
   //! The initialized BigInt value should be equal to 0.
   BigInt();
