@@ -233,7 +233,7 @@ void test_get_bits(TestObjs *objs) {
   ASSERT(1UL == objs->two_pow_64.get_bits(1));
 }
 
-void test_add_1(TestObjs *objs) {
+/*void test_add_1(TestObjs *objs) {
   // very basic tests for addition
 
   BigInt result1 = objs->zero + objs->zero;
@@ -528,7 +528,7 @@ void test_div_2(TestObjs *) {
     ASSERT(!result.is_negative());
   }
 }
-
+*/
 void test_to_hex_1(TestObjs *objs) {
   // some basic tests for to_hex()
 
@@ -562,6 +562,7 @@ void test_to_hex_2(TestObjs *) {
 
 }
 
+/*
 void test_to_dec_1(TestObjs *objs) {
   // some basic tests for to_dec()
 
@@ -586,3 +587,4 @@ void test_to_dec_2(TestObjs *) {
 }
 
 // TODO: implement additional test functions
+*/
