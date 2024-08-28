@@ -46,12 +46,12 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
 
 BigInt BigInt::operator+(const BigInt &rhs) const
 {
-  return result;
+  return BigInt result;
 }
 
 BigInt BigInt::operator-(const BigInt &rhs) const {
   // TODO: implement
-  return result;
+  return BigInt result;
 }
 
 BigInt BigInt::operator-() const {
@@ -61,26 +61,26 @@ BigInt BigInt::operator-() const {
 bool BigInt::is_bit_set(unsigned n) const
 {
   // TODO: implement
-    return result;
+    return BigInt result;
 }
 
 BigInt BigInt::operator<<(unsigned n) const
 {
   // TODO: implement
-    return result;
+    return BigInt result;
 }
 
 BigInt BigInt::operator*(const BigInt &rhs) const
 {
   // TODO: implement
-    return result;
+    return BigInt result;
 
 }
 
 BigInt BigInt::operator/(const BigInt &rhs) const
 {
   // TODO: implement
-    return result;
+    return BigInt result;
 
 }
 
