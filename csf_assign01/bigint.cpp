@@ -117,7 +117,7 @@ bool BigInt::is_zero() const {
     return bits.size() == 1 && bits[0] == 0;
 }
 
-std::string BigInt::to_dec() const
-{
-  // TODO: implement
+std::string BigInt::to_dec() const {
+    // TODO: implement
+    return ""; // Placeholder return
 }
