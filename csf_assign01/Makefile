@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -Wall -std=c++17 -Wno-return-type
+CXXFLAGS = -g -Wall -std=c++17
 
 CC = gcc
 CFLAGS = -g -Wall -std=gnu11
@@ -11,10 +11,10 @@ C_SRCS = tctest.c
 C_OBJS = $(C_SRCS:.c=.o)
 
 %.o : %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $*.cpp -o $*.o
 
 %.o : %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $*.c -o $*.o
 
 bigint_tests : $(CXX_OBJS) $(C_OBJS)
 	$(CXX) -o $@ $(CXX_OBJS) $(C_OBJS)
