@@ -20,9 +20,7 @@ BigInt::BigInt(uint64_t val, bool negative)
 BigInt::BigInt(const BigInt &other)
     : bits(other.bits), negative(other.negative) {}
 
-BigInt::~BigInt()
-{
-}
+BigInt::~BigInt() {}
 
 BigInt &BigInt::operator=(const BigInt &rhs) {
     if (this != &rhs) {
@@ -69,7 +67,6 @@ BigInt BigInt::operator+(const BigInt &rhs) const {
     }
 }
 
-
 BigInt BigInt::operator-(const BigInt &rhs) const {
     // Subtract rhs from *this, which is equivalent to adding *this and -rhs
     BigInt neg_rhs = rhs;
@@ -77,37 +74,13 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
     return *this + neg_rhs;
 }
 
-
 BigInt BigInt::operator-() const {
-    // BigInt result;
-    // if (result.negative) {
-    //     result.negative = false;
-    // }
-    // else {
-    //     result.negative = true;
-    // }
-
-    BigInt result;
-    result.bits = this->bits; 
-
-    if (this->is_zero()) {
-        result.negative = false; 
-    } else {
-        result.negative = !this->negative;  
-    result.bits = this->bits;
-
-    if (this->is_zero())
-    {
-        result.negative = false;
-    }
-    else
-    {
+    BigInt result = *this;
+    if (!this->is_zero()) {
         result.negative = !this->negative;
     }
-
     return result;
 }
-
 
 bool BigInt::is_bit_set(unsigned n) const {
     if (n >= bits.size() * 64) {
@@ -124,8 +97,33 @@ bool BigInt::is_bit_set(unsigned n) const {
 }
 
 BigInt BigInt::operator<<(unsigned n) const {
-    // TODO: implement
-    return BigInt(); // Placeholder return
+    if (n == 0) return *this;
+
+    // Prepare the result BigInt
+    BigInt result;
+    size_t shift_words = n / 64;
+    size_t shift_bits = n % 64;
+
+    result.bits.resize(bits.size() + shift_words + 1, 0);
+
+    // Shift bits within each uint64_t element
+    uint64_t carry = 0;
+    for (size_t i = 0; i < bits.size(); ++i) {
+        uint64_t current = bits[i];
+        result.bits[i + shift_words] = (current << shift_bits) | carry;
+        carry = current >> (64 - shift_bits);
+    }
+    result.bits[bits.size() + shift_words] = carry;
+
+    // Remove leading zeros from result.bits
+    while (result.bits.size() > 1 && result.bits.back() == 0) {
+        result.bits.pop_back();
+    }
+
+    // Set the sign of the result
+    result.negative = this->negative;
+
+    return result;
 }
 
 BigInt BigInt::operator*(const BigInt &rhs) const {
@@ -155,7 +153,6 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     return result;
 }
 
-
 BigInt BigInt::operator/(const BigInt &rhs) const {
     // TODO: implement
     return BigInt(); // Placeholder return
@@ -182,7 +179,6 @@ int BigInt::compare(const BigInt &rhs) const {
     return magnitude_comparison;
 }
 
-
 std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
@@ -202,7 +198,7 @@ std::string BigInt::to_hex() const {
             if (*it == 0) {
                 continue; // skip leading zero groups
             } else {
-                oss << std::hex << std::hex << *it;
+                oss << std::hex << *it;
                 leading = false; // stop skipping after first non-zero group
             }
         } else {
@@ -213,9 +209,8 @@ std::string BigInt::to_hex() const {
     return oss.str();
 }
 
-
 bool BigInt::is_zero() const {
-    return bits.empty() || bits.size() == 1 && bits[0] == 0;
+    return bits.empty() || (bits.size() == 1 && bits[0] == 0);
 }
 
 static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
@@ -259,42 +254,41 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t sum = lhs_val + rhs_val + carry;
-        carry = (sum < lhs_val || sum < rhs_val) ? 1 : 0; // Determine carry
+        carry = (sum < lhs_val) ? 1 : 0; // Carry occurs if sum overflowed
         result_bits[i] = sum;
     }
 
-    if (carry > 0) {
-        result_bits.push_back(carry); // Add the final carry if needed
+    if (carry != 0) {
+        result_bits.push_back(carry);
     }
 
-    return BigInt(result_bits, false); // The result of addition is non-negative
+    return BigInt(result_bits, false); // Assuming positive result
 }
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
-    size_t max_size = lhs_bits.size();
-    std::vector<uint64_t> result_bits(max_size, 0);
-
+    std::vector<uint64_t> result_bits(lhs_bits.size(), 0);
     uint64_t borrow = 0;
 
-    for (size_t i = 0; i < max_size; ++i) {
+    for (size_t i = 0; i < lhs_bits.size(); ++i) {
         uint64_t lhs_val = lhs_bits[i];
         uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t diff = lhs_val - rhs_val - borrow;
-        borrow = (diff > lhs_val) ? 1 : 0; // Determine borrow
+        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0; // Borrow occurs if lhs_val is less than rhs_val + borrow
         result_bits[i] = diff;
     }
 
-    // Remove trailing zeros from result_bits
+    // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
     }
 
-    return BigInt(result_bits, false); // The result of subtraction is non-negative
+    return BigInt(result_bits, false); // Assuming positive result
 }
+
 
 BigInt BigInt::div_by_2() const {
     if (is_zero()) {
