@@ -207,6 +207,26 @@ BigInt BigInt::add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     std::vector<uint64_t> result_bits;
     size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
     result_bits.resize(max_size, 0);
+
+    uint64_t carry = 0;
+    for (size_t i = 0; i < max_size; ++i) {
+        uint64_t lhs_val = (i < lhs.bits.size()) ? lhs.bits[i] : 0;
+        uint64_t rhs_val = (i < rhs.bits.size()) ? rhs.bits[i] : 0;
+
+        uint64_t sum = lhs_val + rhs_val + carry;
+        result_bits[i] = sum;
+        carry = (sum < lhs_val) ? 1 : 0; // Carry is set if sum overflowed
+    }
+
+    // Handle final carry
+    if (carry > 0) {
+        result_bits.push_back(carry);
+    }
+
+    // Create and return a new BigInt object
+    return BigInt(result_bits, false);
+}
+
 BigInt BigInt::subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     std::vector<uint64_t> result_bits;
     size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
@@ -236,26 +256,6 @@ BigInt BigInt::subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     // Create and return a new BigInt object
     return BigInt(result_bits, false);
 }
-
-    uint64_t carry = 0;
-    for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs.bits.size()) ? lhs.bits[i] : 0;
-        uint64_t rhs_val = (i < rhs.bits.size()) ? rhs.bits[i] : 0;
-
-        uint64_t sum = lhs_val + rhs_val + carry;
-        result_bits[i] = sum;
-        carry = (sum < lhs_val) ? 1 : 0; // Carry is set if sum overflowed
-    }
-
-    // Handle final carry
-    if (carry > 0) {
-        result_bits.push_back(carry);
-    }
-
-    // Create and return a new BigInt object
-    return BigInt(result_bits, false);
-}
-
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
