@@ -234,3 +234,12 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return BigInt(result_bits, false);
 }
+BigInt BigInt::div_by_2() const {
+    // Implement division by 2
+    return BigInt(); // Placeholder return
+}
+
+std::string BigInt::to_dec() const {
+    // TODO: implement
+    return ""; // Placeholder return
+}
