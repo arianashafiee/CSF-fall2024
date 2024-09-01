@@ -61,20 +61,20 @@ BigInt BigInt::operator-() const {
     BigInt result = *this;
 
     // Invert all bits
-    for (std::size_t i = 0; i < result.bit_string.size(); ++i) {
-        result.bit_string[i] = ~result.bit_string[i];
+    for (std::size_t i = 0; i < result.bits.size(); ++i) {
+        result.bits[i] = ~result.bits[i];
     }
 
     // Add 1 to get the two's complement
     uint64_t carry = 1;
-    for (std::size_t i = 0; i < result.bit_string.size(); ++i) {
-        uint64_t temp = result.bit_string[i] + carry;
-        if (temp < result.bit_string[i]) {  // Check for overflow
+    for (std::size_t i = 0; i < result.bits.size(); ++i) {
+        uint64_t temp = result.bits[i] + carry;
+        if (temp < result.bits[i]) {  // Check for overflow
             carry = 1;
         } else {
             carry = 0;
         }
-        result.bit_string[i] = temp;
+        result.bits[i] = temp;
         if (carry == 0) {
             break;
         }
