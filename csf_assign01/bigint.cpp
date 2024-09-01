@@ -166,7 +166,7 @@ bool BigInt::is_zero() const {
     return bits.empty() || (bits.size() == 1 && bits[0] == 0);
 }
 
-int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
@@ -189,7 +189,7 @@ int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return 0;
 }
 
-BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
@@ -221,7 +221,7 @@ BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return result;
 }
 
-BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
