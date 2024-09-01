@@ -214,12 +214,14 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Use std::copy and std::back_inserter to create the BigInt
-    BigInt result;
-    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result.bits));
-    return result;
+    // Create a BigInt object using the initializer_list constructor
+    return BigInt(result_bits.begin(), result_bits.end(), false);
 }
 
+
+#include <vector>
+#include <algorithm> // For std::copy
+#include <iterator>  // For std::back_inserter
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
@@ -244,11 +246,10 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Use std::copy and std::back_inserter to create the BigInt
-    BigInt result;
-    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result.bits));
-    return result;
+    // Create a BigInt object using the initializer_list constructor
+    return BigInt(result_bits.begin(), result_bits.end(), false);
 }
+
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
