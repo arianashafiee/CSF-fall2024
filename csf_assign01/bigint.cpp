@@ -88,28 +88,22 @@ BigInt BigInt::operator-() const {
     // }
 
     BigInt result;
-<<<<<<< HEAD
     result.bits = this->bits; 
 
     if (this->is_zero()) {
         result.negative = false; 
     } else {
         result.negative = !this->negative;  
-=======
     result.bits = this->bits;
 
     if (this->is_zero())
     {
         result.negative = false;
->>>>>>> 3f304630904a86b442b8398671d8f5525c655212
     }
-<<<<<<< HEAD
-=======
     else
     {
         result.negative = !this->negative;
     }
->>>>>>> 3f304630904a86b442b8398671d8f5525c655212
 
     return result;
 }
