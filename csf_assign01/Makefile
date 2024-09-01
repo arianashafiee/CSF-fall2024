@@ -2,7 +2,6 @@ CXX = g++
 CXXFLAGS = -g -w -std=c++17  # Suppress all warnings
 # Edit out -Wno-return-type before submission
 # Just included to ignore warnings about missing return statements for m2 functions
-
 CC = gcc
 CFLAGS = -g -w -std=gnu11  # Suppress all warnings
 
@@ -12,22 +11,19 @@ CXX_OBJS = $(CXX_SRCS:.cpp=.o)
 C_SRCS = tctest.c
 C_OBJS = $(C_SRCS:.c=.o)
 
-# Rule for compiling .cpp files into .o files
 %.o : %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Rule for compiling .c files into .o files
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Link object files to create the final executable
 bigint_tests : $(CXX_OBJS) $(C_OBJS)
 	$(CXX) -o $@ $(CXX_OBJS) $(C_OBJS)
 
 .PHONY: solution.zip
-solution.zip : $(CXX_SRCS) $(C_SRCS) *.h README.txt
+solution.zip :
 	rm -f $@
-	zip -9r $@ $(CXX_SRCS) $(C_SRCS) *.h README.txt
+	zip -9r $@ *.c *.cpp *.h README.txt
 
 clean :
 	rm -f bigint_tests *.o
