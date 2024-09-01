@@ -193,10 +193,15 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+<<<<<<< HEAD
 
     // Create a temporary BigInt for the result
     BigInt result;
     result.bits.resize(max_size, 0); // Initialize with zeros
+=======
+    std::vector<uint64_t> result_bits;
+    result_bits.reserve(max_size);
+>>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
 
     uint64_t carry = 0;
 
@@ -210,7 +215,11 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     }
 
     if (carry > 0) {
+<<<<<<< HEAD
         result.bits.push_back(carry);
+=======
+        result_bits.push_back(carry);
+>>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
     }
 
     // Set the sign of the result. Assuming it's not negative here.
