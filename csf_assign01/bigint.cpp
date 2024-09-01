@@ -234,6 +234,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits[i] = diff;
     }
 
+
     // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
