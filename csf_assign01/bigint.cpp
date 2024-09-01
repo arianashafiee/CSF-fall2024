@@ -190,9 +190,9 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    std::list<uint64_t> result_list;
-    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result_list));
-    return BigInt(result_list, false);
+    // Convert result_bits to vector and then use the BigInt constructor
+    std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
+    return BigInt(result_vector, false);
 }
 
 // Subtract magnitudes
@@ -219,10 +219,11 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    std::list<uint64_t> result_list;
-    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result_list));
-    return BigInt(result_list, false);
+    // Convert result_bits to vector and then use the BigInt constructor
+    std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
+    return BigInt(result_vector, false);
 }
+
 BigInt BigInt::operator+(const BigInt &rhs) const {
     if (this->is_negative() == rhs.is_negative()) {
         BigInt result = add_magnitudes(*this, rhs);
