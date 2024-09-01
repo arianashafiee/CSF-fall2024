@@ -197,10 +197,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    
-    // Initialize the result BigInt with the maximum size of the vectors.
-    BigInt result;
-    result.bits.resize(max_size, 0);
+    std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t carry = 0;
 
@@ -209,16 +206,19 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t sum = lhs_val + rhs_val + carry;
-        carry = (sum < lhs_val || sum < rhs_val) ? 1 : 0;
-        result.bits[i] = sum;
+        carry = (sum < lhs_val) ? 1 : 0;
+        result_bits[i] = sum;
     }
 
     if (carry > 0) {
-        result.bits.push_back(carry);
+        result_bits.push_back(carry);
     }
 
+    // Construct the BigInt using the public constructor that takes an initializer_list
+    BigInt result(std::move(result_bits), false); // assuming non-negative result
     return result;
 }
+
 
 
 
