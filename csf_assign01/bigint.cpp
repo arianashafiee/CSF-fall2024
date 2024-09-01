@@ -210,8 +210,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t diff = lhs_val - rhs_val - borrow;
-        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
-        result_bits[i] = diff;
+        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0; 
     }
 
     // Remove leading zeros
