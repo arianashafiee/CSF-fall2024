@@ -58,10 +58,14 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
 }
 
 BigInt BigInt::operator-() const {
-    BigInt result;
-    result.bits = this->bits;  // Copy the bits
-    result.negative = !this->negative;  // Toggle the sign
+    BigInt BigInt::operator-() const {
+    BigInt result = *this;   
+    if (!result.is_zero()) { 
+        result.is_negative = !this->is_negative; 
+    }
     return result;
+}
+
 }
 
 bool BigInt::is_bit_set(unsigned n) const {
@@ -92,32 +96,33 @@ int BigInt::compare(const BigInt &rhs) const {
 std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
-    if (is_zero()) {
-        return "0";
+    // Handle the sign
+    if (this->is_negative) {
+        oss << '-';
     }
 
-    if (is_negative()) {
-        oss << "-";
-    }
-
-    const std::vector<uint64_t>& bit_vector = get_bit_vector();
-    bool leading = true; // skip leading zeros
-
-    for (std::vector<uint64_t>::const_reverse_iterator it = bit_vector.rbegin(); it != bit_vector.rend(); ++it) {
-        if (leading) {
-            if (*it == 0) {
-                continue; // skip leading zero groups
-            } else {
-                oss << std::hex << std::hex << *it;
-                leading = false; // stop skipping after first non-zero group
+    // Loop through the vector in reverse to convert each uint64_t to hex
+    bool leading_zero = true; // To skip leading zeros
+    for (std::vector<uint64_t>::const_reverse_iterator it = bit_string.rbegin(); it != bit_string.rend(); ++it) {
+        if (leading_zero) {
+            if (*it != 0) {
+                leading_zero = false;
+                oss << std::hex << *it;
             }
         } else {
-            oss << std::hex << std::setw(16) << std::setfill('0') << *it;
+            // Set width to 16 to ensure full representation of uint64_t
+            oss << std::setfill('0') << std::setw(16) << std::hex << *it;
         }
+    }
+
+    // Handle the case where all bits are zero
+    if (oss.str().empty() || oss.str() == "-") {
+        return "0";
     }
 
     return oss.str();
 }
+
 
 
 bool BigInt::is_zero() const {
