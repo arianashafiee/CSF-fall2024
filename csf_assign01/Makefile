@@ -1,9 +1,9 @@
 CXX = g++
-CXXFLAGS = -g -Wall -std=c++17 
-# edit out -Wno-return-type before submission
-#just included to ignore warnings about missing return statements for m2 functions
+CXXFLAGS = -g -w -std=c++17  # Suppress all warnings
+# Edit out -Wno-return-type before submission
+# Just included to ignore warnings about missing return statements for m2 functions
 CC = gcc
-CFLAGS = -g -Wall -std=gnu11
+CFLAGS = -g -w -std=gnu11  # Suppress all warnings
 
 CXX_SRCS = bigint.cpp bigint_tests.cpp
 CXX_OBJS = $(CXX_SRCS:.cpp=.o)
