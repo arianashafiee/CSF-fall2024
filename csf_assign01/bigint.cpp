@@ -66,7 +66,7 @@ BigInt BigInt::operator-() const {
     return result;
 }
 
-}
+
 
 bool BigInt::is_bit_set(unsigned n) const {
     // TODO: implement
