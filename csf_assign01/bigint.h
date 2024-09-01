@@ -14,6 +14,7 @@
 //! to record whether or not the value is negative.
 class BigInt {
 private:
+  std::vector<uint64_t> bits;
    bool negative;
    static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs);
    static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs);
@@ -22,7 +23,6 @@ private:
 
 public:
    bool is_zero() const;
-    std::vector<uint64_t> bits;
 
 
   //! Default constructor.
