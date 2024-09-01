@@ -187,37 +187,6 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return 0;
 }
-static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
-
-    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::vector<uint64_t> result_bits(max_size, 0);
-
-    uint64_t borrow = 0;
-
-    for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
-        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
-
-        uint64_t diff = lhs_val - rhs_val - borrow;
-        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
-        result_bits[i] = diff;
-    }
-
-    // Remove leading zeros
-    while (result_bits.size() > 1 && result_bits.back() == 0) {
-        result_bits.pop_back();
-    }
-
-    // Create the BigInt object using the initializer list constructor
-    BigInt result{result_bits}; // Use the constructor to directly pass the result_bits
-
-    return result;
-}
-
-
-
 
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
@@ -241,19 +210,34 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Remove leading zeros (not strictly necessary here, but good practice)
+    return BigInt(result_bits, false);
+}
+
+static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+
+    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+    std::vector<uint64_t> result_bits(max_size, 0);
+
+    uint64_t borrow = 0;
+
+    for (size_t i = 0; i < max_size; ++i) {
+        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
+        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
+
+        uint64_t diff = lhs_val - rhs_val - borrow;
+        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
+        result_bits[i] = diff;
+    }
+
+    // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
     }
 
-    // Create the BigInt object using the initializer list constructor
-    BigInt result{result_bits}; // Use the constructor to directly pass the result_bits
-
-    return result;
+    return BigInt(result_bits, false);
 }
-
-
-
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
