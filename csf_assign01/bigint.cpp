@@ -123,7 +123,7 @@ std::string BigInt::to_hex() const {
 
     // Loop through the vector in reverse to convert each uint64_t to hex
     bool leading_zero = true; // To skip leading zeros
-    for (std::vector<uint64_t>::const_reverse_iterator it = bit_string.rbegin(); it != bit_string.rend(); ++it) {
+    for (std::vector<uint64_t>::const_reverse_iterator it = bits.rbegin(); it != bits.rend(); ++it) {
         if (leading_zero) {
             if (*it != 0) {
                 leading_zero = false;
