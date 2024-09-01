@@ -236,7 +236,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    return BigInt(result_bits. false);
+    return BigInt(result_bits, false);
 }
 
 BigInt BigInt::div_by_2() const {
