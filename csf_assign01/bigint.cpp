@@ -58,17 +58,19 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
 }
 
 BigInt BigInt::operator-() const {
-    BigInt result;
-    if (is_zero()) {
-        result.negative = false;
-    }
-    else if (result.negative) {
-        result.negative = false;
-    }
-    else {
-        result.negative = true;
-    }
+    // BigInt result;
+    // if (result.negative) {
+    //     result.negative = false;
+    // }
+    // else {
+    //     result.negative = true;
+    // }
 
+    BigInt result;
+    if (!result.is_zero()) {
+        result.bits = this->bits;          // Copy the bits
+        result.negative = !this->negative; // Toggle the sign
+    }
     return result;
 }
 
