@@ -38,7 +38,7 @@ void test_u64_ctor(TestObjs *objs);
 void test_initlist_ctor(TestObjs *objs);
 void test_copy_ctor(TestObjs *objs);
 void test_get_bits(TestObjs *objs);
-/*void test_add_1(TestObjs *objs);
+void test_add_1(TestObjs *objs);
 void test_add_2(TestObjs *objs);
 void test_add_3(TestObjs *objs);
 void test_add_4(TestObjs *objs);
@@ -48,12 +48,14 @@ void test_sub_3(TestObjs *objs);
 void test_sub_4(TestObjs *objs);
 void test_is_bit_set_1(TestObjs *objs);
 void test_is_bit_set_2(TestObjs *objs);
-void test_lshift_1(TestObjs *objs);
+/*void test_lshift_1(TestObjs *objs);
 void test_lshift_2(TestObjs *objs);
 void test_mul_1(TestObjs *objs);
 void test_mul_2(TestObjs *objs);
+*/
 void test_compare_1(TestObjs *objs);
 void test_compare_2(TestObjs *objs);
+/*
 void test_div_1(TestObjs *objs);
 void test_div_2(TestObjs *objs);
 */
@@ -75,7 +77,7 @@ int main(int argc, char **argv) {
   TEST(test_initlist_ctor);
   TEST(test_copy_ctor);
   TEST(test_get_bits);
-  /*TEST(test_add_1);
+  TEST(test_add_1);
   TEST(test_add_2);
   TEST(test_add_3);
   TEST(test_add_4);
@@ -85,12 +87,15 @@ int main(int argc, char **argv) {
   TEST(test_sub_4);
   TEST(test_is_bit_set_1);
   TEST(test_is_bit_set_2);
+  /*
   TEST(test_lshift_1);
   TEST(test_lshift_2);
   TEST(test_mul_1);
   TEST(test_mul_2);
+  */
   TEST(test_compare_1);
   TEST(test_compare_2);
+  /*
   TEST(test_div_1);
   TEST(test_div_2);
   */
@@ -235,7 +240,7 @@ void test_get_bits(TestObjs *objs) {
   ASSERT(1UL == objs->two_pow_64.get_bits(1));
 }
 
-/*void test_add_1(TestObjs *objs) {
+void test_add_1(TestObjs *objs) {
   // very basic tests for addition
 
   BigInt result1 = objs->zero + objs->zero;
@@ -401,7 +406,7 @@ void test_is_bit_set_2(TestObjs *) {
     ASSERT(val.is_bit_set(241));
   }
 }
-
+/*
 void test_lshift_1(TestObjs *objs) {
   // Some very basic left shift tests
 
@@ -477,7 +482,7 @@ void test_mul_2(TestObjs *) {
     ASSERT(!result.is_negative());
   }
 }
-
+*/
 void test_compare_1(TestObjs *objs) {
   // some basic tests for compare
   ASSERT(objs->zero.compare(objs->zero) == 0);
@@ -498,7 +503,7 @@ void test_compare_2(TestObjs *) {
     ASSERT(result < 0);
   }
 }
-
+/*
 void test_div_1(TestObjs *objs) {
   // Some relatively basic division tests
 
