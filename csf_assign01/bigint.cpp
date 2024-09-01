@@ -59,7 +59,7 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
 
 BigInt BigInt::operator-() const {
     BigInt result;
-    if (is_zero) {
+    if (result.is_zero()) {
         result.negative = false;
     }
     else if (result.negative) {
