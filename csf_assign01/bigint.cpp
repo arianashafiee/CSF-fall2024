@@ -67,7 +67,7 @@ BigInt BigInt::operator-() const {
     // }
 
     BigInt result;
-    if (!result.is_zero()) {
+    if (result.is_zero()) {
         result.bits = this->bits;          // Copy the bits
         result.negative = !this->negative; // Toggle the sign
     }
