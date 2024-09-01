@@ -189,11 +189,16 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Use `auto` to convert `result_bits` to a `BigInt`
-    std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
-    BigInt result(result_vector, false);  // Using existing constructor
+    // Use auto to convert result_bits to a single uint64_t value
+    uint64_t result_val = 0;
+    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
+        result_val = (result_val << 64) | *it;
+    }
+
+    BigInt result(result_val, false);  // Using existing constructor
     return result;
 }
+
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -217,12 +222,15 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Use `auto` to convert `result_bits` to a `BigInt`
-    std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
-    BigInt result(result_vector, false);  // Using existing constructor
+    // Use auto to convert result_bits to a single uint64_t value
+    uint64_t result_val = 0;
+    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
+        result_val = (result_val << 64) | *it;
+    }
+
+    BigInt result(result_val, false);  // Using existing constructor
     return result;
 }
-
 
 
 BigInt BigInt::operator+(const BigInt &rhs) const {
