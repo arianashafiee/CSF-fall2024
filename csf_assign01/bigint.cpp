@@ -88,15 +88,15 @@ BigInt BigInt::operator-() const {
     // }
 
     BigInt result;
-    result.bits = this->bits; 
+    result.bits = this->bits;
 
     if (this->is_zero()) {
-        result.negative = false; 
+        result.negative = false;
     } else {
-        result.negative = !this->negative;  
+        result.negative = !this->negative;
     result.bits = this->bits;
     }
-    
+
 
     return result;
 }
@@ -260,7 +260,9 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry); // Add the final carry if needed
     }
 
-    return BigInt(result_bits, false); // The result of addition is non-negative
+    std::initializer_list<uint64_t> myList;
+    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(myList));
+    return BigInt(myList, false); // The result of addition is non-negative
 }
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
