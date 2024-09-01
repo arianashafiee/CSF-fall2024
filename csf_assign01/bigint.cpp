@@ -167,7 +167,6 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return 0;
 }
-
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -190,12 +189,11 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Convert result_bits to vector and then use the BigInt constructor
+    // Use `auto` to convert `result_bits` to a `BigInt`
     std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
-    return BigInt(result_vector);
+    BigInt result(result_vector, false);  // Using existing constructor
+    return result;
 }
-
-// Subtract magnitudes
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -210,7 +208,8 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t diff = lhs_val - rhs_val - borrow;
-        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0; 
+        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
+        result_bits[i] = diff;
     }
 
     // Remove leading zeros
@@ -218,10 +217,13 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Convert result_bits to vector and then use the BigInt constructor
+    // Use `auto` to convert `result_bits` to a `BigInt`
     std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
-    return BigInt(result_vector);
+    BigInt result(result_vector, false);  // Using existing constructor
+    return result;
 }
+
+
 
 BigInt BigInt::operator+(const BigInt &rhs) const {
     if (this->is_negative() == rhs.is_negative()) {
