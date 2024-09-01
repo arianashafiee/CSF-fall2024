@@ -44,29 +44,6 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
     return bits;
 }
 
-BigInt BigInt::operator+(const BigInt &rhs) const {
-    if (this->is_negative() == rhs.is_negative()) {
-        BigInt result = add_magnitudes(*this, rhs);
-        result.negative = this->is_negative();
-        return result;
-    } else {
-        if (compare_magnitudes(*this, rhs) >= 0) {
-            BigInt result = subtract_magnitudes(*this, rhs);
-            result.negative = this->is_negative();
-            return result;
-        } else {
-            BigInt result = subtract_magnitudes(rhs, *this);
-            result.negative = rhs.is_negative();
-            return result;
-        }
-    }
-}
-
-BigInt BigInt::operator-(const BigInt &rhs) const {
-    BigInt neg_rhs = rhs;
-    neg_rhs.negative = !neg_rhs.is_negative();
-    return *this + neg_rhs;
-}
 
 BigInt BigInt::operator-() const {
     BigInt result = *this;
@@ -210,8 +187,8 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Convert vector to initializer_list using a temporary vector
-    return BigInt({result_bits.begin(), result_bits.end()}, false);
+    // Convert result_bits to a BigInt object
+    return BigInt(std::vector<uint64_t>(result_bits.begin(), result_bits.end()), false);
 }
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
@@ -237,9 +214,34 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Convert vector to initializer_list using a temporary vector
-    return BigInt({result_bits.begin(), result_bits.end()}, false);
+    // Convert result_bits to a BigInt object
+    return BigInt(std::vector<uint64_t>(result_bits.begin(), result_bits.end()), false);
 }
+
+BigInt BigInt::operator+(const BigInt &rhs) const {
+    if (this->is_negative() == rhs.is_negative()) {
+        BigInt result = add_magnitudes(*this, rhs);
+        result.negative = this->is_negative();
+        return result;
+    } else {
+        if (compare_magnitudes(*this, rhs) >= 0) {
+            BigInt result = subtract_magnitudes(*this, rhs);
+            result.negative = this->is_negative();
+            return result;
+        } else {
+            BigInt result = subtract_magnitudes(rhs, *this);
+            result.negative = rhs.is_negative();
+            return result;
+        }
+    }
+}
+
+BigInt BigInt::operator-(const BigInt &rhs) const {
+    BigInt neg_rhs = rhs;
+    neg_rhs.negative = !neg_rhs.is_negative();
+    return *this + neg_rhs;
+}
+
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
