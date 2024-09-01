@@ -58,13 +58,34 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
 }
 
 BigInt BigInt::operator-() const {
-    
-    BigInt result = *this;   
-    if (!result.is_zero()) { 
-        result.is_negative = !this->is_negative; 
+    BigInt result = *this;
+
+    // Invert all bits
+    for (std::size_t i = 0; i < result.bit_string.size(); ++i) {
+        result.bit_string[i] = ~result.bit_string[i];
     }
+
+    // Add 1 to get the two's complement
+    uint64_t carry = 1;
+    for (std::size_t i = 0; i < result.bit_string.size(); ++i) {
+        uint64_t temp = result.bit_string[i] + carry;
+        if (temp < result.bit_string[i]) {  // Check for overflow
+            carry = 1;
+        } else {
+            carry = 0;
+        }
+        result.bit_string[i] = temp;
+        if (carry == 0) {
+            break;
+        }
+    }
+
+    // Toggle the sign
+    result.is_negative = !this->is_negative;
+
     return result;
 }
+
 
 bool BigInt::is_bit_set(unsigned n) const {
     // TODO: implement
@@ -95,7 +116,7 @@ std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
     // Handle the sign
-    if (this->is_negative) {
+    if (is_negative) {
         oss << '-';
     }
 
@@ -120,6 +141,7 @@ std::string BigInt::to_hex() const {
 
     return oss.str();
 }
+
 
 
 
