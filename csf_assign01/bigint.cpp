@@ -188,10 +188,6 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return 0;
 }
 
-#include <vector>
-#include <algorithm> // For std::copy
-#include <iterator>  // For std::back_inserter
-
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -206,7 +202,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t sum = lhs_val + rhs_val + carry;
-        carry = (sum < lhs_val) ? 1 : 0;
+        carry = (sum < lhs_val || sum < rhs_val) ? 1 : 0;
         result_bits[i] = sum;
     }
 
@@ -214,13 +210,8 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Construct the BigInt using the public constructor that takes an initializer_list
-    BigInt result(std::move(result_bits), false); // assuming non-negative result
-    return result;
+    return BigInt(result_bits, false);
 }
-
-
-
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
@@ -245,12 +236,8 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Construct the BigInt using the public constructor that takes an initializer_list
-    BigInt result(std::move(result_bits), false); // assuming non-negative result
-    return result;
+    return BigInt(result_bits, false);
 }
-
-
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
