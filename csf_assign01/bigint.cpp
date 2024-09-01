@@ -58,7 +58,7 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
 }
 
 BigInt BigInt::operator-() const {
-    BigInt BigInt::operator-() const {
+    
     BigInt result = *this;   
     if (!result.is_zero()) { 
         result.is_negative = !this->is_negative; 
