@@ -167,18 +167,15 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return 0;
 }
-static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
-
-    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+BigInt BigInt::add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
     std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t carry = 0;
 
     for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
-        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
+        uint64_t lhs_val = lhs.get_bits(i);
+        uint64_t rhs_val = rhs.get_bits(i);
 
         uint64_t sum = lhs_val + rhs_val + carry;
         carry = (sum < lhs_val || sum < rhs_val) ? 1 : 0;
@@ -189,28 +186,19 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Use auto to convert result_bits to a single uint64_t value
-    uint64_t result_val = 0;
-    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
-        result_val = (result_val << 64) | *it;
-    }
-
-    BigInt result(result_val, false);  // Using existing constructor
-    return result;
+    // Construct and return the resulting BigInt
+    return BigInt(result_bits, false);
 }
 
-static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
-
-    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+BigInt BigInt::subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
     std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t borrow = 0;
 
     for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
-        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
+        uint64_t lhs_val = lhs.get_bits(i);
+        uint64_t rhs_val = rhs.get_bits(i);
 
         uint64_t diff = lhs_val - rhs_val - borrow;
         borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
@@ -222,14 +210,8 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Use auto to convert result_bits to a single uint64_t value
-    uint64_t result_val = 0;
-    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
-        result_val = (result_val << 64) | *it;
-    }
-
-    BigInt result(result_val, false);  // Using existing constructor
-    return result;
+    // Construct and return the resulting BigInt
+    return BigInt(result_bits, false);
 }
 
 
