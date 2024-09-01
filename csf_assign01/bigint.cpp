@@ -138,7 +138,7 @@ std::string BigInt::to_hex() const {
 
 
 bool BigInt::is_zero() const {
-    return bits.size() == 1 && bits[0] == 0;
+    return bits.empty() || bits.size() == 1 && bits[0] == 0;
 }
 
 std::string BigInt::to_dec() const {
