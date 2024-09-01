@@ -215,6 +215,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return BigInt(myList, false);
 }
 
+
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -242,6 +243,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(myList));
     return BigInt(myList, false);
 }
+
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
