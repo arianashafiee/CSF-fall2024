@@ -81,10 +81,11 @@ BigInt BigInt::operator-() const {
     }
 
     // Toggle the sign
-    result.is_negative = !this->is_negative;
+    result.is_negative = !this->is_negative(); // Assuming is_negative() is a member function
 
     return result;
 }
+
 
 
 bool BigInt::is_bit_set(unsigned n) const {
@@ -116,7 +117,7 @@ std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
     // Handle the sign
-    if (is_negative) {
+    if (is_negative()) { // Assuming is_negative() is a member function
         oss << '-';
     }
 
@@ -141,8 +142,6 @@ std::string BigInt::to_hex() const {
 
     return oss.str();
 }
-
-
 
 
 bool BigInt::is_zero() const {
