@@ -188,6 +188,10 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return 0;
 }
 
+#include <vector>
+#include <algorithm> // For std::copy
+#include <iterator>  // For std::back_inserter
+
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -210,8 +214,12 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    return BigInt(result_bitS);
+    // Use std::copy and std::back_inserter to create the BigInt
+    BigInt result;
+    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result.bits));
+    return result;
 }
+
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
@@ -236,7 +244,10 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    return BigInt(result_bits);
+    // Use std::copy and std::back_inserter to create the BigInt
+    BigInt result;
+    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result.bits));
+    return result;
 }
 
 BigInt BigInt::div_by_2() const {
