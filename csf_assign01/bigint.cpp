@@ -207,7 +207,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     }
 
     if (carry > 0) {
-        result_bits.push_back(carry);
+        result_bits.pop_back(carry);
     }
 
     std::initializer_list<uint64_t> myList;
