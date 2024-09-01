@@ -1,5 +1,5 @@
-#include <cassert>
 #include "bigint.h"
+#include <cassert>
 #include <sstream>
 #include <iomanip>
 #include <ios>
@@ -231,13 +231,13 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits[i] = diff;
     }
 
-    // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
     }
 
     return BigInt(result_bits, false);
 }
+
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
