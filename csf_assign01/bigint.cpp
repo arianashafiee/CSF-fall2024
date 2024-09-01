@@ -67,7 +67,29 @@ bool BigInt::is_bit_set(unsigned n) const {
 
 BigInt BigInt::operator<<(unsigned n) const {
     // Implement left shift
-    return BigInt(); // Placeholder return
+    if (n == 0 || is_zero()) {
+        return *this;
+    }
+
+    size_t full_words_shift = n / 64;
+    size_t bit_shift = n % 64;
+    BigInt result;
+
+    result.bits.resize(bits.size() + full_words_shift + 1, 0);
+
+    for (size_t i = 0; i < bits.size(); ++i) {
+        result.bits[i + full_words_shift] |= (bits[i] << bit_shift);
+        if (bit_shift && i + full_words_shift + 1 < result.bits.size()) {
+            result.bits[i + full_words_shift + 1] |= (bits[i] >> (64 - bit_shift));
+        }
+    }
+
+    while (result.bits.size() > 1 && result.bits.back() == 0) {
+        result.bits.pop_back();
+    }
+
+    result.negative = negative;
+    return result;
 }
 
 BigInt BigInt::operator*(const BigInt &rhs) const {
