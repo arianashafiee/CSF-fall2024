@@ -208,7 +208,7 @@ std::string BigInt::to_hex() const {
 
 
 bool BigInt::is_zero() const {
-    return bits.empty() || bits.size() == 1 && bits[0] == 0;
+    return bits.empty() || (bits.size() == 1 && bits[0] == 0);
 }
 
 static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
