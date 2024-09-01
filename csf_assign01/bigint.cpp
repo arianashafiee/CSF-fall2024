@@ -95,15 +95,8 @@ BigInt BigInt::operator-() const {
     } else {
         result.negative = !this->negative;  
     result.bits = this->bits;
-
-    if (this->is_zero())
-    {
-        result.negative = false;
     }
-    else
-    {
-        result.negative = !this->negative;
-    }
+    
 
     return result;
 }
