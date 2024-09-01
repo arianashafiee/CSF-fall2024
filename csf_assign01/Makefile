@@ -1,4 +1,4 @@
-=CXX = g++
+CXX = g++
 CXXFLAGS = -g -Wall -std=c++17
 
 CC = gcc
