@@ -166,8 +166,8 @@ bool BigInt::is_zero() const {
 }
 
 static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     if (lhs_bits.size() > rhs_bits.size()) {
         return 1;
@@ -189,11 +189,11 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 }
 
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::vector<uint64_t> result_bits(max_size, 0);
+    std::initializer_list<uint64_t> result_bits(max_size, 0);
 
     uint64_t carry = 0;
 
@@ -214,11 +214,11 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 }
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::vector<uint64_t> result_bits(max_size, 0);
+    std::initializer_list<uint64_t> result_bits(max_size, 0);
 
     uint64_t borrow = 0;
 
