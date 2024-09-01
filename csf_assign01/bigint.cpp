@@ -192,7 +192,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     // Convert result_bits to vector and then use the BigInt constructor
     std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
-    return BigInt(result_vector, false);
+    return BigInt(result_vector);
 }
 
 // Subtract magnitudes
@@ -220,7 +220,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     // Convert result_bits to vector and then use the BigInt constructor
     std::vector<uint64_t> result_vector(result_bits.begin(), result_bits.end());
-    return BigInt(result_vector, false);
+    return BigInt(result_vector);
 }
 
 BigInt BigInt::operator+(const BigInt &rhs) const {
