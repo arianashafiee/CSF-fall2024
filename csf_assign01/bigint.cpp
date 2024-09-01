@@ -66,11 +66,6 @@ BigInt BigInt::operator-() const {
     return result;
 }
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> b4ba81733e0e6e81be11541328bd5f6a4cdb9b74
 bool BigInt::is_bit_set(unsigned n) const {
     // TODO: implement
     return false; // Placeholder return
