@@ -58,36 +58,19 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
 }
 
 BigInt BigInt::operator-() const {
-    BigInt result = *this;
-
-    // Invert all bits
-    for (std::size_t i = 0; i < result.bits.size(); ++i) {
-        result.bits[i] = ~result.bits[i];
+    BigInt result;
+    if (is_zero) {
+        result.negative = false;
     }
-
-    // Add 1 to get the two's complement
-    uint64_t carry = 1;
-    for (std::size_t i = 0; i < result.bits.size(); ++i) {
-        uint64_t temp = result.bits[i] + carry;
-        if (temp < result.bits[i]) {  // Check for overflow
-            carry = 1;
-        } else {
-            carry = 0;
-        }
-        result.bits[i] = temp;
-        if (carry == 0) {
-            break;
-        }
+    else if (result.negative) {
+        result.negative = false;
     }
-
-    // Toggle the sign
-    result.negative = !this->negative; // Directly access the member variable
+    else {
+        result.negative = true;
+    }
 
     return result;
 }
-
-
-
 
 bool BigInt::is_bit_set(unsigned n) const {
     // TODO: implement
@@ -117,33 +100,32 @@ int BigInt::compare(const BigInt &rhs) const {
 std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
-    // Handle the sign
-    if (negative) { // Directly access the member variable
-        oss << '-';
+    if (is_zero()) {
+        return "0";
     }
 
-    // Loop through the vector in reverse to convert each uint64_t to hex
-    bool leading_zero = true; // To skip leading zeros
-    for (std::vector<uint64_t>::const_reverse_iterator it = bits.rbegin(); it != bits.rend(); ++it) {
-        if (leading_zero) {
-            if (*it != 0) {
-                leading_zero = false;
-                oss << std::hex << *it;
+    if (is_negative()) {
+        oss << "-";
+    }
+
+    const std::vector<uint64_t>& bit_vector = get_bit_vector();
+    bool leading = true; // skip leading zeros
+
+    for (std::vector<uint64_t>::const_reverse_iterator it = bit_vector.rbegin(); it != bit_vector.rend(); ++it) {
+        if (leading) {
+            if (*it == 0) {
+                continue; // skip leading zero groups
+            } else {
+                oss << std::hex << std::hex << *it;
+                leading = false; // stop skipping after first non-zero group
             }
         } else {
-            // Set width to 16 to ensure full representation of uint64_t
-            oss << std::setfill('0') << std::setw(16) << std::hex << *it;
+            oss << std::hex << std::setw(16) << std::setfill('0') << *it;
         }
-    }
-
-    // Handle the case where all bits are zero
-    if (oss.str().empty() || oss.str() == "-") {
-        return "0";
     }
 
     return oss.str();
 }
-
 
 
 bool BigInt::is_zero() const {
