@@ -81,10 +81,11 @@ BigInt BigInt::operator-() const {
     }
 
     // Toggle the sign
-    result.is_negative = !this->is_negative(); // Assuming is_negative() is a member function
+    result.negative = !this->negative; // Directly access the member variable
 
     return result;
 }
+
 
 
 
@@ -117,7 +118,7 @@ std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
     // Handle the sign
-    if (is_negative()) { // Assuming is_negative() is a member function
+    if (negative) { // Directly access the member variable
         oss << '-';
     }
 
@@ -142,6 +143,7 @@ std::string BigInt::to_hex() const {
 
     return oss.str();
 }
+
 
 
 bool BigInt::is_zero() const {
