@@ -202,104 +202,22 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return 0;
 }
-
 BigInt BigInt::add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     // Ensure lhs and rhs are of the same size
     std::vector<uint64_t> result_bits;
     size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
     result_bits.resize(max_size, 0);
-
-<<<<<<< HEAD
-=======
-    const std::vector<uint64_t>& lhs_bits = lhs_copy.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs_copy.get_bit_vector();
-
-    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    // Create a temporary BigInt for the result
-    BigInt result;
-    result.bits.resize(max_size, 0); // Initialize with zeros
-=======
-    std::vector<uint64_t> result_bits;
-    result_bits.reserve(max_size);
->>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
-=======
-    std::vector<uint64_t> result_bits(max_size, 0);
->>>>>>> d53e7f44d689a0932325b28b0360930a7b1f1108
-
->>>>>>> 2ff190e644f04b39f3af12cbc1d1905b04d50a3c
-    uint64_t carry = 0;
-    for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs.bits.size()) ? lhs.bits[i] : 0;
-        uint64_t rhs_val = (i < rhs.bits.size()) ? rhs.bits[i] : 0;
-
-        uint64_t sum = lhs_val + rhs_val + carry;
-<<<<<<< HEAD
-        result_bits[i] = sum;
-        carry = (sum < lhs_val) ? 1 : 0; // Carry is set if sum overflowed
-=======
-        carry = (sum < lhs_val || sum < rhs_val) ? 1 : 0;
-        result.bits[i] = sum;
->>>>>>> 2ff190e644f04b39f3af12cbc1d1905b04d50a3c
-    }
-
-    // Handle final carry
-    if (carry > 0) {
-<<<<<<< HEAD
-        result.bits.push_back(carry);
-=======
-        result_bits.push_back(carry);
->>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
-    }
-
-<<<<<<< HEAD
-    // Create and return a new BigInt object
-    return BigInt(result_bits, false);
-=======
-<<<<<<< HEAD
-    // Set the sign of the result. Assuming it's not negative here.
-    result.negative = false;
-=======
-    // Create a new BigInt object for the result
-    BigInt result;
-    result.bits = result_bits;
-    result.negative = false; // assuming addition of magnitudes should be positive
->>>>>>> d53e7f44d689a0932325b28b0360930a7b1f1108
-
-    return result;
->>>>>>> 2ff190e644f04b39f3af12cbc1d1905b04d50a3c
-}
-
-
-
 BigInt BigInt::subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     std::vector<uint64_t> result_bits;
     size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
     result_bits.resize(max_size, 0);
 
-<<<<<<< HEAD
     int64_t borrow = 0;
-=======
-    const std::vector<uint64_t>& lhs_bits = lhs_copy.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs_copy.get_bit_vector();
-
-    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    
-    // Create a temporary BigInt for the result
-    BigInt result;
-    result.bits.resize(max_size, 0); // Initialize with zeros
-
-    uint64_t borrow = 0;
-
->>>>>>> 2ff190e644f04b39f3af12cbc1d1905b04d50a3c
     for (size_t i = 0; i < max_size; ++i) {
         uint64_t lhs_val = (i < lhs.bits.size()) ? lhs.bits[i] : 0;
         uint64_t rhs_val = (i < rhs.bits.size()) ? rhs.bits[i] : 0;
 
         uint64_t diff = lhs_val - rhs_val - borrow;
-<<<<<<< HEAD
         if (lhs_val < rhs_val + borrow) {
             borrow = 1;
             diff += (1ULL << 64); // Add 2^64 to the difference to handle underflow
@@ -308,38 +226,34 @@ BigInt BigInt::subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         }
 
         result_bits[i] = diff;
-=======
-        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
-        result.bits[i] = diff;
->>>>>>> 2ff190e644f04b39f3af12cbc1d1905b04d50a3c
     }
 
-<<<<<<< HEAD
-    // Remove leading zeros from the result
-    while (result.bits.size() > 1 && result.bits.back() == 0) {
-        result.bits.pop_back();
-    }
-
-    // Set the sign of the result. Assuming it's not negative here.
-    result.negative = false;
-=======
     // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
     }
 
-<<<<<<< HEAD
     // Create and return a new BigInt object
     return BigInt(result_bits, false);
-=======
-    // Create a new BigInt object for the result
-    BigInt result;
-    result.bits = result_bits;
-    result.negative = false; // assuming subtraction of magnitudes should be positive
->>>>>>> d53e7f44d689a0932325b28b0360930a7b1f1108
+}
 
-    return result;
->>>>>>> 2ff190e644f04b39f3af12cbc1d1905b04d50a3c
+    uint64_t carry = 0;
+    for (size_t i = 0; i < max_size; ++i) {
+        uint64_t lhs_val = (i < lhs.bits.size()) ? lhs.bits[i] : 0;
+        uint64_t rhs_val = (i < rhs.bits.size()) ? rhs.bits[i] : 0;
+
+        uint64_t sum = lhs_val + rhs_val + carry;
+        result_bits[i] = sum;
+        carry = (sum < lhs_val) ? 1 : 0; // Carry is set if sum overflowed
+    }
+
+    // Handle final carry
+    if (carry > 0) {
+        result_bits.push_back(carry);
+    }
+
+    // Create and return a new BigInt object
+    return BigInt(result_bits, false);
 }
 
 
