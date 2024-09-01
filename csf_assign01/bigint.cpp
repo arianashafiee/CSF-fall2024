@@ -1,5 +1,5 @@
-#include "bigint.h"
 #include <cassert>
+#include "bigint.h"
 #include <sstream>
 #include <iomanip>
 #include <ios>
@@ -166,8 +166,8 @@ bool BigInt::is_zero() const {
 }
 
 static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     if (lhs_bits.size() > rhs_bits.size()) {
         return 1;
@@ -189,11 +189,11 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 }
 
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::initializer_list<uint64_t> result_bits(max_size, 0);
+    std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t carry = 0;
 
@@ -214,11 +214,11 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 }
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::initializer_list<uint64_t> result_bits(max_size, 0);
+    std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t borrow = 0;
 
@@ -231,13 +231,13 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits[i] = diff;
     }
 
+    // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
     }
 
     return BigInt(result_bits, false);
 }
-
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
