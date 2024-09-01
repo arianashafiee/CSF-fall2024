@@ -245,7 +245,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::vector<uint64_t> result_bits(max_size, 0);
+    std::vector<uint64_t> bits(max_size, 0);
 
     uint64_t carry = 0;
 
@@ -255,21 +255,21 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
         uint64_t sum = lhs_val + rhs_val + carry;
         carry = (sum < lhs_val) ? 1 : 0; // Carry occurs if sum overflowed
-        result_bits[i] = sum;
+        bits[i] = sum;
     }
 
     if (carry != 0) {
-        result_bits.push_back(carry);
+        bits.push_back(carry);
     }
 
-    return BigInt(result_bits, false); // Assuming positive result
+    return BigInt(bits, false); // Assuming positive result
 }
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
-    std::vector<uint64_t> result_bits(lhs_bits.size(), 0);
+    std::vector<uint64_t> bits(lhs_bits.size(), 0);
     uint64_t borrow = 0;
 
     for (size_t i = 0; i < lhs_bits.size(); ++i) {
@@ -278,15 +278,15 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
         uint64_t diff = lhs_val - rhs_val - borrow;
         borrow = (lhs_val < rhs_val + borrow) ? 1 : 0; // Borrow occurs if lhs_val is less than rhs_val + borrow
-        result_bits[i] = diff;
+        bits[i] = diff;
     }
 
     // Remove leading zeros
-    while (result_bits.size() > 1 && result_bits.back() == 0) {
-        result_bits.pop_back();
+    while (bits.size() > 1 && bits.back() == 0) {
+        bits.pop_back();
     }
 
-    return BigInt(result_bits, false); // Assuming positive result
+    return BigInt(bits, false); // Assuming positive result
 }
 
 
@@ -295,23 +295,23 @@ BigInt BigInt::div_by_2() const {
         return BigInt(); // Dividing zero by 2 results in zero
     }
 
-    std::vector<uint64_t> result_bits(bits.size(), 0);
+    std::vector<uint64_t> bits(bits.size(), 0);
 
     uint64_t carry = 0;
 
     for (size_t i = bits.size(); i-- > 0; ) {
         uint64_t current = bits[i];
-        result_bits[i] = (current >> 1) | carry;
+        bits[i] = (current >> 1) | carry;
         carry = (current & 1) ? (1ULL << 63) : 0; // Determine if the carry bit is set for the next iteration
     }
 
     // Remove leading zeros from result_bits
-    while (result_bits.size() > 1 && result_bits.back() == 0) {
-        result_bits.pop_back();
+    while (bits.size() > 1 && bits.back() == 0) {
+        bits.pop_back();
     }
 
     // The sign of the result depends on the original sign
-    return BigInt(result_bits, is_negative());
+    return BigInt(bits, is_negative());
 }
 
 
