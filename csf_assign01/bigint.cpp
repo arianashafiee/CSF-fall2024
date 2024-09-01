@@ -212,13 +212,15 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Create a new BigInt from result_bits
-    BigInt result;
-    result.bits = result_bits;
-    result.negative = false;  // As we are adding magnitudes, the result should not be negative
+    // Use auto to convert result_bits to a single uint64_t value
+    uint64_t result_val = 0;
+    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
+        result_val = (result_val << 64) | *it;
+    }
+
+    BigInt result(result_val, false);  // Using existing constructor
     return result;
 }
-
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
@@ -243,21 +245,23 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Create a new BigInt from result_bits
-    BigInt result;
-    result.bits = result_bits;
-    result.negative = false;  // As we are subtracting magnitudes, the result should not be negative
+    // Use auto to convert result_bits to a single uint64_t value
+    uint64_t result_val = 0;
+    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
+        result_val = (result_val << 64) | *it;
+    }
+
+    BigInt result(result_val, false);  // Using existing constructor
     return result;
 }
 
+
 BigInt BigInt::operator+(const BigInt &rhs) const {
     if (this->is_negative() == rhs.is_negative()) {
-        // Both numbers have the same sign, so add their magnitudes
         BigInt result = add_magnitudes(*this, rhs);
         result.negative = this->is_negative();
         return result;
     } else {
-        // Numbers have different signs, so perform subtraction
         if (compare_magnitudes(*this, rhs) >= 0) {
             BigInt result = subtract_magnitudes(*this, rhs);
             result.negative = this->is_negative();
@@ -269,7 +273,6 @@ BigInt BigInt::operator+(const BigInt &rhs) const {
         }
     }
 }
-
 
 BigInt BigInt::operator-(const BigInt &rhs) const {
     BigInt neg_rhs = rhs;
