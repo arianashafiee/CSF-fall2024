@@ -100,7 +100,7 @@ int BigInt::compare(const BigInt &rhs) const {
 std::string BigInt::to_hex() const {
     std::ostringstream oss;
 
-    if (rersult.is_zero()) {
+    if (is_zero()) {
         return "0";
     }
 
