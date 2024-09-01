@@ -193,8 +193,12 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+<<<<<<< HEAD
+    std::vector<uint64_t> result_bits(max_size, 0);
+=======
     std::vector<uint64_t> result_bits;
     result_bits.reserve(max_size);
+>>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
 
     uint64_t carry = 0;
 
@@ -208,7 +212,11 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     }
 
     if (carry > 0) {
+<<<<<<< HEAD
+        result_bits.p_back(carry);
+=======
         result_bits.push_back(carry);
+>>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
     }
 
     std::initializer_list<uint64_t> myList;
@@ -235,10 +243,16 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits[i] = diff;
     }
 
+<<<<<<< HEAD
+    // Remove leading zeros
+    while (result_bits.size() > 1 && result_bits.back() == 0) {
+        result_bits.pop_back();
+=======
 
     // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
+>>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
     }
 
     std::initializer_list<uint64_t> myList;
