@@ -3,6 +3,9 @@
 #include <sstream>
 #include <iomanip>
 #include <ios>
+#include <list>
+
+
 
 BigInt::BigInt() : bits(1, 0), negative(false) {}
 
