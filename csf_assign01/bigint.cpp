@@ -45,43 +45,28 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
 }
 
 BigInt BigInt::operator+(const BigInt &rhs) const {
-    if (this->negative == rhs.negative) {
-        // Both numbers have the same sign; add magnitudes
-        return add_magnitudes(*this, rhs);
+    if (this->is_negative() == rhs.is_negative()) {
+        BigInt result = add_magnitudes(*this, rhs);
+        result.negative = this->is_negative();
+        return result;
     } else {
-        // Different signs; perform subtraction
         if (compare_magnitudes(*this, rhs) >= 0) {
-            // `*this` is greater or equal to `rhs`
-            return subtract_magnitudes(*this, rhs);
+            BigInt result = subtract_magnitudes(*this, rhs);
+            result.negative = this->is_negative();
+            return result;
         } else {
-            // `rhs` is greater than `*this`
             BigInt result = subtract_magnitudes(rhs, *this);
-            result.negative = rhs.negative;
+            result.negative = rhs.is_negative();
             return result;
         }
     }
 }
-
 
 BigInt BigInt::operator-(const BigInt &rhs) const {
-    if (this->negative == rhs.negative) {
-        if (compare_magnitudes(*this, rhs) >= 0) {
-            // Subtract magnitudes and keep the sign of `*this`
-            return subtract_magnitudes(*this, rhs);
-        } else {
-            // Subtract magnitudes and negate the result
-            BigInt result = subtract_magnitudes(rhs, *this);
-            result.negative = !this->negative;
-            return result;
-        }
-    } else {
-        // If signs are different, add magnitudes
-        BigInt rhs_neg = rhs;
-        rhs_neg.negative = !rhs_neg.negative;
-        return *this + rhs_neg;
-    }
+    BigInt neg_rhs = rhs;
+    neg_rhs.negative = !neg_rhs.is_negative();
+    return *this + neg_rhs;
 }
-
 
 BigInt BigInt::operator-() const {
     BigInt result = *this;
@@ -202,49 +187,49 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return 0;
 }
-BigInt BigInt::add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    // Ensure lhs and rhs are of the same size
-    std::vector<uint64_t> result_bits;
-    size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
-    result_bits.resize(max_size, 0);
+
+static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+
+    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+    std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t carry = 0;
+
     for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs.bits.size()) ? lhs.bits[i] : 0;
-        uint64_t rhs_val = (i < rhs.bits.size()) ? rhs.bits[i] : 0;
+        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
+        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t sum = lhs_val + rhs_val + carry;
+        carry = (sum < lhs_val || sum < rhs_val) ? 1 : 0;
         result_bits[i] = sum;
-        carry = (sum < lhs_val) ? 1 : 0; // Carry is set if sum overflowed
     }
 
-    // Handle final carry
     if (carry > 0) {
         result_bits.push_back(carry);
     }
 
-    // Create and return a new BigInt object
-    return BigInt(result_bits, false);
+    std::initializer_list<uint64_t> myList;
+    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(myList));
+    return BigInt(myList, false);
 }
 
-BigInt BigInt::subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    std::vector<uint64_t> result_bits;
-    size_t max_size = std::max(lhs.bits.size(), rhs.bits.size());
-    result_bits.resize(max_size, 0);
+static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
-    int64_t borrow = 0;
+    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+    std::vector<uint64_t> result_bits(max_size, 0);
+
+    uint64_t borrow = 0;
+
     for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs.bits.size()) ? lhs.bits[i] : 0;
-        uint64_t rhs_val = (i < rhs.bits.size()) ? rhs.bits[i] : 0;
+        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
+        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
 
         uint64_t diff = lhs_val - rhs_val - borrow;
-        if (lhs_val < rhs_val + borrow) {
-            borrow = 1;
-            diff += (1ULL << 64); // Add 2^64 to the difference to handle underflow
-        } else {
-            borrow = 0;
-        }
-
+        borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
         result_bits[i] = diff;
     }
 
@@ -253,8 +238,9 @@ BigInt BigInt::subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Create and return a new BigInt object
-    return BigInt(result_bits, false);
+    std::initializer_list<uint64_t> myList;
+    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(myList));
+    return BigInt(myList, false);
 }
 
 BigInt BigInt::div_by_2() const {
