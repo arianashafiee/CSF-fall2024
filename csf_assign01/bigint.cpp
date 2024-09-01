@@ -227,10 +227,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    
-    // Initialize the result BigInt with the maximum size of the vectors.
-    BigInt result;
-    result.bits.resize(max_size, 0);
+    std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t borrow = 0;
 
@@ -240,16 +237,19 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
         uint64_t diff = lhs_val - rhs_val - borrow;
         borrow = (lhs_val < rhs_val + borrow) ? 1 : 0;
-        result.bits[i] = diff;
+        result_bits[i] = diff;
     }
 
     // Remove leading zeros
-    while (result.bits.size() > 1 && result.bits.back() == 0) {
-        result.bits.pop_back();
+    while (result_bits.size() > 1 && result_bits.back() == 0) {
+        result_bits.pop_back();
     }
 
+    // Construct the BigInt using the public constructor that takes an initializer_list
+    BigInt result(std::move(result_bits), false); // assuming non-negative result
     return result;
 }
+
 
 
 BigInt BigInt::div_by_2() const {
