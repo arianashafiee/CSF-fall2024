@@ -187,41 +187,6 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return 0;
 }
-
-#include <vector>
-#include <algorithm> // For std::copy
-#include <iterator>  // For std::back_inserter
-
-static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
-
-    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::vector<uint64_t> result_bits(max_size, 0);
-
-    uint64_t carry = 0;
-
-    for (size_t i = 0; i < max_size; ++i) {
-        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
-        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
-
-        uint64_t sum = lhs_val + rhs_val + carry;
-        carry = (sum < lhs_val) ? 1 : 0;
-        result_bits[i] = sum;
-    }
-
-    if (carry > 0) {
-        result_bits.push_back(carry);
-    }
-
-    // Construct the BigInt using the public constructor that takes an initializer_list
-    BigInt result(std::move(result_bits), false); // assuming non-negative result
-    return result;
-}
-
-
-
-
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -245,10 +210,48 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Construct the BigInt using the public constructor that takes an initializer_list
-    BigInt result(std::move(result_bits), false); // assuming non-negative result
+    // Create the BigInt object using the initializer list constructor
+    BigInt result{result_bits}; // Use the constructor to directly pass the result_bits
+
     return result;
 }
+
+
+
+
+static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+
+    size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+    std::vector<uint64_t> result_bits(max_size, 0);
+
+    uint64_t carry = 0;
+
+    for (size_t i = 0; i < max_size; ++i) {
+        uint64_t lhs_val = (i < lhs_bits.size()) ? lhs_bits[i] : 0;
+        uint64_t rhs_val = (i < rhs_bits.size()) ? rhs_bits[i] : 0;
+
+        uint64_t sum = lhs_val + rhs_val + carry;
+        carry = (sum < lhs_val || sum < rhs_val) ? 1 : 0;
+        result_bits[i] = sum;
+    }
+
+    if (carry > 0) {
+        result_bits.push_back(carry);
+    }
+
+    // Remove leading zeros (not strictly necessary here, but good practice)
+    while (result_bits.size() > 1 && result_bits.back() == 0) {
+        result_bits.pop_back();
+    }
+
+    // Create the BigInt object using the initializer list constructor
+    BigInt result{result_bits}; // Use the constructor to directly pass the result_bits
+
+    return result;
+}
+
 
 
 
