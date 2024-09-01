@@ -216,7 +216,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     // Use std::copy and std::back_inserter to create the BigInt
     BigInt result;
-    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result.bits));
+    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result_bits));
     return result;
 }
 
@@ -246,7 +246,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     // Use std::copy and std::back_inserter to create the BigInt
     BigInt result;
-    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result.bits));
+    std::copy(result_bits.begin(), result_bits.end(), std::back_inserter(result_bits));
     return result;
 }
 
