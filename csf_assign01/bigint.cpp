@@ -59,8 +59,16 @@ BigInt BigInt::operator-(const BigInt &rhs) const {
 
 BigInt BigInt::operator-() const {
     BigInt result;
-    result.bits = this->bits;  // Copy the bits
-    result.negative = !this->negative;  // Toggle the sign
+    if (is_zero) {
+        result.negative = false;
+    }
+    else if (result.negative) {
+        result.negative = false;
+    }
+    else {
+        result.negative = true;
+    }
+
     return result;
 }
 
