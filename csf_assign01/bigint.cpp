@@ -189,10 +189,15 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 }
 
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    // Create copies of the input BigInts
+    BigInt lhs_copy(lhs);
+    BigInt rhs_copy(rhs);
+
+    const std::vector<uint64_t>& lhs_bits = lhs_copy.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs_copy.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     // Create a temporary BigInt for the result
@@ -202,6 +207,9 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     std::vector<uint64_t> result_bits;
     result_bits.reserve(max_size);
 >>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
+=======
+    std::vector<uint64_t> result_bits(max_size, 0);
+>>>>>>> d53e7f44d689a0932325b28b0360930a7b1f1108
 
     uint64_t carry = 0;
 
@@ -222,8 +230,15 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 >>>>>>> 9a57d511de4851bcb1917055e84cf5ae0a84896f
     }
 
+<<<<<<< HEAD
     // Set the sign of the result. Assuming it's not negative here.
     result.negative = false;
+=======
+    // Create a new BigInt object for the result
+    BigInt result;
+    result.bits = result_bits;
+    result.negative = false; // assuming addition of magnitudes should be positive
+>>>>>>> d53e7f44d689a0932325b28b0360930a7b1f1108
 
     return result;
 }
@@ -231,8 +246,12 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    // Create copies of the input BigInts
+    BigInt lhs_copy(lhs);
+    BigInt rhs_copy(rhs);
+
+    const std::vector<uint64_t>& lhs_bits = lhs_copy.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs_copy.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
     
@@ -251,6 +270,7 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result.bits[i] = diff;
     }
 
+<<<<<<< HEAD
     // Remove leading zeros from the result
     while (result.bits.size() > 1 && result.bits.back() == 0) {
         result.bits.pop_back();
@@ -258,6 +278,17 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     // Set the sign of the result. Assuming it's not negative here.
     result.negative = false;
+=======
+    // Remove leading zeros
+    while (result_bits.size() > 1 && result_bits.back() == 0) {
+        result_bits.pop_back();
+    }
+
+    // Create a new BigInt object for the result
+    BigInt result;
+    result.bits = result_bits;
+    result.negative = false; // assuming subtraction of magnitudes should be positive
+>>>>>>> d53e7f44d689a0932325b28b0360930a7b1f1108
 
     return result;
 }
