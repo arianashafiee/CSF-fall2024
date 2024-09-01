@@ -19,6 +19,7 @@ private:
    static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs);
    static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs);
    static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs);
+   BigInt div_by_2() const
 
 public:
    bool is_zero() const;
