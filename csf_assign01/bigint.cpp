@@ -188,8 +188,7 @@ bool BigInt::is_zero() const {
 
     return 0;
 }
-
- BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
@@ -211,17 +210,14 @@ bool BigInt::is_zero() const {
         result_bits.push_back(carry);
     }
 
-    // Use auto to convert result_bits to a single uint64_t value
-    uint64_t result_val = 0;
-    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
-        result_val = (result_val << 64) | *it;
-    }
+    // Create an initializer list from result_bits
+    std::initializer_list<uint64_t> result_val = { result_bits.begin(), result_bits.end() };
 
-    BigInt result(result_val, false);  // Using existing constructor
+    // Return a BigInt object
+    BigInt result(result_val, false);  // false indicates the result is positive
     return result;
 }
-
- BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
@@ -244,15 +240,14 @@ bool BigInt::is_zero() const {
         result_bits.pop_back();
     }
 
-    // Use auto to convert result_bits to a single uint64_t value
-    uint64_t result_val = 0;
-    for (auto it = result_bits.rbegin(); it != result_bits.rend(); ++it) {
-        result_val = (result_val << 64) | *it;
-    }
+    // Create an initializer list from result_bits
+    std::initializer_list<uint64_t> result_val = { result_bits.begin(), result_bits.end() };
 
-    BigInt result(result_val, false);  // Using existing constructor
+    // Return a BigInt object
+    BigInt result(result_val, false);  // false indicates the result is positive
     return result;
 }
+
 
 
 BigInt BigInt::operator+(const BigInt &rhs) const {
