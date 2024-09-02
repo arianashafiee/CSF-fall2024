@@ -1,10 +1,8 @@
-#include <cassert>
 #include "bigint.h"
+#include <cassert>
 #include <sstream>
 #include <iomanip>
 #include <ios>
-
-
 
 BigInt::BigInt() : bits(1, 0), negative(false) {}
 
@@ -46,6 +44,29 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
     return bits;
 }
 
+BigInt BigInt::operator+(const BigInt &rhs) const {
+    if (this->is_negative() == rhs.is_negative()) {
+        BigInt result = add_magnitudes(*this, rhs);
+        result.negative = this->is_negative();
+        return result;
+    } else {
+        if (compare_magnitudes(*this, rhs) >= 0) {
+            BigInt result = subtract_magnitudes(*this, rhs);
+            result.negative = this->is_negative();
+            return result;
+        } else {
+            BigInt result = subtract_magnitudes(rhs, *this);
+            result.negative = rhs.is_negative();
+            return result;
+        }
+    }
+}
+
+BigInt BigInt::operator-(const BigInt &rhs) const {
+    BigInt neg_rhs = rhs;
+    neg_rhs.negative = !neg_rhs.is_negative();
+    return *this + neg_rhs;
+}
 
 BigInt BigInt::operator-() const {
     BigInt result = *this;
@@ -66,29 +87,7 @@ bool BigInt::is_bit_set(unsigned n) const {
 
 BigInt BigInt::operator<<(unsigned n) const {
     // Implement left shift
-    if (n == 0 || is_zero()) {
-        return *this;
-    }
-
-    size_t full_words_shift = n / 64;
-    size_t bit_shift = n % 64;
-    BigInt result;
-
-    result.bits.resize(bits.size() + full_words_shift + 1, 0);
-
-    for (size_t i = 0; i < bits.size(); ++i) {
-        result.bits[i + full_words_shift] |= (bits[i] << bit_shift);
-        if (bit_shift && i + full_words_shift + 1 < result.bits.size()) {
-            result.bits[i + full_words_shift + 1] |= (bits[i] >> (64 - bit_shift));
-        }
-    }
-
-    while (result.bits.size() > 1 && result.bits.back() == 0) {
-        result.bits.pop_back();
-    }
-
-    result.negative = negative;
-    return result;
+    return BigInt(); // Placeholder return
 }
 
 BigInt BigInt::operator*(const BigInt &rhs) const {
@@ -166,9 +165,9 @@ bool BigInt::is_zero() const {
     return bits.empty() || (bits.size() == 1 && bits[0] == 0);
 }
 
- int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     if (lhs_bits.size() > rhs_bits.size()) {
         return 1;
@@ -189,12 +188,12 @@ bool BigInt::is_zero() const {
     return 0;
 }
 
-BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::vector<uint64_t> result_bits(max_size, 0);
+    std::initializer_list<uint64_t> result_bits(max_size, 0);
 
     uint64_t carry = 0;
 
@@ -211,24 +210,15 @@ BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Create an initializer list by iterating through result_bits
-    std::initializer_list<uint64_t> result_val = [result_bits]() {
-        std::initializer_list<uint64_t> temp_list = {};
-        for (auto it = result_bits.begin(); it != result_bits.end(); ++it) {
-            temp_list = {temp_list, *it};
-        }
-        return temp_list;
-    }();
-
-    BigInt result(result_val, false);  // Using the existing constructor
-    return result;
+    return BigInt(result_bits, false);
 }
-BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+
+static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::vector<uint64_t> result_bits(max_size, 0);
+    std::initializer_list<uint64_t> result_bits(max_size, 0);
 
     uint64_t borrow = 0;
 
@@ -241,46 +231,11 @@ BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits[i] = diff;
     }
 
-    // Remove leading zeros
     while (result_bits.size() > 1 && result_bits.back() == 0) {
         result_bits.pop_back();
     }
 
-    // Create an initializer list by iterating through result_bits
-    std::initializer_list<uint64_t> result_val = [result_bits]() {
-        std::initializer_list<uint64_t> temp_list = {};
-        for (auto it = result_bits.begin(); it != result_bits.end(); ++it) {
-            temp_list = {temp_list, *it};
-        }
-        return temp_list;
-    }();
-
-    BigInt result(result_val, false);  // Using the existing constructor
-    return result;
-}
-
-BigInt BigInt::operator+(const BigInt &rhs) const {
-    if (this->is_negative() == rhs.is_negative()) {
-        BigInt result = add_magnitudes(*this, rhs);
-        result.negative = this->is_negative();
-        return result;
-    } else {
-        if (compare_magnitudes(*this, rhs) >= 0) {
-            BigInt result = subtract_magnitudes(*this, rhs);
-            result.negative = this->is_negative();
-            return result;
-        } else {
-            BigInt result = subtract_magnitudes(rhs, *this);
-            result.negative = rhs.is_negative();
-            return result;
-        }
-    }
-}
-
-BigInt BigInt::operator-(const BigInt &rhs) const {
-    BigInt neg_rhs = rhs;
-    neg_rhs.negative = !neg_rhs.is_negative();
-    return *this + neg_rhs;
+    return BigInt(result_bits, false);
 }
 
 
