@@ -45,26 +45,25 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
 }
 
 BigInt BigInt::operator+(const BigInt &rhs) const {
+    BigInt result;
     if (this->is_negative() == rhs.is_negative()) {
-        BigInt result = add_magnitudes(*this, rhs);
+        result.bits = add_magnitudes(*this, rhs).get_bit_vector();
         result.negative = this->is_negative();
-        return result;
     } else {
         if (compare_magnitudes(*this, rhs) >= 0) {
-            BigInt result = subtract_magnitudes(*this, rhs);
+            result.bits = subtract_magnitudes(*this, rhs).get_bit_vector();
             result.negative = this->is_negative();
-            return result;
         } else {
-            BigInt result = subtract_magnitudes(rhs, *this);
+            result.bits = subtract_magnitudes(rhs, *this).get_bit_vector();
             result.negative = rhs.is_negative();
-            return result;
         }
     }
+    return result;
 }
 
 BigInt BigInt::operator-(const BigInt &rhs) const {
     BigInt neg_rhs = rhs;
-    neg_rhs.negative = !neg_rhs.is_negative();
+    neg_rhs.negative = !rhs.is_negative();
     return *this + neg_rhs;
 }
 
@@ -189,11 +188,11 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 }
 
 static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::initializer_list<uint64_t> result_bits(max_size, 0);
+    std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t carry = 0;
 
@@ -214,11 +213,11 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 }
 
 static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::initializer_list<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::initializer_list<uint64_t>& rhs_bits = rhs.get_bit_vector();
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
     size_t max_size = std::max(lhs_bits.size(), rhs_bits.size());
-    std::initializer_list<uint64_t> result_bits(max_size, 0);
+    std::vector<uint64_t> result_bits(max_size, 0);
 
     uint64_t borrow = 0;
 
@@ -237,7 +236,6 @@ static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
 
     return BigInt(result_bits, false);
 }
-
 
 BigInt BigInt::div_by_2() const {
     // Implement division by 2
