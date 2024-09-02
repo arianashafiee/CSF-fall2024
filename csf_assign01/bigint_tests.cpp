@@ -482,7 +482,7 @@ void test_mul_2(TestObjs *) {
     ASSERT(!result.is_negative());
   }
 }
-
+ 
 void test_compare_1(TestObjs *objs) {
   // some basic tests for compare
   ASSERT(objs->zero.compare(objs->zero) == 0);
