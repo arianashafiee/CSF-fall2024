@@ -91,7 +91,7 @@ BigInt BigInt::operator<<(unsigned n) const {
 
 BigInt BigInt::operator*(const BigInt &rhs) const {
     if (this->is_zero() || rhs.is_zero()) {
-        return BigInt();
+        return BigInt(); // Return zero BigInt
     }
 
     bool result_negative = (this->is_negative() != rhs.is_negative());
@@ -103,15 +103,16 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     for (unsigned i = 0; i < bits.size(); ++i) {
         if (is_bit_set(i)) {
             BigInt term = rhs;
-            term = term << i;
-            // Use add_magnitudes to accumulate the result
-            result.bits = add_magnitudes(result.bits, term.get_bit_vector());
+            term = term << i; // Shift term by i
+            // Convert term to a BigInt and use add_magnitudes to accumulate the result
+            result = BigInt::add_magnitudes(result, term);
         }
     }
 
     result.negative = result_negative;
     return result;
 }
+
 
 
 BigInt BigInt::operator/(const BigInt &rhs) const {
