@@ -134,15 +134,16 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     for (unsigned i = 0; i < bits.size(); ++i) {
         if (is_bit_set(i)) {
             BigInt term = rhs;
-            term = term << i; // Shift term by i
-            // Convert term to a BigInt and use add_magnitudes to accumulate the result
-            result.bits = BigInt::add_magnitudes(result, term);
+            term = term << i; // Shift term by i to get the partial product
+            // Use add_magnitudes to accumulate the result
+            result.bits = add_magnitudes(result, term);
         }
     }
 
     result.negative = result_negative;
     return result;
 }
+
 
 
 
