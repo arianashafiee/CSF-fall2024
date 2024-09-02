@@ -133,19 +133,19 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
 
     for (unsigned i = 0; i < bits.size(); ++i) {
         if (is_bit_set(i)) {
-            // Create a partial product term
             BigInt term = rhs;
-            term = term << i; // Shift term by i to get the partial product
-
-            // Convert term to a vector and add it to the result
-            std::vector<uint64_t> term_bits = term.get_bit_vector();
-            result.bits = add_magnitudes(result.get_bit_vector(), term_bits);
+            term = term << i; // Shift term by i
+            // Convert result.bits and term.bits to BigInt objects
+            BigInt temp_result(result.bits, false);
+            temp_result.bits = add_magnitudes(temp_result, term); // Use the updated add_magnitudes
+            result = temp_result;
         }
     }
 
     result.negative = result_negative;
     return result;
 }
+
 
 
 
