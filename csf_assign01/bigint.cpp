@@ -86,29 +86,39 @@ bool BigInt::is_bit_set(unsigned n) const {
 
 BigInt BigInt::operator<<(unsigned n) const {
     if (n == 0 || is_zero()) {
-        return *this;
+        return *this; // No shift needed for zero or n = 0
     }
 
-    size_t full_words_shift = n / 64;
-    size_t bit_shift = n % 64;
-    BigInt result;
+    if (is_negative()) {
+        throw std::invalid_argument("Cannot shift negative BigInt");
+    }
 
+    size_t full_words_shift = n / 64; // Number of 64-bit words to shift
+    size_t bit_shift = n % 64; // Bit shift within a 64-bit word
+
+    BigInt result;
     result.bits.resize(bits.size() + full_words_shift + 1, 0);
 
     for (size_t i = 0; i < bits.size(); ++i) {
-        result.bits[i + full_words_shift] |= (bits[i] << bit_shift);
-        if (bit_shift && i + full_words_shift + 1 < result.bits.size()) {
-            result.bits[i + full_words_shift + 1] |= (bits[i] >> (64 - bit_shift));
+        if (bit_shift) {
+            result.bits[i + full_words_shift] |= (bits[i] << bit_shift);
+            if (i + full_words_shift + 1 < result.bits.size()) {
+                result.bits[i + full_words_shift + 1] |= (bits[i] >> (64 - bit_shift));
+            }
+        } else {
+            result.bits[i + full_words_shift] = bits[i];
         }
     }
 
+    // Remove leading zeros
     while (result.bits.size() > 1 && result.bits.back() == 0) {
         result.bits.pop_back();
     }
 
-    result.negative = negative;
+    result.negative = negative; // Copy the sign
     return result;
 }
+
 
 BigInt BigInt::operator*(const BigInt &rhs) const {
     if (this->is_zero() || rhs.is_zero()) {
