@@ -188,6 +188,7 @@ bool BigInt::is_zero() const {
 
     return 0;
 }
+
 BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -210,14 +211,18 @@ BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.push_back(carry);
     }
 
-    // Create an initializer list from result_bits
-    std::initializer_list<uint64_t> result_val(result_bits.begin(), result_bits.end());
+    // Create an initializer list by iterating through result_bits
+    std::initializer_list<uint64_t> result_val = [result_bits]() {
+        std::initializer_list<uint64_t> temp_list = {};
+        for (auto it = result_bits.begin(); it != result_bits.end(); ++it) {
+            temp_list = {temp_list, *it};
+        }
+        return temp_list;
+    }();
 
-    // Return a BigInt object
-    BigInt result(result_val, false);  // false indicates the result is positive
+    BigInt result(result_val, false);  // Using the existing constructor
     return result;
 }
-
 BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -241,11 +246,16 @@ BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
         result_bits.pop_back();
     }
 
-    // Create an initializer list from result_bits
-    std::initializer_list<uint64_t> result_val(result_bits.begin(), result_bits.end());
+    // Create an initializer list by iterating through result_bits
+    std::initializer_list<uint64_t> result_val = [result_bits]() {
+        std::initializer_list<uint64_t> temp_list = {};
+        for (auto it = result_bits.begin(); it != result_bits.end(); ++it) {
+            temp_list = {temp_list, *it};
+        }
+        return temp_list;
+    }();
 
-    // Return a BigInt object
-    BigInt result(result_val, false);  // false indicates the result is positive
+    BigInt result(result_val, false);  // Using the existing constructor
     return result;
 }
 
