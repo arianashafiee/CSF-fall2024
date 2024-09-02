@@ -47,14 +47,14 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
 BigInt BigInt::operator+(const BigInt &rhs) const {
     BigInt result;
     if (this->is_negative() == rhs.is_negative()) {
-        result.bits = add_magnitudes(*this, rhs).get_bit_vector();
+        result.bits = add_magnitudes(*this, rhs);
         result.negative = this->is_negative();
     } else {
         if (compare_magnitudes(*this, rhs) >= 0) {
-            result.bits = subtract_magnitudes(*this, rhs).get_bit_vector();
+            result.bits = subtract_magnitudes(*this, rhs);
             result.negative = this->is_negative();
         } else {
-            result.bits = subtract_magnitudes(rhs, *this).get_bit_vector();
+            result.bits = subtract_magnitudes(rhs, *this);
             result.negative = rhs.is_negative();
         }
     }
@@ -164,28 +164,6 @@ bool BigInt::is_zero() const {
     return bits.empty() || (bits.size() == 1 && bits[0] == 0);
 }
 
-static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
-    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
-    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
-
-    if (lhs_bits.size() > rhs_bits.size()) {
-        return 1;
-    }
-    if (lhs_bits.size() < rhs_bits.size()) {
-        return -1;
-    }
-
-    for (size_t i = lhs_bits.size(); i-- > 0; ) {
-        if (lhs_bits[i] > rhs_bits[i]) {
-            return 1;
-        }
-        if (lhs_bits[i] < rhs_bits[i]) {
-            return -1;
-        }
-    }
-
-    return 0;
-}
 
 
 BigInt BigInt::div_by_2() const {

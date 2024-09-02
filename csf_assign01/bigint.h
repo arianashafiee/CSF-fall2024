@@ -189,6 +189,30 @@ public:
   std::string to_dec() const;
 
 private:
+
+static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+    const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
+    const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
+
+    if (lhs_bits.size() > rhs_bits.size()) {
+        return 1;
+    }
+    if (lhs_bits.size() < rhs_bits.size()) {
+        return -1;
+    }
+
+    for (size_t i = lhs_bits.size(); i-- > 0; ) {
+        if (lhs_bits[i] > rhs_bits[i]) {
+            return 1;
+        }
+        if (lhs_bits[i] < rhs_bits[i]) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
    static std::vector<uint64_t>  add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
