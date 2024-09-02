@@ -48,11 +48,11 @@ void test_sub_3(TestObjs *objs);
 void test_sub_4(TestObjs *objs);
 void test_is_bit_set_1(TestObjs *objs);
 void test_is_bit_set_2(TestObjs *objs);
-/*void test_lshift_1(TestObjs *objs);
+void test_lshift_1(TestObjs *objs);
 void test_lshift_2(TestObjs *objs);
 void test_mul_1(TestObjs *objs);
 void test_mul_2(TestObjs *objs);
-*/
+
 void test_compare_1(TestObjs *objs);
 void test_compare_2(TestObjs *objs);
 /*
@@ -87,12 +87,12 @@ int main(int argc, char **argv) {
   TEST(test_sub_4);
   TEST(test_is_bit_set_1);
   TEST(test_is_bit_set_2);
-  /*
+  
   TEST(test_lshift_1);
   TEST(test_lshift_2);
   TEST(test_mul_1);
   TEST(test_mul_2);
-  */
+  
   TEST(test_compare_1);
   TEST(test_compare_2);
   /*
@@ -406,7 +406,7 @@ void test_is_bit_set_2(TestObjs *) {
     ASSERT(val.is_bit_set(241));
   }
 }
-/*
+
 void test_lshift_1(TestObjs *objs) {
   // Some very basic left shift tests
 
@@ -482,7 +482,7 @@ void test_mul_2(TestObjs *) {
     ASSERT(!result.is_negative());
   }
 }
-*/
+
 void test_compare_1(TestObjs *objs) {
   // some basic tests for compare
   ASSERT(objs->zero.compare(objs->zero) == 0);
