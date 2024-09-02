@@ -105,7 +105,7 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
             BigInt term = rhs;
             term = term << i; // Shift term by i
             // Convert term to a BigInt and use add_magnitudes to accumulate the result
-            result = BigInt::add_magnitudes(result, term);
+            result.bits = BigInt::add_magnitudes(result, term);
         }
     }
 
