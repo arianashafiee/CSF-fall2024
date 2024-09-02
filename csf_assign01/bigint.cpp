@@ -211,12 +211,13 @@ BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     }
 
     // Create an initializer list from result_bits
-    std::initializer_list<uint64_t> result_val = { result_bits.begin(), result_bits.end() };
+    std::initializer_list<uint64_t> result_val(result_bits.begin(), result_bits.end());
 
     // Return a BigInt object
     BigInt result(result_val, false);  // false indicates the result is positive
     return result;
 }
+
 BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
@@ -241,14 +242,12 @@ BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     }
 
     // Create an initializer list from result_bits
-    std::initializer_list<uint64_t> result_val = { result_bits.begin(), result_bits.end() };
+    std::initializer_list<uint64_t> result_val(result_bits.begin(), result_bits.end());
 
     // Return a BigInt object
     BigInt result(result_val, false);  // false indicates the result is positive
     return result;
 }
-
-
 
 BigInt BigInt::operator+(const BigInt &rhs) const {
     if (this->is_negative() == rhs.is_negative()) {
