@@ -14,7 +14,7 @@
 //! to record whether or not the value is negative.
 class BigInt {
 private:
-  std::vector<uint64_t> bits;
+   std::vector<uint64_t> bits;
    bool negative;
    BigInt div_by_2() const;
 
@@ -189,9 +189,9 @@ public:
   std::string to_dec() const;
 
 private:
-  static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs);
-  static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs);
-  static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs);
+   BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs);
+   BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs);
+   int compare_magnitudes(const BigInt &lhs, const BigInt &rhs);
    
 };
 
