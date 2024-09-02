@@ -97,17 +97,22 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     bool result_negative = (this->is_negative() != rhs.is_negative());
     BigInt result;
 
+    // Initialize result.bits with a vector of zeroes
+    result.bits = std::vector<uint64_t>(bits.size() + rhs.bits.size(), 0);
+
     for (unsigned i = 0; i < bits.size(); ++i) {
         if (is_bit_set(i)) {
             BigInt term = rhs;
             term = term << i;
-            result = add_magnitudes(result, term);
+            // Use add_magnitudes to accumulate the result
+            result.bits = add_magnitudes(result.bits, term.get_bit_vector());
         }
     }
 
     result.negative = result_negative;
     return result;
 }
+
 
 BigInt BigInt::operator/(const BigInt &rhs) const {
     // Implement division
