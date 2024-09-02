@@ -187,7 +187,7 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return 0;
 }
 
-static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+static vector add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
@@ -212,7 +212,7 @@ static BigInt add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return result_bits;
 }
 
-static BigInt subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+static vector subtract_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
