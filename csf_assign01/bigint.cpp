@@ -129,24 +129,20 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     BigInt result;
 
     // Initialize result.bits with a vector of zeroes
-    result.bits.resize(bits.size() + rhs.bits.size(), 0);
+    result.bits = std::vector<uint64_t>(bits.size() + rhs.bits.size(), 0);
 
     for (unsigned i = 0; i < bits.size(); ++i) {
         if (is_bit_set(i)) {
             BigInt term = rhs;
-            term = term << i; // Shift term by i
-            // Convert result.bits and term.bits to BigInt objects
-            BigInt temp_result(result.bits, false);
-            temp_result.bits = add_magnitudes(temp_result, term); // Use the updated add_magnitudes
-            result = temp_result;
+            term = term << i; // Shift term by i to get the partial product
+            // Use add_magnitudes to accumulate the result
+            result.bits = add_magnitudes(result, term);
         }
     }
 
     result.negative = result_negative;
     return result;
 }
-
-
 
 
 
