@@ -145,8 +145,6 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
 }
 
 
-
-
 BigInt BigInt::operator/(const BigInt &rhs) const {
     // Implement division
     return BigInt(); // Placeholder return
