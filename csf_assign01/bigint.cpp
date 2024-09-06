@@ -154,9 +154,47 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
 
 
 BigInt BigInt::operator/(const BigInt &rhs) const {
-    // Implement division
-    return BigInt(); // Placeholder return
+    if (rhs.is_zero()) {
+        throw std::invalid_argument("Division by zero");
+    }
+
+    if (this->is_zero()) {
+        return BigInt();  // Return 0 if dividend is 0
+    }
+
+    BigInt dividend = *this;  // Make a copy of the dividend
+    BigInt divisor = rhs;     // Copy of the divisor
+    dividend.negative = false;
+    divisor.negative = false;
+
+    // Handle sign of the result
+    bool result_negative = (this->is_negative() != rhs.is_negative());
+
+    // Binary search bounds: low = 0, high = dividend
+    BigInt low(0, false);
+    BigInt high = dividend;
+
+    BigInt quotient(0, false);  // The final result
+
+    while (low <= high) {
+        BigInt mid = (low + high).div_by_2();  // Midpoint of the binary search range
+        BigInt product = mid * divisor;  // mid * divisor
+
+        if (product == dividend) {
+            quotient = mid;  // Exact match
+            break;
+        } else if (product < dividend) {
+            quotient = mid;  // Update quotient
+            low = mid + BigInt(1, false);  // Move lower bound up
+        } else {
+            high = mid - BigInt(1, false);  // Move upper bound down
+        }
+    }
+
+    quotient.negative = result_negative;
+    return quotient;
 }
+
 
 int BigInt::compare(const BigInt &rhs) const {
     int magnitude_comparison = compare_magnitudes(*this, rhs);
@@ -211,9 +249,24 @@ bool BigInt::is_zero() const {
 
 
 BigInt BigInt::div_by_2() const {
-    // Implement division by 2
-    return BigInt(); // Placeholder return
+    BigInt result(*this);  // Create a copy of the current BigInt to store the result
+    uint64_t carry = 0;    // Variable to hold bits carried over between words
+
+    // Iterate from the most significant word to the least significant word
+    for (size_t i = result.bits.size(); i-- > 0; ) {
+        uint64_t new_carry = result.bits[i] & 1;  // Get the least significant bit of the current word
+        result.bits[i] = (result.bits[i] >> 1) | (carry << 63);  // Shift right and add carry from the previous word
+        carry = new_carry;  // Carry over the LSB to the next word
+    }
+
+    // Remove leading zero words from the result
+    while (result.bits.size() > 1 && result.bits.back() == 0) {
+        result.bits.pop_back();
+    }
+
+    return result;
 }
+
 
 std::string BigInt::to_dec() const {
     // TODO: implement
