@@ -58,8 +58,8 @@ void test_div_1(TestObjs *objs);
 void test_div_2(TestObjs *objs);
 void test_to_hex_1(TestObjs *objs);
 void test_to_hex_2(TestObjs *objs);
-//void test_to_dec_1(TestObjs *objs);
-//void test_to_dec_2(TestObjs *objs);
+void test_to_dec_1(TestObjs *objs);
+void test_to_dec_2(TestObjs *objs);
 // TODO: declare additional test functions
 
 int main(int argc, char **argv) {
@@ -92,13 +92,13 @@ int main(int argc, char **argv) {
   
   TEST(test_compare_1);
   TEST(test_compare_2);
-  
+
   TEST(test_div_1);
   TEST(test_div_2);
   TEST(test_to_hex_1);
   TEST(test_to_hex_2);
-  //TEST(test_to_dec_1);
-  //TEST(test_to_dec_2);
+  TEST(test_to_dec_1);
+  TEST(test_to_dec_2);
   // TODO: add calls to TEST for additional test functions
 
   TEST_FINI();
@@ -565,7 +565,7 @@ void test_to_hex_2(TestObjs *) {
 
 }
 
-/*
+
 void test_to_dec_1(TestObjs *objs) {
   // some basic tests for to_dec()
 
@@ -590,4 +590,3 @@ void test_to_dec_2(TestObjs *) {
 }
 
 // TODO: implement additional test functions
-*/
