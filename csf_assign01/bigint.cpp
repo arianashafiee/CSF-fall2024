@@ -125,35 +125,50 @@ BigInt BigInt::operator<<(unsigned n) const {
 
 
 BigInt BigInt::operator*(const BigInt &rhs) const {
-    BigInt result;
-    bool result_negative = (this->is_negative() != rhs.is_negative());
-
+    // Handle trivial cases like multiplying by zero
     if (this->is_zero() || rhs.is_zero()) {
-        return BigInt(); // Return zero BigInt
+        return BigInt();  // Return zero
     }
 
-    // Result starts at 0
-    result = BigInt(0, false);
+    // Determine the sign of the result
+    bool result_negative = (this->is_negative() != rhs.is_negative());
 
-    // Iterate through each bit of the first operand
-    for (size_t i = 0; i < bits.size() * 64; ++i) {
-        if (this->is_bit_set(i)) {
-            // Shift the second operand by i and add to the result
-            BigInt shifted_rhs = rhs << i;
-            result = result + shifted_rhs;
+    // Initialize the result BigInt to zero
+    BigInt result(0, false);
+
+    // Iterate through each bit of the first operand (this BigInt)
+    for (size_t i = 0; i < bits.size(); ++i) {
+        uint64_t carry = 0;  // Initialize carry for the current "row" of multiplication
+
+        // Multiply each word of this->bits[i] with all words of rhs
+        for (size_t j = 0; j < rhs.bits.size() || carry > 0; ++j) {
+            // Ensure the result is large enough to hold the result
+            if (result.bits.size() <= i + j) {
+                result.bits.push_back(0);
+            }
+
+            // Calculate the product of bits[i] * rhs.bits[j] + carry + current result value
+            __uint128_t product = static_cast<__uint128_t>(bits[i]) *
+                                  (j < rhs.bits.size() ? rhs.bits[j] : 0) +
+                                  result.bits[i + j] +
+                                  carry;
+
+            result.bits[i + j] = static_cast<uint64_t>(product);  // Store the lower 64 bits
+            carry = static_cast<uint64_t>(product >> 64);         // Store the carry (upper 64 bits)
         }
+    }
+
+    // Remove leading zeros in the result
+    while (result.bits.size() > 1 && result.bits.back() == 0) {
+        result.bits.pop_back();
     }
 
     // Set the correct sign
     result.negative = result_negative;
-    
-    // Remove leading zeros from the result
-    while (result.bits.size() > 1 && result.bits.back() == 0) {
-        result.bits.pop_back();
-    } 
 
     return result;
 }
+
 
 
 
