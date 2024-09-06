@@ -269,6 +269,38 @@ BigInt BigInt::div_by_2() const {
 
 
 std::string BigInt::to_dec() const {
-    // TODO: implement
-    return ""; // Placeholder return
+    if (is_zero()) {
+        return "0";
+    }
+
+    BigInt value = *this;  // Copy of the BigInt to manipulate
+    value.negative = false;  // Work with the absolute value (magnitude)
+
+    std::stringstream ss;
+    if (is_negative()) {
+        ss << "-";
+    }
+
+    // Vector to store digits in reverse order
+    std::vector<char> digits;
+
+    // BigInt for 10 (divisor)
+    BigInt ten(10, false);
+
+    while (!value.is_zero()) {
+        // Get the quotient and remainder (digit)
+        BigInt quotient = value / ten;
+        BigInt remainder = value - (quotient * ten);  // remainder = value % 10
+        digits.push_back(static_cast<char>(remainder.get_bits(0) + '0'));  // Store digit as a char
+        value = quotient;  // Update value to the quotient for the next iteration
+    }
+
+    // Reverse the collected digits
+    for (auto it = digits.rbegin(); it != digits.rend(); ++it) {
+        ss << *it;
+    }
+
+    return ss.str();
 }
+
+
