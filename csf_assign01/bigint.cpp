@@ -146,7 +146,7 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     // Remove leading zeros from the result
     while (result.bits.size() > 1 && result.bits.back() == 0) {
         result.bits.pop_back();
-    }
+    } 
 
     return result;
 }
