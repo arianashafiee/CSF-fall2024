@@ -44,18 +44,22 @@ const std::vector<uint64_t> &BigInt::get_bit_vector() const {
     return bits;
 }
 
+
 BigInt BigInt::operator+(const BigInt &rhs) const {
     BigInt result;
     if (this->is_negative() == rhs.is_negative()) {
         result.bits = add_magnitudes(*this, rhs);
         result.negative = this->is_negative();
     } else {
-        if (compare_magnitudes(*this, rhs) >= 0) {
+        if (compare_magnitudes(*this, rhs) > 0) {
             result.bits = subtract_magnitudes(*this, rhs);
             result.negative = this->is_negative();
-        } else {
+        } else if (compare_magnitudes(*this, rhs) < 0) {
             result.bits = subtract_magnitudes(rhs, *this);
             result.negative = rhs.is_negative();
+        } else {
+            result.bits = subtract_magnitudes(rhs, *this);
+            result.negative = false;
         }
     }
     return result;
