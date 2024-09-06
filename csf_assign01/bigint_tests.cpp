@@ -52,13 +52,10 @@ void test_lshift_1(TestObjs *objs);
 void test_lshift_2(TestObjs *objs);
 void test_mul_1(TestObjs *objs);
 void test_mul_2(TestObjs *objs);
-
 void test_compare_1(TestObjs *objs);
 void test_compare_2(TestObjs *objs);
-/*
 void test_div_1(TestObjs *objs);
 void test_div_2(TestObjs *objs);
-*/
 void test_to_hex_1(TestObjs *objs);
 void test_to_hex_2(TestObjs *objs);
 //void test_to_dec_1(TestObjs *objs);
@@ -95,10 +92,9 @@ int main(int argc, char **argv) {
   
   TEST(test_compare_1);
   TEST(test_compare_2);
-  /*
+  
   TEST(test_div_1);
   TEST(test_div_2);
-  */
   TEST(test_to_hex_1);
   TEST(test_to_hex_2);
   //TEST(test_to_dec_1);
@@ -503,7 +499,7 @@ void test_compare_2(TestObjs *) {
     ASSERT(result < 0);
   }
 }
-/*
+
 void test_div_1(TestObjs *objs) {
   // Some relatively basic division tests
 
@@ -535,7 +531,7 @@ void test_div_2(TestObjs *) {
     ASSERT(!result.is_negative());
   }
 }
-*/
+
 void test_to_hex_1(TestObjs *objs) {
   // some basic tests for to_hex()
 
