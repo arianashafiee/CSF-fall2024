@@ -173,46 +173,75 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
 
 
 BigInt BigInt::operator/(const BigInt &rhs) const {
+    // Edge case: Division by zero
     if (rhs.is_zero()) {
         throw std::invalid_argument("Division by zero");
     }
 
+    // Edge case: If the dividend is zero, return 0
     if (this->is_zero()) {
-        return BigInt();  // Return 0 if dividend is 0
+        return BigInt();  // Return 0
     }
 
-    BigInt dividend = *this;  // Make a copy of the dividend
+    // Edge case: If dividing by 1 or -1, return the dividend or negated dividend
+    if (rhs == BigInt(1, false)) {
+        return *this;
+    }
+    if (rhs == BigInt(1, true)) {
+        return -*this;
+    }
+
+    BigInt dividend = *this;  // Copy of the dividend
     BigInt divisor = rhs;     // Copy of the divisor
     dividend.negative = false;
     divisor.negative = false;
 
-    // Handle sign of the result
+    // Handle case where dividend is smaller than divisor
+    if (compare_magnitudes(dividend, divisor) < 0) {
+        return BigInt(0, false);  // Quotient is 0
+    }
+
+    // Determine the sign of the result
     bool result_negative = (this->is_negative() != rhs.is_negative());
 
     // Binary search bounds: low = 0, high = dividend
     BigInt low(0, false);
     BigInt high = dividend;
 
-    BigInt quotient(0, false);  // The final result
+    BigInt quotient(0, false);  // To store the final quotient
 
     while (low <= high) {
-        BigInt mid = (low + high).div_by_2();  // Midpoint of the binary search range
-        BigInt product = mid * divisor;  // mid * divisor
+        // Midpoint of the binary search range
+        BigInt mid = (low + high).div_by_2();
+        BigInt product = mid * divisor;
 
+        // Exact match, stop here
         if (product == dividend) {
-            quotient = mid;  // Exact match
+            quotient = mid;
             break;
-        } else if (product < dividend) {
+        }
+        // If product is less than dividend, move the lower bound up
+        else if (product < dividend) {
             quotient = mid;  // Update quotient
-            low = mid + BigInt(1, false);  // Move lower bound up
-        } else {
-            high = mid - BigInt(1, false);  // Move upper bound down
+            low = mid + BigInt(1, false);  // Narrow the range upwards
+        }
+        // If product is greater than dividend, move the upper bound down
+        else {
+            high = mid - BigInt(1, false);  // Narrow the range downwards
         }
     }
 
+    // Set the sign of the result
     quotient.negative = result_negative;
+
+    // Remove leading zeros
+    while (quotient.bits.size() > 1 && quotient.bits.back() == 0) {
+        quotient.bits.pop_back();
+    }
+
     return quotient;
 }
+
 
 
 int BigInt::compare(const BigInt &rhs) const {
