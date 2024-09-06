@@ -121,28 +121,36 @@ BigInt BigInt::operator<<(unsigned n) const {
 
 
 BigInt BigInt::operator*(const BigInt &rhs) const {
+    BigInt result;
+    bool result_negative = (this->is_negative() != rhs.is_negative());
+
     if (this->is_zero() || rhs.is_zero()) {
         return BigInt(); // Return zero BigInt
     }
 
-    bool result_negative = (this->is_negative() != rhs.is_negative());
-    BigInt result;
+    // Result starts at 0
+    result = BigInt(0, false);
 
-    // Initialize result.bits with a vector of zeroes
-    result.bits = std::vector<uint64_t>(bits.size() + rhs.bits.size(), 0);
-
-    for (unsigned i = 0; i < bits.size(); ++i) {
-        if (is_bit_set(i)) {
-            BigInt term = rhs;
-            term = term << i; // Shift term by i to get the partial product
-            // Use add_magnitudes to accumulate the result
-            result.bits = add_magnitudes(result, term);
+    // Iterate through each bit of the first operand
+    for (size_t i = 0; i < bits.size() * 64; ++i) {
+        if (this->is_bit_set(i)) {
+            // Shift the second operand by i and add to the result
+            BigInt shifted_rhs = rhs << i;
+            result = result + shifted_rhs;
         }
     }
 
+    // Set the correct sign
     result.negative = result_negative;
+    
+    // Remove leading zeros from the result
+    while (result.bits.size() > 1 && result.bits.back() == 0) {
+        result.bits.pop_back();
+    }
+
     return result;
 }
+
 
 
 BigInt BigInt::operator/(const BigInt &rhs) const {
