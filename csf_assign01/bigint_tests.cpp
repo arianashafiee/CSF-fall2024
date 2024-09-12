@@ -65,7 +65,6 @@ void test_compare_2(TestObjs *objs);
 void test_div_1(TestObjs *objs);
 void test_div_2(TestObjs *objs);
 void test_div_3(TestObjs *objs);
-void test_div_4(TestObjs *objs);
 void test_div_5(TestObjs *objs);
 void test_div_6(TestObjs *objs);
 void test_div_7(TestObjs *objs);
@@ -123,7 +122,6 @@ void test_mul_5(TestObjs *objs);
 void test_mul_6(TestObjs *objs);
 void test_mul_7(TestObjs *objs);
 void test_div_3(TestObjs *objs);
-void test_div_4(TestObjs *objs);
 void test_div_5(TestObjs *objs);
 void test_div_6(TestObjs *objs);
 void test_div_7(TestObjs *objs);
@@ -200,7 +198,6 @@ int main(int argc, char **argv) {
   TEST(test_div_1);
   TEST(test_div_2);
   TEST(test_div_3);
-  TEST(test_div_4);
 
   TEST(test_to_hex_1);
   TEST(test_to_hex_2);
@@ -1440,25 +1437,6 @@ void test_div_3(TestObjs *objs) {
   check_contents(result4, {1UL});
   ASSERT(!result4.is_negative()); // The result should be positive (neg / neg = pos)
 }
-
-
-void test_div_4(TestObjs *objs) {
-  // Division with negative signs (larger values)
-
-  // Divide two larger negative values
-  BigInt big_neg1({0xe2b272a002612fe3UL, 0xd1ec655e5e2e3d38UL, 0x21bc7b47bae7b899UL}, true);
-  BigInt big_neg2({0x63a2caa5324b539dUL, 0x176fde8a24cUL}, true);
-
-  // Case 2: Another division of large negative values
-  BigInt large_neg_dividend({0xe2b272a002612fe3UL, 0xd1ec655e5e2e3d38UL, 0x21bc7b47bae7b899UL, 0xb211826c4e5c346fUL}, true);
-  BigInt large_neg_divisor({0x7fd944a0481a66c6UL}, true);
-
-  // Case 4: Dividing two large negative numbers
-  BigInt result4 = objs->negative_two_pow_64 / big_neg2;
-  check_contents(result4, {0x1aUL, 0x7UL});
-  ASSERT(!result4.is_negative()); // Result should be positive since neg / neg = pos
-}
-
 
 void test_div_5(TestObjs *objs) {
   // Division with mixed signs (larger values)
