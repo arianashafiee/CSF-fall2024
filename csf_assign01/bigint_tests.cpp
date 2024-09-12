@@ -1810,7 +1810,7 @@ void test_copy_constructor(TestObjs *objs) {
     ASSERT(original1.get_bit_vector() == copy1.get_bit_vector());  
 
     // Test case 2: Copy constructor with a negative BigInt
-    BigInt original2(0x123456789ABCDEF0UL, true);  t
+    BigInt original2(0x123456789ABCDEF0UL, true);  
     BigInt copy2(original2);  
     const std::vector<uint64_t>& bits2 = copy2.get_bit_vector();
     ASSERT(bits2.size() == 1);  
