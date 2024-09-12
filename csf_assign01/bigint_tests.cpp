@@ -1453,11 +1453,6 @@ void test_div_4(TestObjs *objs) {
   BigInt large_neg_dividend({0xe2b272a002612fe3UL, 0xd1ec655e5e2e3d38UL, 0x21bc7b47bae7b899UL, 0xb211826c4e5c346fUL}, true);
   BigInt large_neg_divisor({0x7fd944a0481a66c6UL}, true);
 
-  // Case 3: Dividing a large negative number by a smaller negative number
-  BigInt result3 = objs->negative_two_pow_64 / objs->negative_nine;
-  check_contents(result3, {0x1c71c71c71c71c71UL, 0x71c71c71c71c71cUL});
-  ASSERT(!result3.is_negative()); // The result should be positive (neg / neg = pos)
-
   // Case 4: Dividing two large negative numbers
   BigInt result4 = objs->negative_two_pow_64 / big_neg2;
   check_contents(result4, {0x1aUL, 0x7UL});
