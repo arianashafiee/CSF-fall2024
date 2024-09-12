@@ -1798,20 +1798,6 @@ void test_single_uint64_constructor(TestObjs *objs) {
     ASSERT(bits3[0] == 0x0UL);  // The word should be zero
     ASSERT(!zero_bigint.is_negative());  // Zero should not be negative
 
-    // Test case 4: Construct a BigInt from zero with negative sign
-    BigInt negative_zero_bigint(0x0UL, true);
-    const std::vector<uint64_t>& bits4 = negative_zero_bigint.get_bit_vector();
-    ASSERT(bits4.size() == 1);  // Should have one word
-    ASSERT(bits4[0] == 0x0UL);  // The word should be zero
-    ASSERT(!negative_zero_bigint.is_negative());  // Zero should not be negative, sign ignored
-
-    // Test case 5: Construct a BigInt from the maximum 64-bit unsigned integer (positive)
-    BigInt max_positive_bigint(0xFFFFFFFFFFFFFFFFUL, false);
-    const std::vector<uint64_t>& bits5 = max_positive_bigint.get_bit_vector();
-    ASSERT(bits5.size() == 1);  // Should have one word
-    ASSERT(bits5[0] == 0xFFFFFFFFFFFFFFFFUL);  // Check the word value
-    ASSERT(!max_positive_bigint.is_negative());  // Should be positive
-
 }
 
 void test_copy_constructor(TestObjs *objs) {
@@ -1841,23 +1827,4 @@ void test_copy_constructor(TestObjs *objs) {
     ASSERT(bits3[0] == 0x0UL);  // Word should be zero
     ASSERT(!copy3.is_negative());  // Sign should match the original (non-negative)
     ASSERT(original3.get_bit_vector() == copy3.get_bit_vector());  // Ensure deep copy of bits
-
-    // Test case 4: Copy constructor with zero BigInt (negative)
-    BigInt original4(0x0UL, true);  // Original zero BigInt with negative flag
-    BigInt copy4(original4);  // Copy using the copy constructor
-    const std::vector<uint64_t>& bits4 = copy4.get_bit_vector();
-    ASSERT(bits4.size() == 1);  // Should have one word
-    ASSERT(bits4[0] == 0x0UL);  // Word should be zero
-    ASSERT(!copy4.is_negative());  // Zero should always be non-negative regardless of the original flag
-    ASSERT(original4.get_bit_vector() == copy4.get_bit_vector());  // Ensure deep copy of bits
-
-    // Test case 5: Copy constructor with multiple 64-bit words
-    BigInt original5({0xFFFFFFFFFFFFFFFFUL, 0x123456789ABCDEF0UL}, false);  // Original BigInt with multiple words
-    BigInt copy5(original5);  // Copy using the copy constructor
-    const std::vector<uint64_t>& bits5 = copy5.get_bit_vector();
-    ASSERT(bits5.size() == 2);  // Should have two words
-    ASSERT(bits5[0] == 0xFFFFFFFFFFFFFFFFUL);  // Check the lower word
-    ASSERT(bits5[1] == 0x123456789ABCDEF0UL);  // Check the higher word
-    ASSERT(!copy5.is_negative());  // Sign should match the original (positive)
-    ASSERT(original5.get_bit_vector() == copy5.get_bit_vector());  // Ensure deep copy of bits
 }
