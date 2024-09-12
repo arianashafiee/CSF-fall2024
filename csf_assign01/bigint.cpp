@@ -172,29 +172,35 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
 
     // Initialize the result BigInt to zero
     BigInt result(0, false);
+    result.bits.resize(bits.size() + rhs.bits.size(), 0);  // Pre-allocate the space for the result
 
+    // Perform multiplication row by row
     for (size_t i = 0; i < bits.size(); ++i) {
-        uint64_t carry = 0;  // Initialize carry for the current "row" of multiplication
+        uint64_t carry = 0;
 
-        // Multiply each word of this->bits[i] with all words of rhs
         for (size_t j = 0; j < rhs.bits.size() || carry > 0; ++j) {
-            // Ensure the result is large enough to hold the result
+            // Ensure the result array is large enough
             if (result.bits.size() <= i + j) {
                 result.bits.push_back(0);
             }
 
-            // Calculate the product of bits[i] * rhs.bits[j] + carry + current result value
-            __uint128_t product = static_cast<__uint128_t>(bits[i]) *
-                                  (j < rhs.bits.size() ? rhs.bits[j] : 0) +
-                                  result.bits[i + j] +
-                                  carry;
+            // Multiply the bits (64-bit x 64-bit = 128-bit product split into high/low parts)
+            uint64_t rhs_part = (j < rhs.bits.size()) ? rhs.bits[j] : 0;
+            uint64_t low, high;
 
-            result.bits[i + j] = static_cast<uint64_t>(product);  // Store the lower 64 bits
-            carry = static_cast<uint64_t>(product >> 64);         // Store the carry (upper 64 bits)
+            // Split the multiplication into 64-bit parts
+            multiply_64bit(bits[i], rhs_part, low, high);
+
+            // Add the current result bits and carry
+            uint64_t sum_low = result.bits[i + j] + low + carry;
+            carry = (sum_low < low) ? 1 : 0;  // Check if addition overflowed
+            carry += high;  // Add the higher part of the product
+
+            result.bits[i + j] = sum_low;  // Store the lower 64 bits
         }
     }
 
-    // Remove leading zeros in the result
+    // Remove leading zeros from the result
     while (result.bits.size() > 1 && result.bits.back() == 0) {
         result.bits.pop_back();
     }
@@ -204,6 +210,27 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
 
     return result;
 }
+
+void BigInt::multiply_64bit(uint64_t a, uint64_t b, uint64_t &low, uint64_t &high) const {
+    // Split a and b into 32-bit parts to prevent overflow
+    uint64_t a_low = a & 0xFFFFFFFF;
+    uint64_t a_high = a >> 32;
+    uint64_t b_low = b & 0xFFFFFFFF;
+    uint64_t b_high = b >> 32;
+
+    // Perform partial multiplications
+    uint64_t low_low = a_low * b_low;
+    uint64_t low_high = a_low * b_high;
+    uint64_t high_low = a_high * b_low;
+    uint64_t high_high = a_high * b_high;
+
+    // Combine the results
+    uint64_t carry = ((low_low >> 32) + (low_high & 0xFFFFFFFF) + (high_low & 0xFFFFFFFF)) >> 32;
+
+    low = (low_low & 0xFFFFFFFF) | ((low_high + high_low) << 32);
+    high = high_high + (low_high >> 32) + (high_low >> 32) + carry;
+}
+
 
 BigInt BigInt::operator/(const BigInt &rhs) const {
     // Handle edge cases: Division by zero
