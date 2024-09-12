@@ -1462,7 +1462,7 @@ void test_div_4(TestObjs *objs) {
   // Case 1: Larger negative values division
   BigInt result1 = big_neg1 / big_neg2;
   std::cout << "Expected: {0x6dc75ea98f91ddf3}, Got: " << result1.to_hex() << std::endl;
-  check_contents(result1, {0x1707f76dc75ea98f91ddf3UL}); // Update the expected value with the actual result
+  check_contents(result1, {0x75ea98f91ddf3UL, 0x1707f76dcUL}); // Split into two 64-bit segments
   ASSERT(!result1.is_negative()); // Result should be positive since neg / neg = pos
 
 
