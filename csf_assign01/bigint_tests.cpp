@@ -129,6 +129,8 @@ void test_div_5(TestObjs *objs);
 void test_div_6(TestObjs *objs);
 void test_div_7(TestObjs *objs);
 void test_is_negative(TestObjs *objs);
+void test_get_bits_within_bounds(TestObjs *objs);
+void test_get_bits_out_of_bounds(TestObjs *objs);
 
 
 
@@ -221,6 +223,9 @@ int main(int argc, char **argv) {
   TEST(test_to_dec_8);
   TEST(test_to_dec_9);
   TEST(test_is_negative);
+  TEST(test_get_bits_within_bounds);
+  TEST(test_get_bits_out_of_bounds);
+
 
 
   TEST_FINI();
