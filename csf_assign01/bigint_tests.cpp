@@ -1433,7 +1433,7 @@ void test_div_3(TestObjs *objs) {
 
   BigInt result2 = objs->negative_two_pow_64 / objs->negative_two;
   std::cout << "Expected: {0x8000000000000000UL}, Got: " << result2.to_hex() << std::endl;
-  check_contents(result2, {1c6bf526340000}); // The expected value should be 2^63
+  check_contents(result2, {0x8000000000000000UL}); // The expected value should be 2^63
   ASSERT(!result2.is_negative()); // The result should be positive (neg / neg = pos)
 
   // Test dividing negative two_pow_64 by negative nine
@@ -1458,37 +1458,35 @@ void test_div_3(TestObjs *objs) {
 void test_div_4(TestObjs *objs) {
   // Division with negative signs (larger values)
 
+  // Divide two larger negative values
   BigInt big_neg1({0xe2b272a002612fe3UL, 0xd1ec655e5e2e3d38UL, 0x21bc7b47bae7b899UL}, true);
   BigInt big_neg2({0x63a2caa5324b539dUL, 0x176fde8a24cUL}, true);
 
   // Case 1: Larger negative values division
   BigInt result1 = big_neg1 / big_neg2;
-  std::cout << "Expected: {0x6dc75ea98f91ddf3}, Got: " << result1.to_hex() << std::endl;
-  check_contents(result1, {6dc75ea98f91ddf3}); // Split into two 64-bit segments
+  std::cout << "Expected: {0x6dc75ea98f91ddf3UL}, Got: " << result1.to_hex() << std::endl;
+  check_contents(result1, {0x6dc75ea98f91ddf3UL}); // Split into two 64-bit segments
   ASSERT(!result1.is_negative()); // Result should be positive since neg / neg = pos
-
 
   // Case 2: Another division of large negative values
   BigInt large_neg_dividend({0xe2b272a002612fe3UL, 0xd1ec655e5e2e3d38UL, 0x21bc7b47bae7b899UL, 0xb211826c4e5c346fUL}, true);
   BigInt large_neg_divisor({0x7fd944a0481a66c6UL}, true);
 
   BigInt result2 = large_neg_dividend / large_neg_divisor;
-  std::cout << "Expected: {0x1bUL, 0x21UL}, Got: " << result2.to_hex() << std::endl;
   check_contents(result2, {0x1bUL, 0x21UL});
   ASSERT(!result2.is_negative()); // Result should be positive (neg / neg = pos)
 
   // Case 3: Dividing a large negative number by a smaller negative number
   BigInt result3 = objs->negative_two_pow_64 / objs->negative_nine;
-  std::cout << "Expected: {0x1c71c71c71c71c71UL, 0x71c71c71c71c71cUL}, Got: " << result3.to_hex() << std::endl;
   check_contents(result3, {0x1c71c71c71c71c71UL, 0x71c71c71c71c71cUL});
   ASSERT(!result3.is_negative()); // The result should be positive (neg / neg = pos)
 
   // Case 4: Dividing two large negative numbers
   BigInt result4 = objs->negative_two_pow_64 / big_neg2;
-  std::cout << "Expected: {0x1aUL, 0x7UL}, Got: " << result4.to_hex() << std::endl;
   check_contents(result4, {0x1aUL, 0x7UL});
   ASSERT(!result4.is_negative()); // Result should be positive since neg / neg = pos
 }
+
 
 void test_div_5(TestObjs *objs) {
   // Division with mixed signs (larger values)
