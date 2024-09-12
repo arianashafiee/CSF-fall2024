@@ -134,10 +134,10 @@ void test_get_bits_out_of_bounds(TestObjs *objs);
 void test_assignment_operator(TestObjs *objs);
 void test_unary_negation_operator(TestObjs *objs);
 void test_get_bit_vector(TestObjs *objs);
-
-
-
-
+void test_copy_constructor(TestObjs *objs);
+void test_single_uint64_constructor(TestObjs *objs);
+void test_initializer_list_constructor(TestObjs *objs);
+void test_default_constructor(TestObjs *objs);
 
 
 
@@ -234,6 +234,11 @@ int main(int argc, char **argv) {
   TEST(test_assignment_operator);
   TEST(test_unary_negation_operator);
   TEST(test_get_bit_vector);
+  TEST(test_default_constructor);
+  TEST(test_initializer_list_constructor);
+  TEST(test_single_uint64_constructor);
+  TEST(test_copy_constructor);
+
 
 
 
