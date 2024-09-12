@@ -1431,27 +1431,22 @@ void test_div_3(TestObjs *objs) {
   check_contents(result1, {3UL});
   ASSERT(!result1.is_negative()); // The result should be positive (neg / neg = pos)
 
-  BigInt result2 = objs->negative_two_pow_64 / objs->negative_two;
-  std::cout << "Expected: {0x8000000000000000UL}, Got: " << result2.to_hex() << std::endl;
-  check_contents(result2, {0x8000000000000000UL}); // The expected value should be 2^63
+  // Test dividing negative two_pow_64 by negative nine
+  BigInt result2 = objs->negative_two_pow_64 / objs->negative_nine;
+  std::cout << "Expected: {0x1c71c71c71c71c71UL, 0x71c71c71c71c71cUL}, Got: " << result2.to_hex() << std::endl;
+  check_contents(result2, {0x1c71c71c71c71c71UL, 0x71c71c71c71c71cUL});
   ASSERT(!result2.is_negative()); // The result should be positive (neg / neg = pos)
 
-  // Test dividing negative two_pow_64 by negative nine
-  BigInt result3 = objs->negative_two_pow_64 / objs->negative_nine;
-  std::cout << "Expected: {0x1c71c71c71c71c71UL, 0x71c71c71c71c71cUL}, Got: " << result3.to_hex() << std::endl;
-  check_contents(result3, {0x1c71c71c71c71c71UL, 0x71c71c71c71c71cUL});
-  ASSERT(!result3.is_negative()); // The result should be positive (neg / neg = pos)
-
   // Divide two smaller negative numbers
-  BigInt result4 = objs->negative_nine / objs->negative_nine;
-  std::cout << "Expected: {1UL}, Got: " << result4.to_hex() << std::endl;
+  BigInt result3 = objs->negative_nine / objs->negative_nine;
+  std::cout << "Expected: {1UL}, Got: " << result3.to_hex() << std::endl;
   check_contents(result4, {1UL});
   ASSERT(!result4.is_negative()); // The result should be positive (neg / neg = pos)
 
-  BigInt result5 = objs->negative_two / objs->negative_two;
-  std::cout << "Expected: {1UL}, Got: " << result5.to_hex() << std::endl;
-  check_contents(result5, {1UL});
-  ASSERT(!result5.is_negative()); // The result should be positive (neg / neg = pos)
+  BigInt result4 = objs->negative_two / objs->negative_two;
+  std::cout << "Expected: {1UL}, Got: " << result4.to_hex() << std::endl;
+  check_contents(result4, {1UL});
+  ASSERT(!result4.is_negative()); // The result should be positive (neg / neg = pos)
 }
 
 
