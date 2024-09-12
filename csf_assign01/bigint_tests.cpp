@@ -1542,8 +1542,9 @@ void test_div_7(TestObjs *objs) {
   } catch (std::invalid_argument &ex) {
     // Expected behavior: division by zero throws an exception
   }
+}
 
-  void test_is_negative(TestObjs *objs) {
+void test_is_negative(TestObjs *objs) {
     // Test cases for non-negative values
     ASSERT(!objs->zero.is_negative());  // 0 is not negative
     ASSERT(!objs->one.is_negative());   // 1 is not negative
@@ -1562,7 +1563,7 @@ void test_div_7(TestObjs *objs) {
     ASSERT(objs->large_negative.is_negative());  // Large negative number is negative
 }
 
-}
+
 
 
 
