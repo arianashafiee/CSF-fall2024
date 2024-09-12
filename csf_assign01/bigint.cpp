@@ -170,15 +170,19 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     // Determine the sign of the result
     bool result_negative = (this->is_negative() != rhs.is_negative());
 
+    // Create absolute values of both operands to avoid shifting negative numbers
+    BigInt abs_this = this->is_negative() ? -*this : *this;
+    BigInt abs_rhs = rhs.is_negative() ? -rhs : rhs;
+
     // Initialize the result BigInt to zero
     BigInt result(0, false);
 
-    // Loop over each bit in `rhs`
-    for (size_t i = 0; i < rhs.bits.size(); ++i) {
+    // Loop over each bit in abs_rhs (the absolute value of rhs)
+    for (size_t i = 0; i < abs_rhs.bits.size(); ++i) {
         for (uint64_t bit_pos = 0; bit_pos < 64; ++bit_pos) {
-            if (rhs.is_bit_set(i * 64 + bit_pos)) {
-                // If the bit is set, add `this << bit_pos` to the result
-                BigInt shifted = *this << (i * 64 + bit_pos);
+            if (abs_rhs.is_bit_set(i * 64 + bit_pos)) {
+                // If the bit is set, add `abs_this << bit_pos` to the result
+                BigInt shifted = abs_this << (i * 64 + bit_pos);
                 result = result + shifted;
             }
         }
