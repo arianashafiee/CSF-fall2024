@@ -396,27 +396,3 @@ std::string BigInt::to_dec() const {
     return ss.str();
 }
 
-void test_get_bits_within_bounds(TestObjs *objs) {
-    // Test case 1: Index within bounds for a small number
-    ASSERT(objs->zero.get_bits(0) == 0);  // zero has no bits
-    ASSERT(objs->one.get_bits(0) == 1);   // one has one bit set at index 0
-    ASSERT(objs->two.get_bits(0) == 2);   // two has one bit set at index 0
-
-    // Test case 2: Index within bounds for larger numbers
-    ASSERT(objs->two_pow_64.get_bits(0) == 0);  // 2^64 has 0 in the lower 64 bits
-    ASSERT(objs->two_pow_64.get_bits(1) == 1);  // 2^64 has 1 in the next 64 bits
-
-    ASSERT(objs->u64_max.get_bits(0) == 0xFFFFFFFFFFFFFFFFUL);  // u64_max has all bits set at index 0
-    ASSERT(objs->negative_two_pow_64.get_bits(1) == 1);         // negative_two_pow_64 has 1 at index 1
-}
-
-void test_get_bits_out_of_bounds(TestObjs *objs) {
-    // Test case 1: Index out of bounds for small numbers
-    ASSERT(objs->one.get_bits(1) == 0);  // one has no bit at index 1
-    ASSERT(objs->two.get_bits(1) == 0);  // two has no bit at index 1
-
-    // Test case 2: Index out of bounds for larger numbers
-    ASSERT(objs->two_pow_64.get_bits(2) == 0);  // two_pow_64 has no bit at index 2
-    ASSERT(objs->u64_max.get_bits(1) == 0);     // u64_max has no bit at index 1
-}
-
