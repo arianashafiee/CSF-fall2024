@@ -22,8 +22,6 @@ private:
    
 public:
    bool is_zero() const;
-   void multiply_64bit(uint64_t a, uint64_t b, uint64_t &low, uint64_t &high) const;
-
 
   //! Default constructor.
   //! The initialized BigInt value should be equal to 0.

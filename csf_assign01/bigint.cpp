@@ -199,8 +199,6 @@ BigInt BigInt::operator*(const BigInt &rhs) const {
     return result;
 }
 
-
-
 BigInt BigInt::operator/(const BigInt &rhs) const {
     // Handle edge cases: Division by zero
     if (rhs.is_zero()) {

@@ -16,7 +16,10 @@ struct TestObjs {
   BigInt negative_three;
   BigInt negative_two;
   BigInt nine;
-  // TODO: add additional test fixture objects
+  
+  BigInt negative_one;
+    BigInt large_positive;
+    BigInt large_negative;
 
   TestObjs();
 };
@@ -125,6 +128,8 @@ void test_div_3(TestObjs *objs);
 void test_div_5(TestObjs *objs);
 void test_div_6(TestObjs *objs);
 void test_div_7(TestObjs *objs);
+void test_is_negative(TestObjs *objs);
+
 
 
 
@@ -215,6 +220,8 @@ int main(int argc, char **argv) {
   TEST(test_to_dec_7);
   TEST(test_to_dec_8);
   TEST(test_to_dec_9);
+  TEST(test_is_negative);
+
 
   TEST_FINI();
 }
@@ -234,7 +241,10 @@ TestObjs::TestObjs()
   , negative_three(3UL, true)
   , negative_two(2UL, true)
   , nine(9UL)
-  // TODO: initialize additional test fixture objects
+
+  , negative_one(1UL, true)
+  , large_positive({0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL})
+  , large_negative({0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL}, true)
 {
 }
 
@@ -1532,6 +1542,26 @@ void test_div_7(TestObjs *objs) {
   } catch (std::invalid_argument &ex) {
     // Expected behavior: division by zero throws an exception
   }
+
+  void test_is_negative(TestObjs *objs) {
+    // Test cases for non-negative values
+    ASSERT(!objs->zero.is_negative());  // 0 is not negative
+    ASSERT(!objs->one.is_negative());   // 1 is not negative
+    ASSERT(!objs->two.is_negative());   // 2 is not negative
+    ASSERT(!objs->nine.is_negative());  // 9 is not negative
+    ASSERT(!objs->u64_max.is_negative());  // U64 max is not negative
+    ASSERT(!objs->two_pow_64.is_negative());  // 2^64 is not negative
+    ASSERT(!objs->large_positive.is_negative());  // Large positive number is not negative
+
+    // Test cases for negative values
+    ASSERT(objs->negative_one.is_negative());  // -1 is negative
+    ASSERT(objs->negative_nine.is_negative());  // -9 is negative
+    ASSERT(objs->negative_three.is_negative());  // -3 is negative
+    ASSERT(objs->negative_two.is_negative());  // -2 is negative
+    ASSERT(objs->negative_two_pow_64.is_negative());  // -2^64 is negative
+    ASSERT(objs->large_negative.is_negative());  // Large negative number is negative
+}
+
 }
 
 
