@@ -19,11 +19,10 @@ private:
    bool negative;
    BigInt div_by_2() const;
    BigInt binary_search_quotient(const BigInt &dividend, const BigInt &divisor) const;
-   BigInt multiply_64bit(uint64_t a, uint64_t b, uint64_t &low, uint64_t &high) const;
-
    
 public:
    bool is_zero() const;
+   void multiply_64bit(uint64_t a, uint64_t b, uint64_t &low, uint64_t &high) const;
 
 
   //! Default constructor.
