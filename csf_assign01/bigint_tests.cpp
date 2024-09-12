@@ -1433,7 +1433,7 @@ void test_div_3(TestObjs *objs) {
 
   BigInt result2 = objs->negative_two_pow_64 / objs->negative_two;
   std::cout << "Expected: {0x8000000000000000UL}, Got: " << result2.to_hex() << std::endl;
-  check_contents(result2, {0x8000000000000000UL}); // The expected value should be 2^63
+  check_contents(result2, {8000000000000000}); // The expected value should be 2^63
   ASSERT(!result2.is_negative()); // The result should be positive (neg / neg = pos)
 
   // Test dividing negative two_pow_64 by negative nine
