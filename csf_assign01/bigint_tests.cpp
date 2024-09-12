@@ -131,6 +131,8 @@ void test_div_7(TestObjs *objs);
 void test_is_negative(TestObjs *objs);
 void test_get_bits_within_bounds(TestObjs *objs);
 void test_get_bits_out_of_bounds(TestObjs *objs);
+void test_assignment_operator(TestObjs *objs);
+
 
 
 
@@ -225,7 +227,7 @@ int main(int argc, char **argv) {
   TEST(test_is_negative);
   TEST(test_get_bits_within_bounds);
   TEST(test_get_bits_out_of_bounds);
-
+  TEST(test_assignment_operator);
 
 
   TEST_FINI();
@@ -1592,6 +1594,40 @@ void test_get_bits_out_of_bounds(TestObjs *objs) {
     ASSERT(objs->u64_max.get_bits(1) == 0);     // u64_max has no bit at index 1
 }
 
+void test_assignment_operator(TestObjs *objs) {
+    // Test case 1: Assigning one positive BigInt to another
+    BigInt a = objs->one;  // Assignment from fixture object
+    ASSERT(a.to_hex() == "1");  // Check the result
+
+    // Test case 2: Assigning a larger BigInt
+    BigInt b = objs->two_pow_64;  // Assignment from another fixture object
+    ASSERT(b.to_hex() == "10000000000000000");  // Check the result
+
+    // Test case 3: Self-assignment (should not change the object)
+    b = b;  // Self-assignment
+    ASSERT(b.to_hex() == "10000000000000000");  // Check the result stays the same
+
+    // Test case 4: Assigning a negative BigInt
+    BigInt c = objs->negative_nine;  // Assignment of a negative BigInt
+    ASSERT(c.to_hex() == "-9");  // Check that the negative sign is correctly preserved
+
+    // Test case 5: Assigning zero to another BigInt
+    BigInt d;
+    d = objs->zero;  // Assign zero to another BigInt
+    ASSERT(d.to_hex() == "0");  // Ensure the value is zero
+
+    // Test case 6: Assigning a BigInt initialized with multiple 64-bit values
+    BigInt e = objs->u64_max;  // Assign a BigInt with multiple 64-bit values
+    ASSERT(e.to_hex() == "ffffffffffffffff");  // Check the result
+
+    // Test case 7: Assigning a BigInt to another after modification
+    a = objs->negative_two_pow_64;  // Assign a different value
+    ASSERT(a.to_hex() == "-10000000000000000");  // Check that the new value is assigned correctly
+
+    // Test case 8: Assigning a smaller value after a larger one
+    e = objs->one;  // Assign a smaller value after a larger one
+    ASSERT(e.to_hex() == "1");  // Ensure the new value is assigned correctly
+}
 
 
 
