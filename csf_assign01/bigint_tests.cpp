@@ -133,6 +133,8 @@ void test_get_bits_within_bounds(TestObjs *objs);
 void test_get_bits_out_of_bounds(TestObjs *objs);
 void test_assignment_operator(TestObjs *objs);
 void test_unary_negation_operator(TestObjs *objs);
+void test_get_bit_vector(TestObjs *objs);
+
 
 
 
@@ -231,6 +233,7 @@ int main(int argc, char **argv) {
   TEST(test_get_bits_out_of_bounds);
   TEST(test_assignment_operator);
   TEST(test_unary_negation_operator);
+  TEST(test_get_bit_vector);
 
 
 
@@ -1666,5 +1669,44 @@ void test_unary_negation_operator(TestObjs *objs) {
     ASSERT(double_neg_one.to_hex() == "1");         // Double negation should give the original value
 }
 
+void test_get_bit_vector(TestObjs *objs) {
+    // Test case 1: Check the bit vector for zero
+    const std::vector<uint64_t>& zero_bits = objs->zero.get_bit_vector();
+    ASSERT(zero_bits.size() == 1);  // The bit vector should contain only one word for zero
+    ASSERT(zero_bits[0] == 0);      // The word should be zero
+
+    // Test case 2: Check the bit vector for a small positive number (one)
+    const std::vector<uint64_t>& one_bits = objs->one.get_bit_vector();
+    ASSERT(one_bits.size() == 1);  // The bit vector should contain only one word
+    ASSERT(one_bits[0] == 1);      // The word should be 1
+
+    // Test case 3: Check the bit vector for a larger positive number (two_pow_64)
+    const std::vector<uint64_t>& two_pow_64_bits = objs->two_pow_64.get_bit_vector();
+    ASSERT(two_pow_64_bits.size() == 2);        // The bit vector should contain two words
+    ASSERT(two_pow_64_bits[0] == 0);            // The lower 64 bits should be zero
+    ASSERT(two_pow_64_bits[1] == 1);            // The upper 64 bits should be 1
+
+    // Test case 4: Check the bit vector for u64_max
+    const std::vector<uint64_t>& u64_max_bits = objs->u64_max.get_bit_vector();
+    ASSERT(u64_max_bits.size() == 1);          // The bit vector should contain one word
+    ASSERT(u64_max_bits[0] == 0xFFFFFFFFFFFFFFFFUL);  // All bits should be set
+
+    // Test case 5: Check the bit vector for a negative number (negative_nine)
+    const std::vector<uint64_t>& negative_nine_bits = objs->negative_nine.get_bit_vector();
+    ASSERT(negative_nine_bits.size() == 1);  // The bit vector should contain one word
+    ASSERT(negative_nine_bits[0] == 9);      // The magnitude should be 9 (only sign differs)
+
+    // Test case 6: Check the bit vector for a larger negative number (negative_two_pow_64)
+    const std::vector<uint64_t>& negative_two_pow_64_bits = objs->negative_two_pow_64.get_bit_vector();
+    ASSERT(negative_two_pow_64_bits.size() == 2);  // The bit vector should contain two words
+    ASSERT(negative_two_pow_64_bits[0] == 0);      // The lower 64 bits should be zero
+    ASSERT(negative_two_pow_64_bits[1] == 1);      // The upper 64 bits should be 1
+
+    // Test case 7: Check if modifying the returned reference modifies the original BigInt (const test)
+    // Since the reference is const, this is just a test for consistency and immutability.
+    // We will verify that the reference indeed reflects the underlying bits without modification.
+    const std::vector<uint64_t>& immutable_bits = objs->one.get_bit_vector();
+    ASSERT(immutable_bits[0] == 1);  // Should still be 1 as the reference is const
+}
 
 
