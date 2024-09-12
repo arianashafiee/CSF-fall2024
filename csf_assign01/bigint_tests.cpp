@@ -132,6 +132,8 @@ void test_is_negative(TestObjs *objs);
 void test_get_bits_within_bounds(TestObjs *objs);
 void test_get_bits_out_of_bounds(TestObjs *objs);
 void test_assignment_operator(TestObjs *objs);
+void test_unary_negation_operator(TestObjs *objs);
+
 
 
 
@@ -228,6 +230,8 @@ int main(int argc, char **argv) {
   TEST(test_get_bits_within_bounds);
   TEST(test_get_bits_out_of_bounds);
   TEST(test_assignment_operator);
+  TEST(test_unary_negation_operator);
+
 
 
   TEST_FINI();
@@ -1630,6 +1634,37 @@ void test_assignment_operator(TestObjs *objs) {
 }
 
 
+void test_unary_negation_operator(TestObjs *objs) {
+    // Test case 1: Negating a positive BigInt (one)
+    BigInt neg_one = -objs->one;
+    ASSERT(neg_one.is_negative() == true);  // The result should be negative
+    ASSERT(neg_one.to_hex() == "-1");       // Check the result
+
+    // Test case 2: Negating a negative BigInt (negative_nine)
+    BigInt pos_nine = -objs->negative_nine;
+    ASSERT(pos_nine.is_negative() == false);  // The result should be positive
+    ASSERT(pos_nine.to_hex() == "9");         // Check the result
+
+    // Test case 3: Negating zero (should remain zero)
+    BigInt neg_zero = -objs->zero;
+    ASSERT(neg_zero.is_negative() == false);  // Zero should not be negative
+    ASSERT(neg_zero.to_hex() == "0");         // Check the result
+
+    // Test case 4: Negating a large positive number (u64_max)
+    BigInt neg_u64_max = -objs->u64_max;
+    ASSERT(neg_u64_max.is_negative() == true);  // The result should be negative
+    ASSERT(neg_u64_max.to_hex() == "-ffffffffffffffff");  // Check the result
+
+    // Test case 5: Negating a large negative number (negative_two_pow_64)
+    BigInt pos_two_pow_64 = -objs->negative_two_pow_64;
+    ASSERT(pos_two_pow_64.is_negative() == false);  // The result should be positive
+    ASSERT(pos_two_pow_64.to_hex() == "10000000000000000");  // Check the result
+
+    // Test case 6: Negating a number twice (double negation should give the original number)
+    BigInt double_neg_one = -neg_one;
+    ASSERT(double_neg_one.is_negative() == false);  // The result should be positive
+    ASSERT(double_neg_one.to_hex() == "1");         // Double negation should give the original value
+}
 
 
 
