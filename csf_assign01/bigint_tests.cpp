@@ -1440,8 +1440,8 @@ void test_div_3(TestObjs *objs) {
   // Divide two smaller negative numbers
   BigInt result3 = objs->negative_nine / objs->negative_nine;
   std::cout << "Expected: {1UL}, Got: " << result3.to_hex() << std::endl;
-  check_contents(result4, {1UL});
-  ASSERT(!result4.is_negative()); // The result should be positive (neg / neg = pos)
+  check_contents(result3, {1UL});
+  ASSERT(!result3.is_negative()); // The result should be positive (neg / neg = pos)
 
   BigInt result4 = objs->negative_two / objs->negative_two;
   std::cout << "Expected: {1UL}, Got: " << result4.to_hex() << std::endl;
