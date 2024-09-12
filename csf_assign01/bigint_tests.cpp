@@ -1613,32 +1613,32 @@ void test_assignment_operator(TestObjs *objs) {
 
     // Test case 2: Assigning a larger BigInt
     BigInt b = objs->two_pow_64;  // Assignment from another fixture object
-    ASSERT(b.to_hex() == "10000000000000000");  // Check the result
+    ASSERT(b.to_hex() == "10000000000000000");  
 
     // Test case 3: Self-assignment (should not change the object)
     b = b;  // Self-assignment
-    ASSERT(b.to_hex() == "10000000000000000");  // Check the result stays the same
+    ASSERT(b.to_hex() == "10000000000000000");  
 
     // Test case 4: Assigning a negative BigInt
-    BigInt c = objs->negative_nine;  // Assignment of a negative BigInt
-    ASSERT(c.to_hex() == "-9");  // Check that the negative sign is correctly preserved
+    BigInt c = objs->negative_nine;  
+    ASSERT(c.to_hex() == "-9");  
 
     // Test case 5: Assigning zero to another BigInt
     BigInt d;
     d = objs->zero;  // Assign zero to another BigInt
-    ASSERT(d.to_hex() == "0");  // Ensure the value is zero
+    ASSERT(d.to_hex() == "0");  
 
     // Test case 6: Assigning a BigInt initialized with multiple 64-bit values
-    BigInt e = objs->u64_max;  // Assign a BigInt with multiple 64-bit values
-    ASSERT(e.to_hex() == "ffffffffffffffff");  // Check the result
+    BigInt e = objs->u64_max;  
+    ASSERT(e.to_hex() == "ffffffffffffffff");  
 
     // Test case 7: Assigning a BigInt to another after modification
-    a = objs->negative_two_pow_64;  // Assign a different value
-    ASSERT(a.to_hex() == "-10000000000000000");  // Check that the new value is assigned correctly
+    a = objs->negative_two_pow_64; 
+    ASSERT(a.to_hex() == "-10000000000000000");  
 
     // Test case 8: Assigning a smaller value after a larger one
-    e = objs->one;  // Assign a smaller value after a larger one
-    ASSERT(e.to_hex() == "1");  // Ensure the new value is assigned correctly
+    e = objs->one;  
+    ASSERT(e.to_hex() == "1"); 
 }
 
 
@@ -1696,20 +1696,19 @@ void test_get_bit_vector(TestObjs *objs) {
     ASSERT(u64_max_bits.size() == 1);          // The bit vector should contain one word
     ASSERT(u64_max_bits[0] == 0xFFFFFFFFFFFFFFFFUL);  // All bits should be set
 
-    // Test case 5: Check the bit vector for a negative number (negative_nine)
+    // Test case 5: Check the bit vector for a negative number 
     const std::vector<uint64_t>& negative_nine_bits = objs->negative_nine.get_bit_vector();
     ASSERT(negative_nine_bits.size() == 1);  // The bit vector should contain one word
     ASSERT(negative_nine_bits[0] == 9);      // The magnitude should be 9 (only sign differs)
 
-    // Test case 6: Check the bit vector for a larger negative number (negative_two_pow_64)
+    // Test case 6: Check the bit vector for a larger negative number
     const std::vector<uint64_t>& negative_two_pow_64_bits = objs->negative_two_pow_64.get_bit_vector();
     ASSERT(negative_two_pow_64_bits.size() == 2);  // The bit vector should contain two words
     ASSERT(negative_two_pow_64_bits[0] == 0);      // The lower 64 bits should be zero
     ASSERT(negative_two_pow_64_bits[1] == 1);      // The upper 64 bits should be 1
 
-    // Test case 7: Check if modifying the returned reference modifies the original BigInt (const test)
-    // Since the reference is const, this is just a test for consistency and immutability.
-    // We will verify that the reference indeed reflects the underlying bits without modification.
+    // Test case 7: Check if modifying the returned reference modifies the original BigInt
+    // verify that the reference indeed reflects the underlying bits without modification.
     const std::vector<uint64_t>& immutable_bits = objs->one.get_bit_vector();
     ASSERT(immutable_bits[0] == 1);  // Should still be 1 as the reference is const
 }
@@ -1718,29 +1717,29 @@ void test_default_constructor(TestObjs *objs) {
     // Test case 1: Check if a BigInt constructed with the default constructor represents zero
     BigInt default_bigint;
     
-    // Check that the magnitude (bit vector) contains only one word and that word is 0
+    // Check that the magnitude contains only one word and that word is 0
     const std::vector<uint64_t>& bits = default_bigint.get_bit_vector();
-    ASSERT(bits.size() == 1);  // The bit vector should contain exactly one word
-    ASSERT(bits[0] == 0);      // The word should be zero, representing the value 0
+    ASSERT(bits.size() == 1);  // bit vector should contain exactly one word
+    ASSERT(bits[0] == 0);      
 
     // Check that the BigInt is not marked as negative
-    ASSERT(!default_bigint.is_negative());  // The BigInt should not be negative
+    ASSERT(!default_bigint.is_negative());  // BigInt should not be negative
 
     // Test case 2: Check that zero from the test objects matches the default constructor behavior
     ASSERT(objs->zero == default_bigint);  // Both should represent the same value (0)
 
     // Test case 3: Check that converting the default BigInt to hex returns "0"
-    ASSERT(default_bigint.to_hex() == "0");  // The hex representation of zero should be "0"
+    ASSERT(default_bigint.to_hex() == "0"); 
 
     // Test case 4: Check that converting the default BigInt to decimal returns "0"
-    ASSERT(default_bigint.to_dec() == "0");  // The decimal representation of zero should be "0"
+    ASSERT(default_bigint.to_dec() == "0");  
 }
 
 void test_initializer_list_constructor(TestObjs *objs) {
     // Test case 1: Construct a BigInt with multiple words and positive sign
     BigInt positive_bigint({0x123456789ABCDEF0UL, 0x0F0F0F0F0F0F0F0FUL}, false);
     const std::vector<uint64_t>& bits1 = positive_bigint.get_bit_vector();
-    ASSERT(bits1.size() == 2);  // Should have two words
+    ASSERT(bits1.size() == 2); 
     ASSERT(bits1[0] == 0x123456789ABCDEF0UL);  // Check the lower word
     ASSERT(bits1[1] == 0x0F0F0F0F0F0F0F0FUL);  // Check the higher word
     ASSERT(!positive_bigint.is_negative());  // Should be positive
@@ -1748,7 +1747,7 @@ void test_initializer_list_constructor(TestObjs *objs) {
     // Test case 2: Construct a BigInt with multiple words and negative sign
     BigInt negative_bigint({0xFFFFFFFFFFFFFFFFUL, 0x123456789ABCDEF0UL}, true);
     const std::vector<uint64_t>& bits2 = negative_bigint.get_bit_vector();
-    ASSERT(bits2.size() == 2);  // Should have two words
+    ASSERT(bits2.size() == 2);  
     ASSERT(bits2[0] == 0xFFFFFFFFFFFFFFFFUL);  // Check the lower word
     ASSERT(bits2[1] == 0x123456789ABCDEF0UL);  // Check the higher word
     ASSERT(negative_bigint.is_negative());  // Should be negative
@@ -1757,21 +1756,21 @@ void test_initializer_list_constructor(TestObjs *objs) {
     BigInt leading_zeros_bigint({0x123456789ABCDEF0UL, 0x0UL, 0x0UL}, false);
     const std::vector<uint64_t>& bits3 = leading_zeros_bigint.get_bit_vector();
     ASSERT(bits3.size() == 1);  // Leading zeros should be removed, leaving only one word
-    ASSERT(bits3[0] == 0x123456789ABCDEF0UL);  // Check the remaining word
+    ASSERT(bits3[0] == 0x123456789ABCDEF0UL);  
     ASSERT(!leading_zeros_bigint.is_negative());  // Should be positive
 
     // Test case 4: Construct a BigInt with a single word and positive sign
     BigInt single_word_bigint({0x123456789ABCDEF0UL}, false);
     const std::vector<uint64_t>& bits4 = single_word_bigint.get_bit_vector();
     ASSERT(bits4.size() == 1);  // Should have one word
-    ASSERT(bits4[0] == 0x123456789ABCDEF0UL);  // Check the word
+    ASSERT(bits4[0] == 0x123456789ABCDEF0UL);  
     ASSERT(!single_word_bigint.is_negative());  // Should be positive
 
     // Test case 5: Construct a BigInt with a single word and negative sign
     BigInt negative_single_word_bigint({0x123456789ABCDEF0UL}, true);
     const std::vector<uint64_t>& bits5 = negative_single_word_bigint.get_bit_vector();
     ASSERT(bits5.size() == 1);  // Should have one word
-    ASSERT(bits5[0] == 0x123456789ABCDEF0UL);  // Check the word
+    ASSERT(bits5[0] == 0x123456789ABCDEF0UL);  
     ASSERT(negative_single_word_bigint.is_negative());  // Should be negative
 
 }
@@ -1781,50 +1780,50 @@ void test_single_uint64_constructor(TestObjs *objs) {
     BigInt positive_bigint(0x123456789ABCDEF0UL, false);
     const std::vector<uint64_t>& bits1 = positive_bigint.get_bit_vector();
     ASSERT(bits1.size() == 1);  // Should have one word
-    ASSERT(bits1[0] == 0x123456789ABCDEF0UL);  // Check the word value
+    ASSERT(bits1[0] == 0x123456789ABCDEF0UL);  
     ASSERT(!positive_bigint.is_negative());  // Should be positive
 
     // Test case 2: Construct a negative BigInt from a 64-bit unsigned integer
     BigInt negative_bigint(0x123456789ABCDEF0UL, true);
     const std::vector<uint64_t>& bits2 = negative_bigint.get_bit_vector();
     ASSERT(bits2.size() == 1);  // Should have one word
-    ASSERT(bits2[0] == 0x123456789ABCDEF0UL);  // Check the word value
+    ASSERT(bits2[0] == 0x123456789ABCDEF0UL); 
     ASSERT(negative_bigint.is_negative());  // Should be negative
 
     // Test case 3: Construct a BigInt from zero with positive sign
     BigInt zero_bigint(0x0UL, false);
     const std::vector<uint64_t>& bits3 = zero_bigint.get_bit_vector();
-    ASSERT(bits3.size() == 1);  // Should have one word
-    ASSERT(bits3[0] == 0x0UL);  // The word should be zero
+    ASSERT(bits3.size() == 1); 
+    ASSERT(bits3[0] == 0x0UL);  
     ASSERT(!zero_bigint.is_negative());  // Zero should not be negative
 
 }
 
 void test_copy_constructor(TestObjs *objs) {
     // Test case 1: Copy constructor with a positive BigInt
-    BigInt original1(0x123456789ABCDEF0UL, false);  // Original positive BigInt
-    BigInt copy1(original1);  // Copy using the copy constructor
+    BigInt original1(0x123456789ABCDEF0UL, false); 
+    BigInt copy1(original1);  
     const std::vector<uint64_t>& bits1 = copy1.get_bit_vector();
-    ASSERT(bits1.size() == 1);  // Should have one word
-    ASSERT(bits1[0] == 0x123456789ABCDEF0UL);  // Word should match the original
+    ASSERT(bits1.size() == 1); 
+    ASSERT(bits1[0] == 0x123456789ABCDEF0UL);  
     ASSERT(!copy1.is_negative());  // Sign should match the original (positive)
-    ASSERT(original1.get_bit_vector() == copy1.get_bit_vector());  // Ensure deep copy of bits
+    ASSERT(original1.get_bit_vector() == copy1.get_bit_vector());  
 
     // Test case 2: Copy constructor with a negative BigInt
-    BigInt original2(0x123456789ABCDEF0UL, true);  // Original negative BigInt
-    BigInt copy2(original2);  // Copy using the copy constructor
+    BigInt original2(0x123456789ABCDEF0UL, true);  t
+    BigInt copy2(original2);  
     const std::vector<uint64_t>& bits2 = copy2.get_bit_vector();
-    ASSERT(bits2.size() == 1);  // Should have one word
-    ASSERT(bits2[0] == 0x123456789ABCDEF0UL);  // Word should match the original
+    ASSERT(bits2.size() == 1);  
+    ASSERT(bits2[0] == 0x123456789ABCDEF0UL);  
     ASSERT(copy2.is_negative());  // Sign should match the original (negative)
-    ASSERT(original2.get_bit_vector() == copy2.get_bit_vector());  // Ensure deep copy of bits
+    ASSERT(original2.get_bit_vector() == copy2.get_bit_vector()); 
 
     // Test case 3: Copy constructor with zero BigInt (non-negative)
-    BigInt original3(0x0UL, false);  // Original zero BigInt
-    BigInt copy3(original3);  // Copy using the copy constructor
+    BigInt original3(0x0UL, false);  
+    BigInt copy3(original3);  
     const std::vector<uint64_t>& bits3 = copy3.get_bit_vector();
-    ASSERT(bits3.size() == 1);  // Should have one word
-    ASSERT(bits3[0] == 0x0UL);  // Word should be zero
+    ASSERT(bits3.size() == 1);  
+    ASSERT(bits3[0] == 0x0UL); 
     ASSERT(!copy3.is_negative());  // Sign should match the original (non-negative)
-    ASSERT(original3.get_bit_vector() == copy3.get_bit_vector());  // Ensure deep copy of bits
+    ASSERT(original3.get_bit_vector() == copy3.get_bit_vector());  
 }
