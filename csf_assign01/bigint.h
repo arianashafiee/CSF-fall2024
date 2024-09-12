@@ -1,3 +1,4 @@
+
 #ifndef BIGINT_H
 #define BIGINT_H
 
@@ -17,7 +18,8 @@ private:
    std::vector<uint64_t> bits;
    bool negative;
    BigInt div_by_2() const;
-
+   BigInt binary_search_quotient(const BigInt &dividend, const BigInt &divisor) const;
+   
 public:
    bool is_zero() const;
 
@@ -213,7 +215,7 @@ static int compare_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     return 0;
 }
 
-   static std::vector<uint64_t>  add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
+static std::vector<uint64_t>  add_magnitudes(const BigInt &lhs, const BigInt &rhs) {
     const std::vector<uint64_t>& lhs_bits = lhs.get_bit_vector();
     const std::vector<uint64_t>& rhs_bits = rhs.get_bit_vector();
 
@@ -263,7 +265,7 @@ static std::vector<uint64_t>  subtract_magnitudes(const BigInt &lhs, const BigIn
     return result_bits;
 }
 
-   
+
 };
 
 #endif // BIGINT_H
