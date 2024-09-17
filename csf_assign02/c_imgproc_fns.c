@@ -18,21 +18,18 @@ int determine_tile_w(int width, int n, int tile_col) {
     return base_tile_w + (tile_col < remainder ? 1 : 0);
 }
 
-// Helper function to determine the x-offset of a tile in the output image
 int determine_tile_x_offset(int width, int n, int tile_col) {
     int base_tile_w = width / n;
     int remainder = width % n;
     return tile_col * base_tile_w + (tile_col < remainder ? tile_col : remainder);
 }
 
-// Helper function to determine the height of a tile in the output image
 int determine_tile_h(int height, int n, int tile_row) {
     int base_tile_h = height / n;
     int remainder = height % n;
     return base_tile_h + (tile_row < remainder ? 1 : 0);
 }
 
-// Helper function to determine the y-offset of a tile in the output image
 int determine_tile_y_offset(int height, int n, int tile_row) {
     int base_tile_h = height / n;
     int remainder = height % n;
@@ -49,16 +46,25 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
 
     for (int y = 0; y < tile_h; y++) {
         for (int x = 0; x < tile_w; x++) {
-            // Sample pixel from input image by skipping every n-th pixel
+            // Sample pixel from the original image (based on every n'th pixel)
             int sample_x = (tile_x_offset + x * n) % img->width;
             int sample_y = (tile_y_offset + y * n) % img->height;
+
+            // Make sure to handle the edge case where the image's width/height
+            // is not divisible by n
+            if (sample_x >= img->width || sample_y >= img->height) {
+                continue;  // Skip out-of-bound pixels
+            }
+
+            // Get the pixel from the input image
             uint32_t pixel = img->data[sample_y * img->width + sample_x];
 
-            // Place the sampled pixel in the corresponding location in the output image
+            // Place the sampled pixel in the output image at the appropriate position
             out_img->data[(tile_y_offset + y) * out_img->width + (tile_x_offset + x)] = pixel;
         }
     }
 }
+
 
 
 
