@@ -196,7 +196,7 @@ int imgproc_tile(struct Image *input_img, int n, struct Image *output_img) {
     if (n < 1) {
         return 0; // Invalid tiling factor
     }
-
+ 
     int width = input_img->width;
     int height = input_img->height;
 
