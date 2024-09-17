@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "imgproc.h"
-#include <stdio.h>  
 
 // TODO: define your helper functions here
 // Helper function to check if all tiles are non-empty
@@ -18,25 +17,27 @@ int determine_tile_w(int width, int n, int tile_col) {
     return base_tile_w + (tile_col < remainder ? 1 : 0);
 }
 
+// Helper function to determine the x-offset of a tile in the output image
 int determine_tile_x_offset(int width, int n, int tile_col) {
     int base_tile_w = width / n;
     int remainder = width % n;
     return tile_col * base_tile_w + (tile_col < remainder ? tile_col : remainder);
 }
 
+// Helper function to determine the height of a tile in the output image
 int determine_tile_h(int height, int n, int tile_row) {
     int base_tile_h = height / n;
     int remainder = height % n;
     return base_tile_h + (tile_row < remainder ? 1 : 0);
 }
 
+// Helper function to determine the y-offset of a tile in the output image
 int determine_tile_y_offset(int height, int n, int tile_row) {
     int base_tile_h = height / n;
     int remainder = height % n;
     return tile_row * base_tile_h + (tile_row < remainder ? tile_row : remainder);
 }
 
-// Helper function to copy a tile from input to output image, downsampling pixels
 // Helper function to copy a tile from input to output image, downsampling pixels
 void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_col, int n) {
     int tile_w = determine_tile_w(img->width, n, tile_col);
@@ -46,43 +47,19 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
 
     for (int y = 0; y < tile_h; y++) {
         for (int x = 0; x < tile_w; x++) {
-            // Sample pixel from the original image (based on every n'th pixel)
-            int sample_x = (tile_x_offset + x * n) % img->width;
-            int sample_y = (tile_y_offset + y * n) % img->height;
+            int sample_x = tile_x_offset + (x * img->width) / out_img->width;
+            int sample_y = tile_y_offset + (y * img->height) / out_img->height;
 
-            // Make sure to handle the edge case where the image's width/height
-            // is not divisible by n
-            if (sample_x >= img->width || sample_y >= img->height) {
-                continue;  // Skip out-of-bound pixels
-            }
-
-            // Get the pixel from the input image
             uint32_t pixel = img->data[sample_y * img->width + sample_x];
-
-            // Place the sampled pixel in the output image at the appropriate position
             out_img->data[(tile_y_offset + y) * out_img->width + (tile_x_offset + x)] = pixel;
         }
     }
 }
 
 
-
-
 // Helper function to get the alpha component from a pixel
 uint32_t get_a(uint32_t pixel) {
     return pixel & 0xFF;
-}
-
-uint32_t get_r(uint32_t pixel) {
-    return (pixel >> 24) & 0xFF;
-}
-
-uint32_t get_g(uint32_t pixel) {
-    return (pixel >> 16) & 0xFF;
-}
-
-uint32_t get_b(uint32_t pixel) {
-    return (pixel >> 8) & 0xFF;
 }
 
 // Helper function to create a pixel from r, g, b, and a components
