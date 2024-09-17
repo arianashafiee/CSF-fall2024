@@ -63,6 +63,18 @@ uint32_t get_a(uint32_t pixel) {
     return pixel & 0xFF;
 }
 
+uint32_t get_r(uint32_t pixel) {
+    return (pixel >> 24) & 0xFF;
+}
+
+uint32_t get_g(uint32_t pixel) {
+    return (pixel >> 16) & 0xFF;
+}
+
+uint32_t get_b(uint32_t pixel) {
+    return (pixel >> 8) & 0xFF;
+}
+
 // Helper function to create a pixel from r, g, b, and a components
 uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
     return (r << 24) | (g << 16) | (b << 8) | a;
