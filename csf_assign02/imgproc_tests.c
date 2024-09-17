@@ -277,28 +277,49 @@ void test_mirror_v_basic( TestObjs *objs ) {
   destroy_img( smiley_mirror_v_expected );
 }
 
-void test_tile_basic( TestObjs *objs ) {
-  Picture smiley_tile_3_pic = {
-    TEST_COLORS,
-    16, 10,
-    "  rg    rg   rg "
-    "                "
-    "  gb    gb   gb "
-    "                "
-    "  rg    rg   rg "
-    "                "
-    "  gb    gb   gb "
-    "  rg    rg   rg "
-    "                "
-    "  gb    gb   gb "
-  };
-  struct Image *smiley_tile_3_expected = picture_to_img( &smiley_tile_3_pic );
+void test_tile_basic(TestObjs *objs) {
+    Picture smiley_tile_3_pic = {
+        TEST_COLORS,
+        16, 10,
+        "  rg    rg   rg "
+        "                "
+        "  gb    gb   gb "
+        "                "
+        "  rg    rg   rg "
+        "                "
+        "  gb    gb   gb "
+        "  rg    rg   rg "
+        "                "
+        "  gb    gb   gb "
+    };
 
-  int success = imgproc_tile( objs->smiley, 3, objs->smiley_out );
-  ASSERT( success );
-  ASSERT( images_equal( smiley_tile_3_expected, objs->smiley_out ) );
+    struct Image *smiley_tile_3_expected = picture_to_img(&smiley_tile_3_pic);
 
-  destroy_img( smiley_tile_3_expected );
+    int success = imgproc_tile(objs->smiley, 3, objs->smiley_out);
+    ASSERT(success);
+
+    if (!images_equal(smiley_tile_3_expected, objs->smiley_out)) {
+        printf("Expected image:\n");
+        print_image(smiley_tile_3_expected);
+        
+        printf("\nActual image:\n");
+        print_image(objs->smiley_out);
+
+        // Fail the test with a message
+        ASSERT(false && "Images are not equal");
+    }
+
+    destroy_img(smiley_tile_3_expected);
+}
+
+void print_image(struct Image *img) {
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+            uint32_t pixel = img->data[y * img->width + x];
+            printf("%08X ", pixel);  // Print each pixel as a hexadecimal value
+        }
+        printf("\n");
+    }
 }
 
 void test_grayscale_basic( TestObjs *objs ) {
