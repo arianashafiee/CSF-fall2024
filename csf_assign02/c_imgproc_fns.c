@@ -40,6 +40,7 @@ int determine_tile_y_offset(int height, int n, int tile_row) {
 }
 
 // Helper function to copy a tile from input to output image, downsampling pixels
+// Helper function to copy a tile from input to output image, downsampling pixels
 void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_col, int n) {
     int tile_w = determine_tile_w(img->width, n, tile_col);
     int tile_h = determine_tile_h(img->height, n, tile_row);
@@ -48,14 +49,17 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
 
     for (int y = 0; y < tile_h; y++) {
         for (int x = 0; x < tile_w; x++) {
-            int sample_x = tile_x_offset + (x * img->width) / out_img->width;
-            int sample_y = tile_y_offset + (y * img->height) / out_img->height;
-
+            // Sample pixel from input image by skipping every n-th pixel
+            int sample_x = (tile_x_offset + x * n) % img->width;
+            int sample_y = (tile_y_offset + y * n) % img->height;
             uint32_t pixel = img->data[sample_y * img->width + sample_x];
+
+            // Place the sampled pixel in the corresponding location in the output image
             out_img->data[(tile_y_offset + y) * out_img->width + (tile_x_offset + x)] = pixel;
         }
     }
 }
+
 
 
 // Helper function to get the alpha component from a pixel
