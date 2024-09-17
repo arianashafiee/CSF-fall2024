@@ -276,7 +276,15 @@ void test_mirror_v_basic( TestObjs *objs ) {
 
   destroy_img( smiley_mirror_v_expected );
 }
-
+void print_image(struct Image *img) {
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+            uint32_t pixel = img->data[y * img->width + x];
+            printf("%08X ", pixel);  // Print each pixel as a hexadecimal value
+        }
+        printf("\n");
+    }
+}
 void test_tile_basic(TestObjs *objs) {
     Picture smiley_tile_3_pic = {
         TEST_COLORS,
@@ -312,15 +320,6 @@ void test_tile_basic(TestObjs *objs) {
     destroy_img(smiley_tile_3_expected);
 }
 
-void print_image(struct Image *img) {
-    for (int y = 0; y < img->height; y++) {
-        for (int x = 0; x < img->width; x++) {
-            uint32_t pixel = img->data[y * img->width + x];
-            printf("%08X ", pixel);  // Print each pixel as a hexadecimal value
-        }
-        printf("\n");
-    }
-}
 
 void test_grayscale_basic( TestObjs *objs ) {
   Picture smiley_grayscale_pic = {
