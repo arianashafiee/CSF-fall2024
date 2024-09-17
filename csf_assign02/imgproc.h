@@ -5,7 +5,29 @@
 #define IMGPROC_H
 
 #include "image.h" // for struct Image and related functions
+// Extract the red component from a pixel.
+uint32_t get_r(uint32_t pixel);
 
+// Extract the green component from a pixel.
+uint32_t get_g(uint32_t pixel);
+
+// Extract the blue component from a pixel.
+uint32_t get_b(uint32_t pixel);
+
+// Extract the alpha component from a pixel.
+uint32_t get_a(uint32_t pixel);
+
+// Make a pixel from RGBA components.
+uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
+
+// Convert a pixel to grayscale.
+uint32_t to_grayscale(uint32_t pixel);
+
+// Blend a single color component (r, g, or b) based on alpha value.
+uint32_t blend_component(uint32_t fg, uint32_t bg, uint32_t alpha);
+
+// Blend two colors (foreground and background) using alpha blending.
+uint32_t blend_colors(uint32_t fg_pixel, uint32_t bg_pixel);
 // Mirror input image horizontally.
 // This transformation always succeeds.
 //
