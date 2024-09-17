@@ -200,42 +200,29 @@ int imgproc_tile(struct Image *input_img, int n, struct Image *output_img) {
     int width = input_img->width;
     int height = input_img->height;
 
-    // Check if the output would contain empty tiles
-    if (width / n == 0 || height / n == 0) {
-        return 0; // Output can't be generated because tiles would be empty
-    }
+    // Loop through each pixel in the output image
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // Find the corresponding pixel in the input image, sampling every n'th pixel
+            int src_x = (x % n) * (width / n);
+            int src_y = (y % n) * (height / n);
 
-    // Calculate the size of the tiles
-    int tile_width = width / n;
-    int tile_height = height / n;
-
-    // Loop through each tile (row-major order)
-    for (int tile_row = 0; tile_row < n; tile_row++) {
-        for (int tile_col = 0; tile_col < n; tile_col++) {
-            // Calculate where the top-left corner of this tile comes from in the original image
-            int src_x = tile_col * tile_width;
-            int src_y = tile_row * tile_height;
-
-            // Loop over the pixels in this tile and copy them to the corresponding place in the output image
-            for (int y = 0; y < tile_height; y++) {
-                for (int x = 0; x < tile_width; x++) {
-                    // Calculate the source pixel index in the input image
-                    int src_idx = (src_y + y) * width + (src_x + x);
-
-                    // Calculate the destination pixel index in the output image
-                    int dest_x = tile_col * tile_width + x;
-                    int dest_y = tile_row * tile_height + y;
-                    int dest_idx = dest_y * width + dest_x;
-
-                    // Copy the pixel from input to output
-                    output_img->data[dest_idx] = input_img->data[src_idx];
-                }
+            // Ensure src_x and src_y don't exceed image dimensions
+            if (src_x >= width) {
+                src_x = width - 1;
             }
+            if (src_y >= height) {
+                src_y = height - 1;
+            }
+
+            // Copy the pixel from the input image to the output image
+            output_img->data[y * width + x] = input_img->data[src_y * width + src_x];
         }
     }
 
     return 1; // Success
 }
+
 
 
 // Convert input pixels to grayscale.
