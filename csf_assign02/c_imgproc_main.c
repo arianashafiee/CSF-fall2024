@@ -1,149 +1,108 @@
-// C main function for image processing program
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
+#include <assert.h>
 #include "imgproc.h"
 
-void usage( const char *progname ) {
-  fprintf( stderr, "Error: invalid command-line arguments\n" );
-  fprintf( stderr, "Usage: %s <transform> <input img> <output img> [args...]\n", progname );
-  exit( 1 );
+// Helper function to check if all tiles are non-empty
+int all_tiles_nonempty(int width, int height, int n) {
+    return (width / n > 0) && (height / n > 0);
 }
 
-// Make a new empty image the same dimensions as given image
-struct Image *create_output_img( struct Image *input_img ) {
-  struct Image *out_img;
-
-  // Allocate Image object
-  out_img = (struct Image *) malloc( sizeof( struct Image ) );
-  if ( out_img == NULL )
-    return NULL;
-
-  // Set data to NULL for now
-  out_img->data = NULL;
-
-  // Attempt to initialize the Image object by calling img_init
-  if ( img_init( out_img, input_img->width, input_img->height ) != IMG_SUCCESS ) {
-    free( out_img );
-    return NULL;
-  }
-
-  // Success!
-  return out_img;
+// Helper function to determine the width of a tile in the output image
+int determine_tile_w(int width, int n, int tile_col) {
+    int base_tile_w = width / n;
+    int remainder = width % n;
+    return base_tile_w + (tile_col < remainder ? 1 : 0);
 }
 
-// Free memory allocated to given Image object
-void cleanup_image( struct Image *img ) {
-  if ( img != NULL ) {
-    img_cleanup( img );
-    free( img );
-  }
+// Helper function to determine the x-offset of a tile in the output image
+int determine_tile_x_offset(int width, int n, int tile_col) {
+    int base_tile_w = width / n;
+    int remainder = width % n;
+    return tile_col * base_tile_w + (tile_col < remainder ? tile_col : remainder);
 }
 
-int main( int argc, char **argv ) {
-  if ( argc < 4 )
-    usage( argv[0] );
+// Helper function to determine the height of a tile in the output image
+int determine_tile_h(int height, int n, int tile_row) {
+    int base_tile_h = height / n;
+    int remainder = height % n;
+    return base_tile_h + (tile_row < remainder ? 1 : 0);
+}
 
-  const char *transformation = argv[1];
-  const char *input_filename = argv[2];
-  const char *output_filename = argv[3];
+// Helper function to determine the y-offset of a tile in the output image
+int determine_tile_y_offset(int height, int n, int tile_row) {
+    int base_tile_h = height / n;
+    int remainder = height % n;
+    return tile_row * base_tile_h + (tile_row < remainder ? tile_row : remainder);
+}
 
-  // Allocate and read the input image
-  struct Image *input_img = (struct Image *) malloc( sizeof( struct Image ) );
-  if ( input_img == NULL ) {
-    fprintf( stderr, "Error: couldn't allocate input image\n" );
-    exit( 1 );
-  }
-  if ( img_read( input_filename, input_img ) != IMG_SUCCESS ) {
-    fprintf( stderr, "Error: couldn't read input image\n" );
-    free( input_img );
-    return 1;
-  }
+// Helper function to copy a tile from input to output image, downsampling pixels
+void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_col, int n) {
+    int tile_w = determine_tile_w(img->width, n, tile_col);
+    int tile_h = determine_tile_h(img->height, n, tile_row);
+    int tile_x_offset = determine_tile_x_offset(img->width, n, tile_col);
+    int tile_y_offset = determine_tile_y_offset(img->height, n, tile_row);
 
-  // Create output Image object
-  struct Image *output_img = create_output_img( input_img );
-  if ( output_img == NULL ) {
-    fprintf( stderr, "Error: couldn't create output image object\n" );
-    cleanup_image( input_img );
-    return 1;
-  }
+    for (int y = 0; y < tile_h; y++) {
+        for (int x = 0; x < tile_w; x++) {
+            // Sample pixel from input image by skipping every n-th pixel
+            int sample_x = (x * n + tile_x_offset) % img->width;
+            int sample_y = (y * n + tile_y_offset) % img->height;
 
-  // Set to true if an error occurs
-  bool error_occurred = false;
+            // Get the pixel from the input image
+            uint32_t pixel = img->data[sample_y * img->width + sample_x];
 
-  // Execute the appropriate transformation
-  if ( strcmp( transformation, "mirror_h" ) == 0 ) {
-    imgproc_mirror_h( input_img, output_img );
-  } else if ( strcmp( transformation, "mirror_v" ) == 0 ) {
-    imgproc_mirror_v( input_img, output_img );
-  } else if ( strcmp( transformation, "tile" ) == 0 ) {
-    if ( argc != 5 ) {
-      fprintf( stderr, "Error: tile transformation needs tiling factor argument\n" );
-      error_occurred = true;
-    } else {
-      int n;
-      if ( sscanf( argv[4], "%d", &n ) != 1 ) {
-        fprintf( stderr, "Error: could not parse tiling factor\n" );
-        error_occurred = true;
-      } else {
-        int success = imgproc_tile( input_img, n, output_img );
-        if ( !success ) {
-          fprintf( stderr, "Error: tile transformation failed\n" );
-          error_occurred = true;
+            // Place the sampled pixel in the corresponding location in the output image
+            out_img->data[(tile_y_offset + y) * out_img->width + (tile_x_offset + x)] = pixel;
         }
-      }
     }
-  } else if ( strcmp( transformation, "grayscale" ) == 0 ) {
-    imgproc_grayscale( input_img, output_img );
-    if ( output_img == NULL ) {
-      fprintf( stderr, "Error: grayscale transformation failed\n" );
-      error_occurred = true;
-    }
-  } else if ( strcmp( transformation, "composite" ) == 0 ) {
-    if ( argc != 5 ) {
-      fprintf( stderr, "Error: composite transformation needs overlay image argument\n" );
-      error_occurred = true;
-    } else {
-      struct Image *overlay_img = (struct Image *) malloc( sizeof(struct Image) );
-      if ( overlay_img == NULL ) {
-        fprintf( stderr, "Error: failed to allocate Image object\n" );
-        error_occurred = true;
-      } else {
-        // Set overlay_img->data to NULL so that cleanup_image
-        // will work correctly even if overlay image can't be read
-        overlay_img->data = NULL;
+}
 
-        if ( img_read( argv[4], overlay_img ) != IMG_SUCCESS ) {
-          fprintf( stderr, "Error: could not read overlay image\n" );
-          error_occurred = true;
-        } else {
-          int success = imgproc_composite( input_img, overlay_img, output_img );
-          if ( !success ) {
-            fprintf( stderr, "Error: composite transformation failed\n" );
-            error_occurred = true;
-          }
+// Convert input pixels to grayscale
+void imgproc_grayscale(struct Image *input_img, struct Image *output_img) {
+    int32_t width = input_img->width;
+    int32_t height = input_img->height;
+
+    // Iterate over each pixel in the image
+    for (int32_t y = 0; y < height; y++) {
+        for (int32_t x = 0; x < width; x++) {
+            // Get the current pixel from the input image
+            uint32_t pixel = input_img->data[y * width + x];
+
+            // Convert the pixel to grayscale
+            uint32_t gray_pixel = to_grayscale(pixel);
+
+            // Store the grayscale pixel in the output image
+            output_img->data[y * width + x] = gray_pixel;
         }
-      }
-      // ensure memory of overlay image is cleaned up
-      cleanup_image( overlay_img );
     }
-  } else {
-    fprintf( stderr, "Error: unknown transformation '%s'\n", transformation );
-    error_occurred = true;
-  }
+}
 
-  if ( !error_occurred ) {
-    // Write output image
-    if ( img_write( output_filename, output_img ) != IMG_SUCCESS ) {
-      fprintf( stderr, "Error: couldn't write output image\n" );
-      error_occurred = true;
+// Composite function for blending images
+int imgproc_composite(struct Image *base_img, struct Image *overlay_img, struct Image *output_img) {
+    // Check if the base and overlay images have the same dimensions
+    if (base_img->width != overlay_img->width || base_img->height != overlay_img->height) {
+        return 0; // Failure: Dimensions don't match
     }
-  }
 
-  cleanup_image( input_img );
-  cleanup_image( output_img );
+    // Set the output image dimensions
+    output_img->width = base_img->width;
+    output_img->height = base_img->height;
 
-  return error_occurred ? 1 : 0;
+    // Iterate over each pixel
+    for (int y = 0; y < base_img->height; y++) {
+        for (int x = 0; x < base_img->width; x++) {
+            // Get the index of the current pixel
+            int idx = y * base_img->width + x;
+
+            // Get the foreground (overlay) and background (base) pixels
+            uint32_t fg_pixel = overlay_img->data[idx];
+            uint32_t bg_pixel = base_img->data[idx];
+
+            // Blend the pixels and store the result in the output image
+            output_img->data[idx] = blend_colors(fg_pixel, bg_pixel);
+        }
+    }
+
+    return 1; // Success
 }
