@@ -47,31 +47,15 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
 
     for (int y = 0; y < tile_h; y++) {
         for (int x = 0; x < tile_w; x++) {
-            // Sample pixel from input image by skipping every n-th pixel
-            int sample_x = x * n;
-            int sample_y = y * n;
-            uint32_t pixel = img->data[sample_y * img->width + sample_x];
+            int sample_x = tile_x_offset + (x * img->width) / out_img->width;
+            int sample_y = tile_y_offset + (y * img->height) / out_img->height;
 
-            // Place the sampled pixel in the corresponding location in the output image
+            uint32_t pixel = img->data[sample_y * img->width + sample_x];
             out_img->data[(tile_y_offset + y) * out_img->width + (tile_x_offset + x)] = pixel;
         }
     }
 }
 
-// Helper function to get the red component from a pixel
-uint32_t get_r(uint32_t pixel) {
-    return (pixel >> 24) & 0xFF;
-}
-
-// Helper function to get the green component from a pixel
-uint32_t get_g(uint32_t pixel) {
-    return (pixel >> 16) & 0xFF;
-}
-
-// Helper function to get the blue component from a pixel
-uint32_t get_b(uint32_t pixel) {
-    return (pixel >> 8) & 0xFF;
-}
 
 // Helper function to get the alpha component from a pixel
 uint32_t get_a(uint32_t pixel) {
@@ -132,27 +116,23 @@ uint32_t blend_colors(uint32_t fg, uint32_t bg) {
 //                pixels should be stored)
 // Function to mirror the image horizontally
 void imgproc_mirror_h(struct Image *input_img, struct Image *output_img) {
-    // Ensure the output image has the same dimensions as the input image
-    int32_t width = input_img->width;
-    int32_t height = input_img->height;
-    
-    // Iterate over each row
-    for (int32_t y = 0; y < height; y++) {
-        // Iterate over each column (only up to the middle of the image)
-        for (int32_t x = 0; x < width / 2; x++) {
-            // Calculate the position of the mirrored pixel
-            int32_t mirrored_x = width - 1 - x;
-            
-            // Get the pixels from both sides
-            uint32_t left_pixel = input_img->data[y * width + x];
-            uint32_t right_pixel = input_img->data[y * width + mirrored_x];
-            
-            // Swap the pixels
-            output_img->data[y * width + x] = right_pixel;
-            output_img->data[y * width + mirrored_x] = left_pixel;
+    output_img->width = input_img->width;
+    output_img->height = input_img->height;
+    output_img->data = malloc(output_img->width * output_img->height * sizeof(uint32_t));
+
+    if (output_img->data == NULL) {
+        fprintf(stderr, "Error: Memory allocation for output image failed.\n");
+        exit(1);
+    }
+
+    for (int32_t y = 0; y < input_img->height; y++) {
+        for (int32_t x = 0; x < input_img->width; x++) {
+            int32_t mirrored_x = input_img->width - 1 - x;
+            output_img->data[y * input_img->width + x] = input_img->data[y * input_img->width + mirrored_x];
         }
     }
 }
+
 
 // Mirror input image vertically.
 // This transformation always succeeds.
@@ -162,27 +142,23 @@ void imgproc_mirror_h(struct Image *input_img, struct Image *output_img) {
 //   output_img - pointer to the output Image (in which the transformed
 //                pixels should be stored)
 void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
-    // Ensure the output image has the same dimensions as the input image
-    int32_t width = input_img->width;
-    int32_t height = input_img->height;
-    
-    // Iterate over each column
-    for (int32_t y = 0; y < height / 2; y++) {
-        // Calculate the position of the mirrored row
-        int32_t mirrored_y = height - 1 - y;
-        
-        // Swap pixels in each column between the current row and the mirrored row
-        for (int32_t x = 0; x < width; x++) {
-            // Get the pixels from both rows
-            uint32_t top_pixel = input_img->data[y * width + x];
-            uint32_t bottom_pixel = input_img->data[mirrored_y * width + x];
-            
-            // Swap the pixels
-            output_img->data[y * width + x] = bottom_pixel;
-            output_img->data[mirrored_y * width + x] = top_pixel;
+    output_img->width = input_img->width;
+    output_img->height = input_img->height;
+    output_img->data = malloc(output_img->width * output_img->height * sizeof(uint32_t));
+
+    if (output_img->data == NULL) {
+        fprintf(stderr, "Error: Memory allocation for output image failed.\n");
+        exit(1);
+    }
+
+    for (int32_t y = 0; y < input_img->height; y++) {
+        int32_t mirrored_y = input_img->height - 1 - y;
+        for (int32_t x = 0; x < input_img->width; x++) {
+            output_img->data[y * input_img->width + x] = input_img->data[mirrored_y * input_img->width + x];
         }
     }
 }
+
 
 // Transform image by generating a grid of n x n smaller tiles created by
 // sampling every n'th pixel from the original image.
@@ -223,24 +199,23 @@ int imgproc_tile(struct Image *input_img, int n, struct Image *output_img) {
 //   output_img - pointer to the output Image (in which the transformed
 //                pixels should be stored)
 void imgproc_grayscale(struct Image *input_img, struct Image *output_img) {
-    // Ensure the output image has the same dimensions as the input image
-    int32_t width = input_img->width;
-    int32_t height = input_img->height;
-    
-    // Iterate over each pixel in the image
-    for (int32_t y = 0; y < height; y++) {
-        for (int32_t x = 0; x < width; x++) {
-            // Get the current pixel from the input image
-            uint32_t pixel = input_img->data[y * width + x];
-            
-            // Convert the pixel to grayscale
-            uint32_t gray_pixel = to_grayscale(pixel);
-            
-            // Store the grayscale pixel in the output image
-            output_img->data[y * width + x] = gray_pixel;
+    output_img->width = input_img->width;
+    output_img->height = input_img->height;
+    output_img->data = malloc(output_img->width * output_img->height * sizeof(uint32_t));
+
+    if (output_img->data == NULL) {
+        fprintf(stderr, "Error: Memory allocation for output image failed.\n");
+        exit(1);
+    }
+
+    for (int32_t y = 0; y < input_img->height; y++) {
+        for (int32_t x = 0; x < input_img->width; x++) {
+            uint32_t pixel = input_img->data[y * input_img->width + x];
+            output_img->data[y * output_img->width + x] = to_grayscale(pixel);
         }
     }
 }
+
 
 // Overlay a foreground image on a background image, using each foreground
 // pixel's alpha value to determine its degree of opacity in order to blend
@@ -255,29 +230,28 @@ void imgproc_grayscale(struct Image *input_img, struct Image *output_img) {
 //   1 if successful, or 0 if the transformation fails because the base
 //   and overlay image do not have the same dimensions
 int imgproc_composite(struct Image *base_img, struct Image *overlay_img, struct Image *output_img) {
-    // Check if the base and overlay images have the same dimensions
     if (base_img->width != overlay_img->width || base_img->height != overlay_img->height) {
-        return 0; // Failure: Dimensions don't match
+        return 0;  // Return failure if dimensions don't match
     }
 
-    // Set the output image dimensions
     output_img->width = base_img->width;
     output_img->height = base_img->height;
+    output_img->data = malloc(output_img->width * output_img->height * sizeof(uint32_t));
 
-    // Iterate over each pixel
+    if (output_img->data == NULL) {
+        fprintf(stderr, "Error: Memory allocation for output image failed.\n");
+        return 0;
+    }
+
     for (int y = 0; y < base_img->height; y++) {
         for (int x = 0; x < base_img->width; x++) {
-            // Get the index of the current pixel
             int idx = y * base_img->width + x;
-
-            // Get the foreground (overlay) and background (base) pixels
             uint32_t fg_pixel = overlay_img->data[idx];
             uint32_t bg_pixel = base_img->data[idx];
-
-            // Blend the pixels and store the result in the output image
             output_img->data[idx] = blend_colors(fg_pixel, bg_pixel);
         }
     }
 
     return 1; // Success
 }
+
