@@ -60,5 +60,6 @@ void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
 // Returns:
 //   1 if successful, or 0 if the transformation fails because the base
 //   and overlay image do not have the same dimensions
+int imgproc_composite(struct Image *base_img, struct Image *overlay_img, struct Image *output_img);
 
 #endif // IMGPROC_H
