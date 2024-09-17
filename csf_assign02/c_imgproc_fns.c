@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "imgproc.h"
+#include <stdio.h>  
 
 // TODO: define your helper functions here
 // Helper function to check if all tiles are non-empty
