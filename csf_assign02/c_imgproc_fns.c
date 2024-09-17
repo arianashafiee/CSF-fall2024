@@ -63,22 +63,18 @@ uint32_t get_r(uint32_t pixel) {
     return (pixel >> 24) & 0xFF;
 }
 
-// Helper function to get the green component from a pixel
 uint32_t get_g(uint32_t pixel) {
     return (pixel >> 16) & 0xFF;
 }
 
-// Helper function to get the blue component from a pixel
 uint32_t get_b(uint32_t pixel) {
     return (pixel >> 8) & 0xFF;
 }
 
-// Helper function to get the alpha component from a pixel
 uint32_t get_a(uint32_t pixel) {
     return pixel & 0xFF;
 }
 
-// Helper function to create a pixel from r, g, b, and a components
 uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
     return (r << 24) | (g << 16) | (b << 8) | a;
 }
@@ -104,23 +100,21 @@ uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha) {
 
 // Helper function to blend two pixels (foreground and background).
 uint32_t blend_colors(uint32_t fg, uint32_t bg) {
-    // Extract the red, green, blue, and alpha components from both pixels
-    uint32_t fg_r = (fg >> 24) & 0xFF;
-    uint32_t fg_g = (fg >> 16) & 0xFF;
-    uint32_t fg_b = (fg >> 8) & 0xFF;
-    uint32_t fg_a = fg & 0xFF;
+    uint32_t fg_r = get_r(fg);
+    uint32_t fg_g = get_g(fg);
+    uint32_t fg_b = get_b(fg);
+    uint32_t fg_a = get_a(fg);
 
-    uint32_t bg_r = (bg >> 24) & 0xFF;
-    uint32_t bg_g = (bg >> 16) & 0xFF;
-    uint32_t bg_b = (bg >> 8) & 0xFF;
+    uint32_t bg_r = get_r(bg);
+    uint32_t bg_g = get_g(bg);
+    uint32_t bg_b = get_b(bg);
 
-    // Blend each color component using the foreground alpha value
     uint32_t blended_r = blend_components(fg_r, bg_r, fg_a);
     uint32_t blended_g = blend_components(fg_g, bg_g, fg_a);
     uint32_t blended_b = blend_components(fg_b, bg_b, fg_a);
 
     // Return the blended pixel with alpha set to 255 (fully opaque)
-    return (blended_r << 24) | (blended_g << 16) | (blended_b << 8) | 0xFF;
+    return make_pixel(blended_r, blended_g, blended_b, 255);
 }
 
 // Mirror input image horizontally.
@@ -224,6 +218,9 @@ int imgproc_tile(struct Image *input_img, int n, struct Image *output_img) {
 //                pixels should be stored)
 void imgproc_grayscale(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
+    assert(input_img != NULL && output_img != NULL);
+    assert(input_img->width == output_img->width && input_img->height == output_img->height);
+
     int32_t width = input_img->width;
     int32_t height = input_img->height;
     
