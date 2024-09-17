@@ -60,48 +60,5 @@ void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
 // Returns:
 //   1 if successful, or 0 if the transformation fails because the base
 //   and overlay image do not have the same dimensions
-int imgproc_composite( struct Image *base_img, struct Image *overlay_img, struct Image *output_img );
 
-// TODO: add prototypes for your helper functions
-// Check if all tiles are non-empty.
-int all_tiles_nonempty(int width, int height, int n);
-
-// Determine the width of a tile in the output image.
-int determine_tile_w(int width, int n, int tile_col);
-
-// Determine the x-offset of a tile in the output image.
-int determine_tile_x_offset(int width, int n, int tile_col);
-
-// Determine the height of a tile in the output image.
-int determine_tile_h(int height, int n, int tile_row);
-
-// Determine the y-offset of a tile in the output image.
-int determine_tile_y_offset(int height, int n, int tile_row);
-
-// Copy a tile from input to output image, downsampling pixels.
-void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_col, int n);
-
-// Get the red component from a pixel.
-uint32_t get_r(uint32_t pixel);
-
-// Get the green component from a pixel.
-uint32_t get_g(uint32_t pixel);
-
-// Get the blue component from a pixel.
-uint32_t get_b(uint32_t pixel);
-
-// Get the alpha component from a pixel.
-uint32_t get_a(uint32_t pixel);
-
-// Create a pixel from r, g, b, and a components.
-uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
-
-// Convert a pixel to grayscale.
-uint32_t to_grayscale(uint32_t pixel);
-
-// Blend a single color component (red, green, or blue).
-uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha);
-
-// Blend two pixels (foreground and background).
-uint32_t blend_colors(uint32_t fg, uint32_t bg);
 #endif // IMGPROC_H
