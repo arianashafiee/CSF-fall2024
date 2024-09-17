@@ -202,15 +202,18 @@ int imgproc_tile(struct Image *input_img, int n, struct Image *output_img) {
     int width = input_img->width;
     int height = input_img->height;
 
+    // Determine the size of each tile
+    int tile_width = width / n;
+    int tile_height = height / n;
+
     // Loop through each pixel in the output image
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            // Calculate the corresponding pixel in the input image
-            // by sampling every n'th pixel
-            int src_x = x / n;
-            int src_y = y / n;
+            // Calculate the corresponding pixel in the input image by sampling every n-th pixel
+            int src_x = (x / tile_width) * tile_width + (x % tile_width);
+            int src_y = (y / tile_height) * tile_height + (y % tile_height);
 
-            // Use the sampled pixel to tile across the entire output image
+            // Copy the sampled pixel from input image to output image
             output_img->data[y * width + x] = input_img->data[src_y * width + src_x];
         }
     }
