@@ -102,21 +102,6 @@ uint32_t to_grayscale(uint32_t pixel) {
     return make_pixel(gray, gray, gray, a);
 }
 
-
-// Helper function to convert a pixel to grayscale
-uint32_t to_grayscale(uint32_t pixel) {
-    uint32_t r = get_r(pixel);
-    uint32_t g = get_g(pixel);
-    uint32_t b = get_b(pixel);
-    uint32_t a = get_a(pixel); // Preserve the alpha value
-
-    // Compute the grayscale value using the formula
-    uint32_t y = (79 * r + 128 * g + 49 * b) / 256;
-
-    // Create the grayscale pixel with the same alpha
-    return make_pixel(y, y, y, a);
-}
-
 // Helper function to blend a single color component (r, g, or b)
 uint32_t blend_component(uint32_t fg, uint32_t bg, uint32_t alpha) {
     return (alpha * fg + (255 - alpha) * bg) / 255;
