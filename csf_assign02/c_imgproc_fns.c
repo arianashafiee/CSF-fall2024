@@ -191,21 +191,24 @@ void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
 //       be empty (i.e., have 0 width or height)
 // Transform image by generating a grid of n x n smaller tiles created by
 // sampling every n'th pixel from the original image.
+// Transform image by generating a grid of n x n smaller tiles created by
+// sampling every n'th pixel from the original image.
 int imgproc_tile(struct Image *input_img, int n, struct Image *output_img) {
     // Check if n is valid
     if (n < 1) {
         return 0; // Invalid tiling factor
     }
- 
+
     int width = input_img->width;
     int height = input_img->height;
 
     // Loop through each pixel in the output image
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            // Find the corresponding pixel in the input image, sampling every n'th pixel
-            int src_x = (x % n) * (width / n);
-            int src_y = (y % n) * (height / n);
+            // Calculate the corresponding pixel in the input image
+            // by sampling every n'th pixel
+            int src_x = (x % n) + (x / n) * n;
+            int src_y = (y % n) + (y / n) * n;
 
             // Ensure src_x and src_y don't exceed image dimensions
             if (src_x >= width) {
@@ -222,6 +225,7 @@ int imgproc_tile(struct Image *input_img, int n, struct Image *output_img) {
 
     return 1; // Success
 }
+
 
 
 
