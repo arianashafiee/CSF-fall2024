@@ -58,10 +58,7 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
     }
 }
 
-// Helper function to get the red component from a pixel
-uint32_t get_r(uint32_t pixel) {
-    return (pixel >> 24) & 0xFF;
-}
+
 
 // Helper function to extract the red component from a pixel
 uint32_t get_r(uint32_t pixel) {
