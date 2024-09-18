@@ -120,6 +120,7 @@ int main( int argc, char **argv ) {
   TEST( test_tile_basic );
   TEST( test_grayscale_basic );
   TEST( test_composite_basic );
+  TEST(compare_images_pixel_by_pixel);
 
   TEST_FINI();
 }
