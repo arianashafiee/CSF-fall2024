@@ -30,7 +30,7 @@ typedef struct {
       { 'c', 0x00FFFFFF }, \
       { 'm', 0xFF00FFFF }, \
     }
-
+ 
 // Expected "basic" colors after grayscale transformation
 #define TEST_COLORS_GRAYSCALE \
     { \
