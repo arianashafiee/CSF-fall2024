@@ -184,7 +184,7 @@ TestObjs *setup(void) {
     }
 
     // Load the actual image from a PNG file (from a folder)
-    const char *actual_img_path = "actual/c_ingo_tile_3.png";
+    const char *actual_img_path = "actual/c_ingo_mirror_h.png";
     objs->actual_img = (struct Image *)malloc(sizeof(struct Image));
     if (img_read(actual_img_path, objs->actual_img) != IMG_SUCCESS) {
         fprintf(stderr, "Error: Couldn't read the actual image from %s\n", actual_img_path);
@@ -435,7 +435,4 @@ void compare_images_pixel_by_pixel(TestObjs *objs) {
             assert(expected_a == actual_a && "Alpha components do not match");
         }
     }
-
-    // If no assertions fail, the images are identical
-    printf("Images are identical!\n");
 }
