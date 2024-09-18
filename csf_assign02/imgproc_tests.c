@@ -79,6 +79,10 @@ typedef struct {
 
   // overlay image object
   struct Image *overlay;
+
+  // New fields for expected and actual images loaded from PNG files
+  struct Image *expected_img;
+  struct Image *actual_img;
 } TestObjs;
 
 // Functions to create and clean up a test fixture object
@@ -191,6 +195,7 @@ TestObjs *setup(void) {
 
     return objs;
 }
+
 
 
 void cleanup( TestObjs *objs ) {
@@ -346,7 +351,10 @@ void test_tile_basic(TestObjs *objs) {
     destroy_img(smiley_tile_3_expected);
 }
 
-void compare_images_pixel_by_pixel(TestObjs *objs ){
+void compare_images_pixel_by_pixel(TestObjs *objs) {
+    struct Image *expected_img = objs->expected_img;
+    struct Image *actual_img = objs->actual_img;
+
     // Ensure the images have the same dimensions
     if (expected_img->width != actual_img->width || expected_img->height != actual_img->height) {
         printf("Error: Images have different dimensions\n");
@@ -376,6 +384,7 @@ void compare_images_pixel_by_pixel(TestObjs *objs ){
     // If no mismatches found
     printf("Images are identical!\n");
 }
+
 
 
 void test_grayscale_basic( TestObjs *objs ) {
