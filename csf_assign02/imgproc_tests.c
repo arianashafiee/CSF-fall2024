@@ -352,42 +352,6 @@ void test_tile_basic(TestObjs *objs) {
     destroy_img(smiley_tile_3_expected);
 }
 
-void compare_images_pixel_by_pixel(TestObjs *objs) {
-    struct Image *expected_img = objs->expected_img;
-    struct Image *actual_img = objs->actual_img;
-
-    // Ensure the images have the same dimensions
-    if (expected_img->width != actual_img->width || expected_img->height != actual_img->height) {
-        printf("Error: Images have different dimensions\n");
-        printf("Expected Image: %dx%d, Actual Image: %dx%d\n",
-               expected_img->width, expected_img->height, actual_img->width, actual_img->height);
-        return;
-    }
-
-    int width = expected_img->width;
-    int height = expected_img->height;
-
-    // Iterate through each pixel and compare
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            uint32_t expected_pixel = expected_img->data[y * width + x];
-            uint32_t actual_pixel = actual_img->data[y * width + x];
-
-            if (expected_pixel != actual_pixel) {
-                printf("Mismatch at pixel (%d, %d):\n", x, y);
-                printf("Expected color: %08X\n", expected_pixel);
-                printf("Actual color:   %08X\n", actual_pixel);
-                return; // Exit after first mismatch
-            }
-        }
-    }
-
-    // If no mismatches found
-    printf("Images are identical!\n");
-}
-
-
-
 void test_grayscale_basic( TestObjs *objs ) {
   Picture smiley_grayscale_pic = {
     TEST_COLORS_GRAYSCALE,
@@ -436,4 +400,48 @@ void test_composite_basic( TestObjs *objs ) {
 }
 
 
+void compare_images_pixel_by_pixel(TestObjs *objs) {
+    struct Image *expected_img = objs->expected_img;
+    struct Image *actual_img = objs->actual_img;
 
+    // Ensure the images have the same dimensions
+    if (expected_img->width != actual_img->width || expected_img->height != actual_img->height) {
+        printf("Error: Images have different dimensions\n");
+        printf("Expected Image: %dx%d, Actual Image: %dx%d\n",
+               expected_img->width, expected_img->height, actual_img->width, actual_img->height);
+        return;
+    }
+
+    int width = expected_img->width;
+    int height = expected_img->height;
+
+    // Iterate through each pixel and compare
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint32_t expected_pixel = expected_img->data[y * width + x];
+            uint32_t actual_pixel = actual_img->data[y * width + x];
+
+            // Extract the color components of both pixels
+            uint32_t expected_r = get_r(expected_pixel);
+            uint32_t expected_g = get_g(expected_pixel);
+            uint32_t expected_b = get_b(expected_pixel);
+            uint32_t expected_a = get_a(expected_pixel);
+
+            uint32_t actual_r = get_r(actual_pixel);
+            uint32_t actual_g = get_g(actual_pixel);
+            uint32_t actual_b = get_b(actual_pixel);
+            uint32_t actual_a = get_a(actual_pixel);
+
+            // Compare color components
+            if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b || expected_a != actual_a) {
+                printf("Mismatch at pixel (%d, %d):\n", x, y);
+                printf("Expected color: R=%02X, G=%02X, B=%02X, A=%02X\n", expected_r, expected_g, expected_b, expected_a);
+                printf("Actual color:   R=%02X, G=%02X, B=%02X, A=%02X\n", actual_r, actual_g, actual_b, actual_a);
+                return; // Exit after first mismatch
+            }
+        }
+    }
+
+    // If no mismatches found
+    printf("Images are identical!\n");
+}
