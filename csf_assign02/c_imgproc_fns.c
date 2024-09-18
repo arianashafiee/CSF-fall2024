@@ -106,7 +106,7 @@ uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha) {
 // Helper function to blend two pixels (foreground and background).
 uint32_t blend_colors(uint32_t fg, uint32_t bg) {
     // Extract the red, green, blue, and alpha components from both pixels
-    uint32_t fg_r = (fg >> 24) & 0xFF;
+    uint32_t fg_r = (fg >> 24) // & 0xFF;
     uint32_t fg_g = (fg >> 16) & 0xFF;
     uint32_t fg_b = (fg >> 8) & 0xFF;
     uint32_t fg_a = fg & 0xFF;
@@ -121,7 +121,7 @@ uint32_t blend_colors(uint32_t fg, uint32_t bg) {
     uint32_t blended_b = blend_components(fg_b, bg_b, fg_a);
 
     // Return the blended pixel with alpha set to 255 (fully opaque)
-    return (blended_r << 24) | (blended_g << 16) | (blended_b << 8) | 0xFF;
+    return (blended_r << 24) | (blended_g << 16) | (blended_b << 8) | 255;
 }
 
 // Mirror input image horizontally.
