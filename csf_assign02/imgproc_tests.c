@@ -405,12 +405,8 @@ void compare_images_pixel_by_pixel(TestObjs *objs) {
     struct Image *actual_img = objs->actual_img;
 
     // Ensure the images have the same dimensions
-    if (expected_img->width != actual_img->width || expected_img->height != actual_img->height) {
-        printf("Error: Images have different dimensions\n");
-        printf("Expected Image: %dx%d, Actual Image: %dx%d\n",
-               expected_img->width, expected_img->height, actual_img->width, actual_img->height);
-        return;
-    }
+    assert(expected_img->width == actual_img->width && "Image widths do not match");
+    assert(expected_img->height == actual_img->height && "Image heights do not match");
 
     int width = expected_img->width;
     int height = expected_img->height;
@@ -432,17 +428,14 @@ void compare_images_pixel_by_pixel(TestObjs *objs) {
             uint32_t actual_b = (actual_pixel >> 8) & 0xFF;
             uint32_t actual_a = actual_pixel & 0xFF;
 
-            // Compare color components
-            if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b || expected_a != actual_a) {
-                printf("Mismatch at pixel (%d, %d):\n", x, y);
-                printf("Expected color: R=%02X, G=%02X, B=%02X, A=%02X\n", expected_r, expected_g, expected_b, expected_a);
-                printf("Actual color:   R=%02X, G=%02X, B=%02X, A=%02X\n", actual_r, actual_g, actual_b, actual_a);
-                return; // Exit after first mismatch
-            }
+            // Assert that all components match
+            assert(expected_r == actual_r && "Red components do not match");
+            assert(expected_g == actual_g && "Green components do not match");
+            assert(expected_b == actual_b && "Blue components do not match");
+            assert(expected_a == actual_a && "Alpha components do not match");
         }
     }
 
-    // If no mismatches found
+    // If no assertions fail, the images are identical
     printf("Images are identical!\n");
 }
-
