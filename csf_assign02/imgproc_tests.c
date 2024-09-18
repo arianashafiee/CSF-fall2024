@@ -181,7 +181,7 @@ TestObjs *setup(void) {
         free(objs->expected_img);
         free(objs);
         return NULL;
-    }
+    } 
 
     // Load the actual image from a PNG file (from a folder)
     const char *actual_img_path = "actual/c_ingo_mirror_h.png";
