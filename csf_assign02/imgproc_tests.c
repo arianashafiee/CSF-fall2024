@@ -81,9 +81,7 @@ typedef struct {
   // overlay image object
   struct Image *overlay;
 
-  // New fields for expected and actual images loaded from PNG files
-  struct Image *expected_img;
-  struct Image *actual_img;
+ 
 } TestObjs;
 
 // Functions to create and clean up a test fixture object
@@ -103,7 +101,6 @@ void test_tile_basic( TestObjs *objs );
 void test_grayscale_basic( TestObjs *objs );
 void test_composite_basic( TestObjs *objs );
 // TODO: add prototypes for additional test functions
-void compare_images_pixel_by_pixel(TestObjs *objs );
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -173,27 +170,6 @@ TestObjs *setup(void) {
     };
     objs->overlay_pic = overlay_pic;
     objs->overlay = picture_to_img(&overlay_pic);
-
-    // Load the expected image from a PNG file (from a folder)
-    const char *expected_img_path = "expected/ingo_tile_3.png";
-    objs->expected_img = (struct Image *)malloc(sizeof(struct Image));
-    if (img_read(expected_img_path, objs->expected_img) != IMG_SUCCESS) {
-        fprintf(stderr, "Error: Couldn't read the expected image from %s\n", expected_img_path);
-        free(objs->expected_img);
-        free(objs);
-        return NULL;
-    } 
-
-    // Load the actual image from a PNG file (from a folder)
-    const char *actual_img_path = "actual/c_ingo_mirror_h.png";
-    objs->actual_img = (struct Image *)malloc(sizeof(struct Image));
-    if (img_read(actual_img_path, objs->actual_img) != IMG_SUCCESS) {
-        fprintf(stderr, "Error: Couldn't read the actual image from %s\n", actual_img_path);
-        free(objs->actual_img);
-        free(objs->expected_img);
-        free(objs);
-        return NULL;
-    }
 
     return objs;
 }
@@ -401,57 +377,4 @@ void test_composite_basic( TestObjs *objs ) {
 }
 
 
-void compare_images_pixel_by_pixel(TestObjs *objs) {
-    struct Image *expected_img = objs->expected_img;
-    struct Image *actual_img = objs->actual_img;
 
-    // Ensure the images have the same dimensions
-    assert(expected_img->width == actual_img->width && "Image widths do not match");
-    assert(expected_img->height == actual_img->height && "Image heights do not match");
-
-    int width = expected_img->width;
-    int height = expected_img->height;
-
-    // Iterate through each pixel and compare
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            uint32_t expected_pixel = expected_img->data[y * width + x];
-            uint32_t actual_pixel = actual_img->data[y * width + x];
-
-            // Extract color components directly using bit shifts
-            uint32_t expected_r = (expected_pixel >> 24) & 0xFF;
-            uint32_t expected_g = (expected_pixel >> 16) & 0xFF;
-            uint32_t expected_b = (expected_pixel >> 8) & 0xFF;
-            uint32_t expected_a = expected_pixel & 0xFF;
-
-            uint32_t actual_r = (actual_pixel >> 24) & 0xFF;
-            uint32_t actual_g = (actual_pixel >> 16) & 0xFF;
-            uint32_t actual_b = (actual_pixel >> 8) & 0xFF;
-            uint32_t actual_a = actual_pixel & 0xFF;
-
-            // Check for mismatches and print detailed info before asserting
-            if (expected_r != actual_r) {
-                printf("Mismatch at pixel (%d, %d): Red channel\n", x, y);
-                printf("Expected R: %02X, Actual R: %02X\n", expected_r, actual_r);
-                assert(expected_r == actual_r && "Red components do not match");
-            }
-            if (expected_g != actual_g) {
-                printf("Mismatch at pixel (%d, %d): Green channel\n", x, y);
-                printf("Expected G: %02X, Actual G: %02X\n", expected_g, actual_g);
-                assert(expected_g == actual_g && "Green components do not match");
-            }
-            if (expected_b != actual_b) {
-                printf("Mismatch at pixel (%d, %d): Blue channel\n", x, y);
-                printf("Expected B: %02X, Actual B: %02X\n", expected_b, actual_b);
-                assert(expected_b == actual_b && "Blue components do not match");
-            }
-            if (expected_a != actual_a) {
-                printf("Mismatch at pixel (%d, %d): Alpha channel\n", x, y);
-                printf("Expected A: %02X, Actual A: %02X\n", expected_a, actual_a);
-                assert(expected_a == actual_a && "Alpha components do not match");
-            }
-        }
-    }
-
-    printf("Images are identical.\n");
-}
