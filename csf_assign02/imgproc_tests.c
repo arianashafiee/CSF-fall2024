@@ -17,7 +17,7 @@ typedef struct {
 typedef struct {
   ExpectedColor colors[20];
   int width, height;
-  const char *data;
+  const char *data; 
 } Picture;
 
 // Some "basic" colors to use in test Pictures
