@@ -79,4 +79,4 @@ uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
 uint32_t to_grayscale(uint32_t pixel);
 uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha);
 uint32_t blend_colors(uint32_t fg, uint32_t bg);
-#endif // IMGPROC_H
+#endif // IMGPROC_H 
