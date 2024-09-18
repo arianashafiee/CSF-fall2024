@@ -428,11 +428,29 @@ void compare_images_pixel_by_pixel(TestObjs *objs) {
             uint32_t actual_b = (actual_pixel >> 8) & 0xFF;
             uint32_t actual_a = actual_pixel & 0xFF;
 
-            // Assert that all components match
-            assert(expected_r == actual_r && "Red components do not match");
-            assert(expected_g == actual_g && "Green components do not match");
-            assert(expected_b == actual_b && "Blue components do not match");
-            assert(expected_a == actual_a && "Alpha components do not match");
+            // Check for mismatches and print detailed info before asserting
+            if (expected_r != actual_r) {
+                printf("Mismatch at pixel (%d, %d): Red channel\n", x, y);
+                printf("Expected R: %02X, Actual R: %02X\n", expected_r, actual_r);
+                assert(expected_r == actual_r && "Red components do not match");
+            }
+            if (expected_g != actual_g) {
+                printf("Mismatch at pixel (%d, %d): Green channel\n", x, y);
+                printf("Expected G: %02X, Actual G: %02X\n", expected_g, actual_g);
+                assert(expected_g == actual_g && "Green components do not match");
+            }
+            if (expected_b != actual_b) {
+                printf("Mismatch at pixel (%d, %d): Blue channel\n", x, y);
+                printf("Expected B: %02X, Actual B: %02X\n", expected_b, actual_b);
+                assert(expected_b == actual_b && "Blue components do not match");
+            }
+            if (expected_a != actual_a) {
+                printf("Mismatch at pixel (%d, %d): Alpha channel\n", x, y);
+                printf("Expected A: %02X, Actual A: %02X\n", expected_a, actual_a);
+                assert(expected_a == actual_a && "Alpha components do not match");
+            }
         }
     }
+
+    printf("Images are identical.\n");
 }
