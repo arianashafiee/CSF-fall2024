@@ -123,49 +123,74 @@ int main( int argc, char **argv ) {
 // Test fixture setup/cleanup functions
 ////////////////////////////////////////////////////////////////////////
 
-TestObjs *setup( void ) {
-  TestObjs *objs = (TestObjs *) malloc( sizeof(TestObjs) );
+TestObjs *setup(void) {
+    TestObjs *objs = (TestObjs *)malloc(sizeof(TestObjs));
 
-  Picture smiley_pic = {
-    TEST_COLORS,
-    16, // width
-    10, // height
-    "    mrrrggbc    "
-    "   c        b   "
-    "  r   r  b   c  "
-    " b            b "
-    " b            r "
-    " g   b    c   r "
-    "  c   ggrb   b  "
-    "   m        c   "
-    "    gggrrbmc    "
-    "                "
-  };
-  objs->smiley_pic = smiley_pic;
-  objs->smiley = picture_to_img( &smiley_pic );
+    // Set up smiley image from picture data (as already implemented)
+    Picture smiley_pic = {
+        TEST_COLORS,
+        16, // width
+        10, // height
+        "    mrrrggbc    "
+        "   c        b   "
+        "  r   r  b   c  "
+        " b            b "
+        " b            r "
+        " g   b    c   r "
+        "  c   ggrb   b  "
+        "   m        c   "
+        "    gggrrbmc    "
+        "                "
+    };
+    objs->smiley_pic = smiley_pic;
+    objs->smiley = picture_to_img(&smiley_pic);
 
-  objs->smiley_out = (struct Image *) malloc( sizeof( struct Image ) );
-  img_init( objs->smiley_out, objs->smiley->width, objs->smiley->height );
+    // Allocate memory for the output smiley image
+    objs->smiley_out = (struct Image *)malloc(sizeof(struct Image));
+    img_init(objs->smiley_out, objs->smiley->width, objs->smiley->height);
 
-  Picture overlay_pic = {
-    OVERLAY_COLORS,
-    16, 10,
-   "                "
-   "                "
-   "                "
-   "                "
-   "                "
-   "  rRgGbB        "
-   "                "
-   "                "
-   "                "
-   "                "
-  };
-  objs->overlay_pic = overlay_pic;
-  objs->overlay = picture_to_img( &overlay_pic );
+    // Set up overlay image from picture data (as already implemented)
+    Picture overlay_pic = {
+        OVERLAY_COLORS,
+        16, 10,
+        "                "
+        "                "
+        "                "
+        "                "
+        "                "
+        "  rRgGbB        "
+        "                "
+        "                "
+        "                "
+        "                "
+    };
+    objs->overlay_pic = overlay_pic;
+    objs->overlay = picture_to_img(&overlay_pic);
 
-  return objs;
+    // Load the expected image from a PNG file (from a folder)
+    const char *expected_img_path = "expected/ingo_tile_3.png";
+    objs->expected_img = (struct Image *)malloc(sizeof(struct Image));
+    if (img_read(expected_img_path, objs->expected_img) != IMG_SUCCESS) {
+        fprintf(stderr, "Error: Couldn't read the expected image from %s\n", expected_img_path);
+        free(objs->expected_img);
+        free(objs);
+        return NULL;
+    }
+
+    // Load the actual image from a PNG file (from a folder)
+    const char *actual_img_path = "actual/c_ingo_tile_3.png";
+    objs->actual_img = (struct Image *)malloc(sizeof(struct Image));
+    if (img_read(actual_img_path, objs->actual_img) != IMG_SUCCESS) {
+        fprintf(stderr, "Error: Couldn't read the actual image from %s\n", actual_img_path);
+        free(objs->actual_img);
+        free(objs->expected_img);
+        free(objs);
+        return NULL;
+    }
+
+    return objs;
 }
+
 
 void cleanup( TestObjs *objs ) {
   destroy_img( objs->smiley );
@@ -320,6 +345,37 @@ void test_tile_basic(TestObjs *objs) {
     destroy_img(smiley_tile_3_expected);
 }
 
+void compare_images_pixel_by_pixel(struct Image *expected_img, struct Image *actual_img) {
+    // Ensure the images have the same dimensions
+    if (expected_img->width != actual_img->width || expected_img->height != actual_img->height) {
+        printf("Error: Images have different dimensions\n");
+        printf("Expected Image: %dx%d, Actual Image: %dx%d\n",
+               expected_img->width, expected_img->height, actual_img->width, actual_img->height);
+        return;
+    }
+
+    int width = expected_img->width;
+    int height = expected_img->height;
+
+    // Iterate through each pixel and compare
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint32_t expected_pixel = expected_img->data[y * width + x];
+            uint32_t actual_pixel = actual_img->data[y * width + x];
+
+            if (expected_pixel != actual_pixel) {
+                printf("Mismatch at pixel (%d, %d):\n", x, y);
+                printf("Expected color: %08X\n", expected_pixel);
+                printf("Actual color:   %08X\n", actual_pixel);
+                return; // Exit after first mismatch
+            }
+        }
+    }
+
+    // If no mismatches found
+    printf("Images are identical!\n");
+}
+
 
 void test_grayscale_basic( TestObjs *objs ) {
   Picture smiley_grayscale_pic = {
@@ -367,4 +423,6 @@ void test_composite_basic( TestObjs *objs ) {
   ASSERT( 0x0000FFFF == objs->smiley_out->data[86] );
   ASSERT( 0x000080FF == objs->smiley_out->data[87] );
 }
+
+void test mirror_
 
