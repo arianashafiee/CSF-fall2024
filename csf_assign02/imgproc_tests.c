@@ -421,16 +421,16 @@ void compare_images_pixel_by_pixel(TestObjs *objs) {
             uint32_t expected_pixel = expected_img->data[y * width + x];
             uint32_t actual_pixel = actual_img->data[y * width + x];
 
-            // Extract the color components of both pixels
-            uint32_t expected_r = get_r(expected_pixel);
-            uint32_t expected_g = get_g(expected_pixel);
-            uint32_t expected_b = get_b(expected_pixel);
-            uint32_t expected_a = get_a(expected_pixel);
+            // Extract color components directly using bit shifts
+            uint32_t expected_r = (expected_pixel >> 24) & 0xFF;
+            uint32_t expected_g = (expected_pixel >> 16) & 0xFF;
+            uint32_t expected_b = (expected_pixel >> 8) & 0xFF;
+            uint32_t expected_a = expected_pixel & 0xFF;
 
-            uint32_t actual_r = get_r(actual_pixel);
-            uint32_t actual_g = get_g(actual_pixel);
-            uint32_t actual_b = get_b(actual_pixel);
-            uint32_t actual_a = get_a(actual_pixel);
+            uint32_t actual_r = (actual_pixel >> 24) & 0xFF;
+            uint32_t actual_g = (actual_pixel >> 16) & 0xFF;
+            uint32_t actual_b = (actual_pixel >> 8) & 0xFF;
+            uint32_t actual_a = actual_pixel & 0xFF;
 
             // Compare color components
             if (expected_r != actual_r || expected_g != actual_g || expected_b != actual_b || expected_a != actual_a) {
@@ -445,3 +445,4 @@ void compare_images_pixel_by_pixel(TestObjs *objs) {
     // If no mismatches found
     printf("Images are identical!\n");
 }
+
