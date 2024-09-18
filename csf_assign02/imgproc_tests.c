@@ -98,6 +98,7 @@ void test_tile_basic( TestObjs *objs );
 void test_grayscale_basic( TestObjs *objs );
 void test_composite_basic( TestObjs *objs );
 // TODO: add prototypes for additional test functions
+void compare_images_pixel_by_pixel(TestObjs *objs );
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -345,7 +346,7 @@ void test_tile_basic(TestObjs *objs) {
     destroy_img(smiley_tile_3_expected);
 }
 
-void compare_images_pixel_by_pixel(struct Image *expected_img, struct Image *actual_img) {
+void compare_images_pixel_by_pixel(TestObjs *objs ){
     // Ensure the images have the same dimensions
     if (expected_img->width != actual_img->width || expected_img->height != actual_img->height) {
         printf("Error: Images have different dimensions\n");
@@ -424,5 +425,5 @@ void test_composite_basic( TestObjs *objs ) {
   ASSERT( 0x000080FF == objs->smiley_out->data[87] );
 }
 
-void test mirror_
+
 
