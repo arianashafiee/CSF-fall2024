@@ -102,6 +102,10 @@ void test_grayscale_basic( TestObjs *objs );
 void test_composite_basic( TestObjs *objs );
 // TODO: add prototypes for additional test functions
 
+void test_all_tiles_nonempty();
+void test_determine_tile_w();
+void test_determine_tile_x_offset();
+
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
   // first command line argument
@@ -118,6 +122,10 @@ int main( int argc, char **argv ) {
   TEST( test_tile_basic );
   TEST( test_grayscale_basic );
   TEST( test_composite_basic );
+
+  TEST(test_all_tiles_nonempty);
+  TEST(test_determine_tile_w);
+  TEST(test_determine_tile_x_offset);
 
   TEST_FINI();
 }
@@ -397,7 +405,7 @@ void test_determine_tile_w() {
   ASSERT(determine_tile_w(105, 4, 3) == 30); // Last tile takes on remainder
 
   // Invalid tile_col
-  ASSERT(determine_tile_w(100, 4, 5) == 0); // Invalid tile_col
+  ASSERT(determine_tile_w(100, 4, 4) == 0); // Invalid tile_col
 }
 
 void test_determine_tile_x_offset() {
