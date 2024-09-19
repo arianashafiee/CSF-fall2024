@@ -405,7 +405,7 @@ void test_determine_tile_w() {
   ASSERT(determine_tile_w(105, 4, 3) == 30); // Last tile takes on remainder
 
   // Invalid tile_col
-  ASSERT(determine_tile_w(100, 4, 4) == 0); // Invalid tile_col
+  ASSERT(determine_tile_w(100, 4, 4) == 0);
 }
 
 void test_determine_tile_x_offset() {
@@ -418,5 +418,5 @@ void test_determine_tile_x_offset() {
   ASSERT(determine_tile_x_offset(105, 4, 3) == 55); // Third tile
 
   // Invalid tile_col
-  ASSERT(determine_tile_x_offset(100, 4, 4) == 0); // Invalid tile
+  ASSERT(determine_tile_x_offset(100, 4, 4) == 0);
 }
