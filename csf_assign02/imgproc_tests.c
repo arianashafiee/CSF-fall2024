@@ -490,3 +490,18 @@ void test_to_grayscale(TestObjs *objs)
     ASSERT(gray_pixel == expected_grayscale[i]);
   }
 }
+
+void test_blend_components(TestObjs *objs)
+{
+  uint32_t overlay_color = objs->overlay->data[0];
+  uint32_t smiley_color = objs->smiley->data[0];
+
+  uint32_t blended = blend_colors(overlay_color, smiley_color);
+  ASSERT(blended == smiley_color);
+
+  overlay_color = objs->overlay->data[5];
+  smiley_color = objs->smiley->data[5];
+
+  blended = blend_colors(overlay_color, smiley_color);
+  ASSERT(blended == get_r)
+}
