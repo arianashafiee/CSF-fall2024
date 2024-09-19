@@ -383,7 +383,8 @@ void test_composite_basic( TestObjs *objs ) {
   ASSERT( 0x000080FF == objs->smiley_out->data[87] );
 }
 
-void test_all_tiles_nonempty() {
+void test_all_tiles_nonempty(TestObjs *objs)
+{
   ASSERT(all_tiles_nonempty(10, 10, 5) == 1);
   ASSERT(all_tiles_nonempty(4, 4, 5) == 0);
   ASSERT(all_tiles_nonempty(0, 10, 5) == 0);
@@ -391,7 +392,8 @@ void test_all_tiles_nonempty() {
   ASSERT(all_tiles_nonempty(200, 100, 100) == 1);
 }
 
-void test_determine_tile_w() {
+void test_determine_tile_w(TestObjs *objs)
+{
   ASSERT(determine_tile_w(10, 5, 0) == 2);
   ASSERT(determine_tile_w(10, 5, 4) == 2);
   ASSERT(determine_tile_w(13, 5, 0) == 3);
@@ -399,14 +401,16 @@ void test_determine_tile_w() {
   ASSERT(determine_tile_w(5, 10, 2) == 0);
 }
 
-void test_determine_tile_x_offset() {
+void test_determine_tile_x_offset(TestObjs *objs)
+{
   ASSERT(determine_tile_x_offset(10, 5, 0) == 0);
   ASSERT(determine_tile_x_offset(10, 5, 4) == 8);
   ASSERT(determine_tile_x_offset(13, 5, 0) == 0);
   ASSERT(determine_tile_x_offset(13, 5, 4) == 10);
 }
 
-void test_determine_tile_h() {
+void test_determine_tile_h(TestObjs *objs)
+{
   ASSERT(determine_tile_h(10, 5, 0) == 2);
   ASSERT(determine_tile_h(10, 5, 4) == 2);
   ASSERT(determine_tile_h(13, 5, 0) == 3);
@@ -414,47 +418,48 @@ void test_determine_tile_h() {
   ASSERT(determine_tile_h(5, 10, 2) == 0);
 }
 
-void test_determine_tile_y_offset() {
+void test_determine_tile_y_offset(TestObjs *objs)
+{
   ASSERT(determine_tile_y_offset(10, 5, 0) == 0);
   ASSERT(determine_tile_y_offset(10, 5, 4) == 8);
   ASSERT(determine_tile_y_offset(13, 5, 0) == 0);
   ASSERT(determine_tile_y_offset(13, 5, 4) == 10);
 }
 
-void test_copy_tile() {
-
+void test_copy_tile(TestObjs *objs)
+{
 }
 
-void test_get_r()
+void test_get_r(TestObjs *objs)
 {
   ASSERT(get_r(0xFF000000) == 255);
   ASSERT(get_r(0x00000000) == 0);
 }
 
-void test_get_g()
+void test_get_g(TestObjs *objs)
 {
   ASSERT(get_g(0x00FF0000) == 255);
   ASSERT(get_g(0x00000000) == 0);
 }
 
-void test_get_b()
+void test_get_b(TestObjs *objs)
 {
   ASSERT(get_b(0x0000FF00) == 255);
   ASSERT(get_b(0x00000000) == 0);
 }
 
-void test_get_a()
+void test_get_a(TestObjs *objs)
 {
   ASSERT(get_a(0x000000FF) == 255);
   ASSERT(get_a(0x00000000) == 0);
 }
 
-void test_make_pixel()
+void test_make_pixel(TestObjs *objs)
 {
   ASSERT(make_pixel(255, 128, 64, 32) == 0xFF804020);
 }
 
-void test_to_grayscale()
+void test_to_grayscale(TestObjs *objs)
 {
   uint32_t pixel = make_pixel(100, 150, 200, 255);
   uint32_t gray_pixel = to_grayscale(pixel);
