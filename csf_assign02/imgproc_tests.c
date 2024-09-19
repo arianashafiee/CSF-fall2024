@@ -463,10 +463,12 @@ void test_make_pixel(TestObjs *objs)
 
 void test_to_grayscale(TestObjs *objs)
 {
-  uint32_t pixel = make_pixel(100, 150, 200, 255);
-  uint32_t gray_pixel = to_grayscale(pixel);
-  // Check that the grayscale values are correct
-  ASSERT(get_r(gray_pixel) == get_g(gray_pixel));
-  ASSERT(get_g(gray_pixel) == get_b(gray_pixel));
-  ASSERT(get_a(gray_pixel) == 255);
+  uint32_t test_colors[] = {0x000000FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF, 0x00FFFFFF, 0xFF00FFFF};
+  uint32_t expected_grayscale[] = {0x000000FF, 0x4E4E4EFF, 0x7F7F7FFF, 0x303030FF, 0xB0B0B0FF, 0x7F7F7FFF};
+
+  for (int i = 0; i < sizeof(test_colors) / sizeof(test_colors[0]); i++)
+  {
+    uint32_t gray_pixel = to_grayscale(test_colors[i]);
+    ASSERT(gray_pixel == expected_grayscale[i]);
+  }
 }
