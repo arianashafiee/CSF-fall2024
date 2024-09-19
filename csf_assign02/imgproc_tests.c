@@ -384,7 +384,7 @@ void test_all_tiles_nonempty() {
   ASSERT(all_tiles_nonempty(100, 0, 4) == 0);
 
   // Test with n larger than width or height
-  ASSERT(all_tiles_nonempty(10, 10, 100) == 0);
+  ASSERT(all_tiles_nonempty(100, 100, 200) == 0);
 }
 
 void test_determine_tile_w() {
