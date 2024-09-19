@@ -393,8 +393,8 @@ void test_determine_tile_w() {
   ASSERT(determine_tile_w(100, 4, 3) == 25); // Last tile
 
   // Width is divided unevenly into tiles
-  ASSERT(determine_tile_w(103, 4, 0) == 25); // First tile
-  ASSERT(determine_tile_w(103, 4, 3) == 28); // Last tile takes on remainder
+  ASSERT(determine_tile_w(105, 4, 0) == 25); // First tile
+  ASSERT(determine_tile_w(105, 4, 3) == 30); // Last tile takes on remainder
 
   // Invalid tile_col
   ASSERT(determine_tile_w(100, 4, 5) == 0); // Invalid tile_col
@@ -406,5 +406,9 @@ void test_determine_tile_x_offset() {
   ASSERT(determine_tile_x_offset(100, 4, 2) == 50); // Third tile
 
   // Width unevenly divided
-  ASSERT(determine_tile_x_offset(103, 4, 2) == 50); // First tile
+  ASSERT(determine_tile_x_offset(105, 4, 2) == 52); // Third tile
+  ASSERT(determine_tile_x_offset(105, 4, 3) == 55); // Third tile
+
+  // Invalid tile_col
+  ASSERT(determine_tile_x_offset(100, 4, 4) == 0); // Invalid tile
 }
