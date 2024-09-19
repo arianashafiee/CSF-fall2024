@@ -384,39 +384,82 @@ void test_composite_basic( TestObjs *objs ) {
 }
 
 void test_all_tiles_nonempty() {
-  assert(all_tiles_nonempty(10, 10, 5) == 1);
-  assert(all_tiles_nonempty(4, 4, 5) == 0);
-  assert(all_tiles_nonempty(0, 10, 5) == 0);
-  assert(all_tiles_nonempty(100, 100, 200) == 0);
-  assert(all_tiles_nonempty(200, 100, 100) == 1);
+  ASSERT(all_tiles_nonempty(10, 10, 5) == 1);
+  ASSERT(all_tiles_nonempty(4, 4, 5) == 0);
+  ASSERT(all_tiles_nonempty(0, 10, 5) == 0);
+  ASSERT(all_tiles_nonempty(100, 100, 200) == 0);
+  ASSERT(all_tiles_nonempty(200, 100, 100) == 1);
 }
 
 void test_determine_tile_w() {
-  assert(determine_tile_w(10, 5, 0) == 2);
-  assert(determine_tile_w(10, 5, 4) == 2);
-  assert(determine_tile_w(13, 5, 0) == 3);
-  assert(determine_tile_w(13, 5, 4) == 2);
-  assert(determine_tile_w(5, 10, 2) == 0);
+  ASSERT(determine_tile_w(10, 5, 0) == 2);
+  ASSERT(determine_tile_w(10, 5, 4) == 2);
+  ASSERT(determine_tile_w(13, 5, 0) == 3);
+  ASSERT(determine_tile_w(13, 5, 4) == 2);
+  ASSERT(determine_tile_w(5, 10, 2) == 0);
 }
 
 void test_determine_tile_x_offset() {
-  assert(determine_tile_x_offset(10, 5, 0) == 0);
-  assert(determine_tile_x_offset(10, 5, 4) == 8);
-  assert(determine_tile_x_offset(13, 5, 0) == 0);
-  assert(determine_tile_x_offset(13, 5, 4) == 10);
+  ASSERT(determine_tile_x_offset(10, 5, 0) == 0);
+  ASSERT(determine_tile_x_offset(10, 5, 4) == 8);
+  ASSERT(determine_tile_x_offset(13, 5, 0) == 0);
+  ASSERT(determine_tile_x_offset(13, 5, 4) == 10);
 }
 
 void test_determine_tile_h() {
-  assert(determine_tile_h(10, 5, 0) == 2);
-  assert(determine_tile_h(10, 5, 4) == 2);
-  assert(determine_tile_h(13, 5, 0) == 3);
-  assert(determine_tile_h(13, 5, 4) == 2);
-  assert(determine_tile_h(5, 10, 2) == 0);
+  ASSERT(determine_tile_h(10, 5, 0) == 2);
+  ASSERT(determine_tile_h(10, 5, 4) == 2);
+  ASSERT(determine_tile_h(13, 5, 0) == 3);
+  ASSERT(determine_tile_h(13, 5, 4) == 2);
+  ASSERT(determine_tile_h(5, 10, 2) == 0);
 }
 
 void test_determine_tile_y_offset() {
-  assert(determine_tile_y_offset(10, 5, 0) == 0);
-  assert(determine_tile_y_offset(10, 5, 4) == 8);
-  assert(determine_tile_y_offset(13, 5, 0) == 0);
-  assert(determine_tile_y_offset(13, 5, 4) == 10);
+  ASSERT(determine_tile_y_offset(10, 5, 0) == 0);
+  ASSERT(determine_tile_y_offset(10, 5, 4) == 8);
+  ASSERT(determine_tile_y_offset(13, 5, 0) == 0);
+  ASSERT(determine_tile_y_offset(13, 5, 4) == 10);
+}
+
+void test_copy_tile() {
+
+}
+
+void test_get_r()
+{
+  ASSERT(get_r(0xFF000000) == 255);
+  ASSERT(get_r(0x00000000) == 0);
+}
+
+void test_get_g()
+{
+  ASSERT(get_g(0x00FF0000) == 255);
+  ASSERT(get_g(0x00000000) == 0);
+}
+
+void test_get_b()
+{
+  ASSERT(get_b(0x0000FF00) == 255);
+  ASSERT(get_b(0x00000000) == 0);
+}
+
+void test_get_a()
+{
+  ASSERT(get_a(0x000000FF) == 255);
+  ASSERT(get_a(0x00000000) == 0);
+}
+
+void test_make_pixel()
+{
+  ASSERT(make_pixel(255, 128, 64, 32) == 0xFF804020);
+}
+
+void test_to_grayscale()
+{
+  uint32_t pixel = make_pixel(100, 150, 200, 255);
+  uint32_t gray_pixel = to_grayscale(pixel);
+  // Check that the grayscale values are correct
+  ASSERT(get_r(gray_pixel) == get_g(gray_pixel));
+  ASSERT(get_g(gray_pixel) == get_b(gray_pixel));
+  ASSERT(get_a(gray_pixel) == 255);
 }
