@@ -384,28 +384,19 @@ void test_composite_basic( TestObjs *objs ) {
 }
 
 void test_all_tiles_nonempty() {
-  // All tiles non-empty
-  ASSERT(all_tiles_nonempty(100, 100, 4) == 1);
-
-  // Zero width or height
-  ASSERT(all_tiles_nonempty(0, 100, 4) == 0);
-  ASSERT(all_tiles_nonempty(100, 0, 4) == 0);
-
-  // Test with n larger than width or height
-  ASSERT(all_tiles_nonempty(100, 100, 200) == 0);
+  assert(all_tiles_nonempty(10, 10, 5) == 1);
+  assert(all_tiles_nonempty(4, 4, 5) == 0);
+  assert(all_tiles_nonempty(0, 10, 5) == 0);
+  assert(all_tiles_nonempty(100, 100, 200) == 0);
+  assert(all_tiles_nonempty(200, 100, 100) == 1);
 }
 
 void test_determine_tile_w() {
-  // Width is divided evenly into tiles
-  ASSERT(determine_tile_w(100, 4, 0) == 25); // First tile
-  ASSERT(determine_tile_w(100, 4, 3) == 25); // Last tile
-
-  // Width is divided unevenly into tiles
-  ASSERT(determine_tile_w(105, 4, 0) == 25); // First tile
-  ASSERT(determine_tile_w(105, 4, 3) == 30); // Last tile takes on remainder
-
-  // Invalid tile_col
-  ASSERT(determine_tile_w(100, 4, 4) == 0);
+  assert(determine_tile_w(10, 5, 0) == 2);
+  assert(determine_tile_w(10, 5, 4) == 2);
+  assert(determine_tile_w(13, 5, 0) == 3);
+  assert(determine_tile_w(13, 5, 4) == 2);
+  assert(determine_tile_w(5, 10, 2) == 0);
 }
 
 void test_determine_tile_x_offset() {
@@ -419,4 +410,12 @@ void test_determine_tile_x_offset() {
 
   // Invalid tile_col
   ASSERT(determine_tile_x_offset(100, 4, 4) == 0);
+}
+
+void test_determine_tile_h() {
+  assert(determine_tile_h(10, 5, 0) == 2);
+  assert(determine_tile_h(10, 5, 4) == 2);
+  assert(determine_tile_h(13, 5, 0) == 3);
+  assert(determine_tile_h(13, 5, 4) == 2);
+  assert(determine_tile_h(5, 10, 2) == 0);
 }
