@@ -416,14 +416,19 @@ void test_determine_tile_h(TestObjs *objs)
 
 void test_determine_tile_y_offset(TestObjs *objs)
 {
-  ASSERT(determine_tile_y_offset(objs->smiley->height, 5, 0) == 0);
-  ASSERT(determine_tile_y_offset(objs->smiley->height, 5, 4) == 8);
-  ASSERT(determine_tile_y_offset(objs->smiley->height, 5, 0) == 0);
-  ASSERT(determine_tile_y_offset(objs->smiley->height, 5, 4) == 10);
+  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
+  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
+  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
+  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
 }
 
 void test_copy_tile(TestObjs *objs)
 {
+  copy_tile(objs->smiley_out, objs->smiley, 0, 0, 2);
+  ASSERT(objs->smiley_out->data[0] == objs->smiley->data[0]);
+  ASSERT(objs->smiley_out->data[1] == objs->smiley->data[2 * 2]);
+
+  cleanup(objs);
 }
 
 void test_get_r(TestObjs *objs)
