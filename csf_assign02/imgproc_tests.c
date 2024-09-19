@@ -433,25 +433,25 @@ void test_copy_tile(TestObjs *objs)
 
 void test_get_r(TestObjs *objs)
 {
-  ASSERT(get_r(0xFF000000) == 255);
+  ASSERT(get_r(0x11223344) == 0x11);
   ASSERT(get_r(0x00000000) == 0);
 }
 
 void test_get_g(TestObjs *objs)
 {
-  ASSERT(get_g(0x00FF0000) == 255);
+  ASSERT(get_g(0x11223344) == 0x22);
   ASSERT(get_g(0x00000000) == 0);
 }
 
 void test_get_b(TestObjs *objs)
 {
-  ASSERT(get_b(0x0000FF00) == 255);
+  ASSERT(get_b(0x11223344) == 0x33);
   ASSERT(get_b(0x00000000) == 0);
 }
 
 void test_get_a(TestObjs *objs)
 {
-  ASSERT(get_a(0x000000FF) == 255);
+  ASSERT(get_a(0x11223344) == 0x44);
   ASSERT(get_a(0x00000000) == 0);
 }
 
