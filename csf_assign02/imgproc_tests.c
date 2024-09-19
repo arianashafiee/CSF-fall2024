@@ -395,6 +395,9 @@ void test_determine_tile_w() {
   // Width is divided unevenly into tiles
   ASSERT(determine_tile_w(103, 4, 0) == 25); // First tile
   ASSERT(determine_tile_w(103, 4, 3) == 28); // Last tile takes on remainder
+
+  // Invalid tile_col
+  ASSERT(determine_tile_w(100, 4, 5) == 0); // Invalid tile_col
 }
 
 void test_determine_tile_x_offset() {
