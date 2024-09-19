@@ -457,7 +457,8 @@ void test_get_a(TestObjs *objs)
 
 void test_make_pixel(TestObjs *objs)
 {
-  ASSERT(make_pixel(255, 128, 64, 32) == 0xFF804020);
+  uint32_t pixel = make_pixel(0x11, 0x22, 0x33, 0x44);
+  ASSERT(pixel == 0x11223344);
 }
 
 void test_to_grayscale(TestObjs *objs)
