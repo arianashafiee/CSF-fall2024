@@ -396,3 +396,12 @@ void test_determine_tile_w() {
   ASSERT(determine_tile_w(103, 4, 0) == 25); // First tile
   ASSERT(determine_tile_w(103, 4, 3) == 28); // Last tile takes on remainder
 }
+
+void test_determine_tile_x_offset() {
+  // Width devenly divided by n
+  ASSERT(determine_tile_x_offset(100, 4, 0) == 0); // First tile
+  ASSERT(determine_tile_x_offset(100, 4, 2) == 50); // Third tile
+
+  // Width unevenly divided
+  ASSERT(determine_tile_x_offset(103, 4, 2) == 50); // First tile
+}
