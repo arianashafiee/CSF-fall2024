@@ -386,3 +386,13 @@ void test_all_tiles_nonempty() {
   // Test with n larger than width or height
   ASSERT(all_tiles_nonempty(10, 10, 100) == 0);
 }
+
+void test_determine_tile_w() {
+  // Width is divided evenly into tiles
+  ASSERT(determine_tile_w(100, 4, 0) == 25); // First tile
+  ASSERT(determine_tile_w(100, 4, 3) == 25); // Last tile
+
+  // Width is divided unevenly into tiles
+  ASSERT(determine_tile_w(103, 4, 0) == 25); // First tile
+  ASSERT(determine_tile_w(103, 4, 3) == 28); // Last tile takes on remainder
+}
