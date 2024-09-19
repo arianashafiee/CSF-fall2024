@@ -400,16 +400,10 @@ void test_determine_tile_w() {
 }
 
 void test_determine_tile_x_offset() {
-  // Width devenly divided by n
-  ASSERT(determine_tile_x_offset(100, 4, 0) == 0); // First tile
-  ASSERT(determine_tile_x_offset(100, 4, 2) == 50); // Third tile
-
-  // Width unevenly divided
-  ASSERT(determine_tile_x_offset(105, 4, 2) == 52); // Third tile
-  ASSERT(determine_tile_x_offset(105, 4, 3) == 55); // Third tile
-
-  // Invalid tile_col
-  ASSERT(determine_tile_x_offset(100, 4, 4) == 0);
+  assert(determine_tile_x_offset(10, 5, 0) == 0);
+  assert(determine_tile_x_offset(10, 5, 4) == 8);
+  assert(determine_tile_x_offset(13, 5, 0) == 0);
+  assert(determine_tile_x_offset(13, 5, 4) == 10);
 }
 
 void test_determine_tile_h() {
@@ -418,4 +412,11 @@ void test_determine_tile_h() {
   assert(determine_tile_h(13, 5, 0) == 3);
   assert(determine_tile_h(13, 5, 4) == 2);
   assert(determine_tile_h(5, 10, 2) == 0);
+}
+
+void test_determine_tile_y_offset() {
+  assert(determine_tile_y_offset(10, 5, 0) == 0);
+  assert(determine_tile_y_offset(10, 5, 4) == 8);
+  assert(determine_tile_y_offset(13, 5, 0) == 0);
+  assert(determine_tile_y_offset(13, 5, 4) == 10);
 }
