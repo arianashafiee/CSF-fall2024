@@ -102,9 +102,18 @@ void test_grayscale_basic( TestObjs *objs );
 void test_composite_basic( TestObjs *objs );
 // TODO: add prototypes for additional test functions
 
-void test_all_tiles_nonempty();
-void test_determine_tile_w();
-void test_determine_tile_x_offset();
+void test_all_tiles_nonempty(TestObjs *objs);
+void test_determine_tile_w(TestObjs *objs);
+void test_determine_tile_x_offset(TestObjs *objs);
+void test_determine_tile_h(TestObjs *objs);
+void test_determine_tile_y_offset(TestObjs *objs);
+void test_copy_tile(TestObjs *objs);
+void test_get_r(TestObjs *objs);
+void test_get_g(TestObjs *objs);
+void test_get_b(TestObjs *objs);
+void test_get_a(TestObjs *objs);
+void test_make_pixel(TestObjs *objs);
+void test_to_grayscale(TestObjs *objs);
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -126,6 +135,15 @@ int main( int argc, char **argv ) {
   TEST(test_all_tiles_nonempty);
   TEST(test_determine_tile_w);
   TEST(test_determine_tile_x_offset);
+  TEST(test_determine_tile_h);
+  TEST(test_determine_tile_y_offset);
+  TEST(test_copy_tile);
+  TEST(test_get_r);
+  TEST(test_get_g);
+  TEST(test_get_b);
+  TEST(test_get_a);
+  TEST(test_make_pixel);
+  TEST(test_to_grayscale);
 
   TEST_FINI();
 }
