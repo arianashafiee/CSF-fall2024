@@ -17,7 +17,7 @@ typedef struct {
 typedef struct {
   ExpectedColor colors[20];
   int width, height;
-  const char *data; 
+  const char *data;
 } Picture;
 
 
@@ -31,7 +31,7 @@ typedef struct {
       { 'c', 0x00FFFFFF }, \
       { 'm', 0xFF00FFFF }, \
     }
-  
+
 // Expected "basic" colors after grayscale transformation
 #define TEST_COLORS_GRAYSCALE \
     { \
@@ -81,7 +81,7 @@ typedef struct {
   // overlay image object
   struct Image *overlay;
 
- 
+
 } TestObjs;
 
 // Functions to create and clean up a test fixture object
@@ -317,7 +317,7 @@ void test_tile_basic(TestObjs *objs) {
     if (!images_equal(smiley_tile_3_expected, objs->smiley_out)) {
         printf("Expected image:\n");
         print_image(smiley_tile_3_expected);
-        
+
         printf("\nActual image:\n");
         print_image(objs->smiley_out);
 
@@ -375,5 +375,14 @@ void test_composite_basic( TestObjs *objs ) {
   ASSERT( 0x000080FF == objs->smiley_out->data[87] );
 }
 
+void test_all_tiles_nonempty() {
+  // All tiles non-empty
+  ASSERT(all_tiles_nonempty(100, 100, 4) == 1);
 
+  // Zero width or height
+  ASSERT(all_tiles_nonempty(0, 100, 4) == 0);
+  ASSERT(all_tiles_nonempty(100, 0, 4) == 0);
 
+  // Test with n larger than width or height
+  ASSERT(all_tiles_nonempty(10, 10, 100) == 0);
+}
