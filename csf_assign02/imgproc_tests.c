@@ -385,11 +385,9 @@ void test_composite_basic( TestObjs *objs ) {
 
 void test_all_tiles_nonempty(TestObjs *objs)
 {
-  ASSERT(all_tiles_nonempty(10, 10, 5) == 1);
-  ASSERT(all_tiles_nonempty(4, 4, 5) == 0);
-  ASSERT(all_tiles_nonempty(0, 10, 5) == 0);
-  ASSERT(all_tiles_nonempty(100, 100, 200) == 0);
-  ASSERT(all_tiles_nonempty(200, 100, 100) == 1);
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 4) == 1);
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 0) == 0);
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 200) == 0);
 }
 
 void test_determine_tile_w(TestObjs *objs)
