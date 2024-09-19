@@ -392,11 +392,10 @@ void test_all_tiles_nonempty(TestObjs *objs)
 
 void test_determine_tile_w(TestObjs *objs)
 {
-  ASSERT(determine_tile_w(10, 5, 0) == 2);
-  ASSERT(determine_tile_w(10, 5, 4) == 2);
-  ASSERT(determine_tile_w(13, 5, 0) == 3);
-  ASSERT(determine_tile_w(13, 5, 4) == 2);
-  ASSERT(determine_tile_w(5, 10, 2) == 0);
+  ASSERT(determine_tile_w(objs->smiley->width, 4, 0) == 4);
+  ASSERT(determine_tile_w(objs->smiley->width, 3, 1) == 6);
+  ASSERT(determine_tile_w(objs->smiley->width, 20, 0) == );
+  ASSERT(determine_tile_w(objs->smiley->width, 0, 20) ==);
 }
 
 void test_determine_tile_x_offset(TestObjs *objs)
