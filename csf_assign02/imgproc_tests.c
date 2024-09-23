@@ -568,60 +568,81 @@ void test_get_r(TestObjs *objs)
 {
   // Test 1: Basic case, middle red value
   uint32_t pixel = 0x7F000000; // Red component = 127 (0x7F), other components = 0
-  assert(get_r(pixel) == 127);
+  ASSERT(get_r(pixel) == 127);
 
   // Test 2: Edge case, red component = 0
   pixel = 0x00000000; // Red component = 0, other components = 0
-  assert(get_r(pixel) == 0);
+  ASSERT(get_r(pixel) == 0);
 
   // Test 3: Edge case, red component = 255 (max value)
   pixel = 0xFFFFFFFF; // Red component = 255 (0xFF), other components = 255
-  assert(get_r(pixel) == 255);
+  ASSERT(get_r(pixel) == 255);
 
   // Test 4: Red component with other color values set
   pixel = 0x7F123456; // Red component = 127, green = 18, blue = 52, alpha = 86
-  assert(get_r(pixel) == 127);
+  ASSERT(get_r(pixel) == 127);
 
   // Test 5: Fully transparent pixel (alpha = 0), red component = 128
   pixel = 0x80000000; // Red component = 128, fully transparent (alpha = 0)
-  assert(get_r(pixel) == 128);
+  ASSERT(get_r(pixel) == 128);
 
   // Test 6: Fully opaque pixel (alpha = 255), red component = 64
   pixel = 0x400000FF; // Red component = 64, fully opaque (alpha = 255)
-  assert(get_r(pixel) == 64);
+  ASSERT(get_r(pixel) == 64);
 }
 
 void test_get_g(TestObjs *objs)
 {
   // Test 1: Basic case, middle green value
   uint32_t pixel = 0x007F0000; // Green component = 127 (0x7F), other components = 0
-  assert(get_r(pixel) == 127);
+  ASSERT(get_r(pixel) == 127);
 
   // Test 2: Edge case, green component = 0
   pixel = 0x00000000; // Green component = 0, other components = 0
-  assert(get_r(pixel) == 0);
+  ASSERT(get_r(pixel) == 0);
 
   // Test 3: Edge case, green component = 255 (max value)
   pixel = 0xFFFFFFFF; // Green component = 255 (0xFF), other components = 255
-  assert(get_r(pixel) == 255);
+  ASSERT(get_r(pixel) == 255);
 
   // Test 4: Green component with other color values set
   pixel = 0x127F3456; // Green component = 127, red = 18, blue = 52, alpha = 86
-  assert(get_r(pixel) == 127);
+  ASSERT(get_r(pixel) == 127);
 
   // Test 5: Fully transparent pixel (alpha = 0), green component = 128
   pixel = 0x00800000; // Green component = 128, fully transparent (alpha = 0)
-  assert(get_r(pixel) == 128);
+  ASSERT(get_r(pixel) == 128);
 
   // Test 6: Fully opaque pixel (alpha = 255), green component = 64
   pixel = 0x004000FF; // Green component = 64, fully opaque (alpha = 255)
-  assert(get_r(pixel) == 64);
+  ASSERT(get_r(pixel) == 64);
 }
 
 void test_get_b(TestObjs *objs)
 {
-  ASSERT(get_b(0x11223344) == 0x33);
-  ASSERT(get_b(0x00000000) == 0);
+  // Test 1: Basic case, middle blue value
+  uint32_t pixel = 0x00007F00; // Blue component = 127 (0x7F), other components = 0
+  ASSERT(get_r(pixel) == 127);
+
+  // Test 2: Edge case, blue component = 0
+  pixel = 0x00000000; // Blue component = 0, other components = 0
+  ASSERT(get_r(pixel) == 0);
+
+  // Test 3: Edge case, blue component = 255 (max value)
+  pixel = 0xFFFFFFFF; // Blue component = 255 (0xFF), other components = 255
+  ASSERT(get_r(pixel) == 255);
+
+  // Test 4: Blue component with other color values set
+  pixel = 0x12347F56; // Blue component = 127, red = 18, green = 52, alpha = 86
+  ASSERT(get_r(pixel) == 127);
+
+  // Test 5: Fully transparent pixel (alpha = 0), blue component = 128
+  pixel = 0x00008000; // Blue component = 128, fully transparent (alpha = 0)
+  ASSERT(get_r(pixel) == 128);
+
+  // Test 6: Fully opaque pixel (alpha = 255), blue component = 64
+  pixel = 0x000040FF; // Blue component = 64, fully opaque (alpha = 255)
+  ASSERT(get_r(pixel) == 64);
 }
 
 void test_get_a(TestObjs *objs)
