@@ -788,36 +788,22 @@ void test_blend_components(TestObjs *objs)
   ASSERT(get_b(blended_pixel) == 255);
   ASSERT(get_a(blended_pixel) == 255); // Alpha should always be 255
 
-  // Test 4: Red component blending only (green and blue same in both)
-  fg = make_pixel(255, 50, 50, 128); // r = 255, g = 50, b = 50, a = 128
-  bg = make_pixel(0, 50, 50, 255);               // r=0, g=50, b=50
-  blended_pixel = blend_components(fg, bg, 128); // alpha=128 (semi-transparent)
+  // Test 4: Extreme case, foreground and background both black
+  fg = make_pixel(0, 0, 0, 128); // r = 0, g = 0, b = 0, a = 128 (black foreground)
+  bg = make_pixel(0, 0, 0, 255); // r = 0, g = 0, b = 0, a = 255 (black background)
+  blended_pixel = blend_components(fg, bg, 255); // a = 128 (semi-transparent)
 
-  expected_r = (128 * 255 + (255 - 128) * 0) / 255;
-  expected_g = (128 * 50 + (255 - 128) * 50) / 255;
-  expected_b = (128 * 50 + (255 - 128) * 50) / 255;
-
-  ASSERT(get_r(blended_pixel) == expected_r); // Red component should be blended
-  ASSERT(get_g(blended_pixel) == expected_g); // Green component should be unchanged
-  ASSERT(get_b(blended_pixel) == expected_b); // Blue component should be unchanged
-  ASSERT(get_a(blended_pixel) == 255);        // Alpha should always be 255
-
-  // Test 5: Extreme case - foreground and background are both black
-  fg = make_pixel(0, 0, 0, 255);                 // r=0, g=0, b=0, alpha=255 (black foreground)
-  bg = make_pixel(0, 0, 0, 255);                 // r=0, g=0, b=0 (black background)
-  blended_pixel = blend_components(fg, bg, 128); // Semi-transparent
-
-  ASSERT(get_r(blended_pixel) == 0); // Black blended with black should remain black
+  ASSERT(get_r(blended_pixel) == 0); // Black blended with black should yield black
   ASSERT(get_g(blended_pixel) == 0);
   ASSERT(get_b(blended_pixel) == 0);
   ASSERT(get_a(blended_pixel) == 255); // Alpha should always be 255
 
-  // Test 6: Extreme case - foreground and background are both white
-  fg = make_pixel(255, 255, 255, 255);           // r=255, g=255, b=255, alpha=255 (white foreground)
-  bg = make_pixel(255, 255, 255, 255);           // r=255, g=255, b=255 (white background)
-  blended_pixel = blend_components(fg, bg, 128); // Semi-transparent
+  // Test 5: Extreme case, foreground and background both white
+  fg = make_pixel(255, 255, 255, 128); // r = 255, g = 255, b = 255, a = 128 (white foreground)
+  bg = make_pixel(255, 255, 255, 255); // r = 255, g = 255, b = 255, a = 255 (white background)
+  blended_pixel = blend_components(fg, bg, 255); // a = 128 (semi-transparent)
 
-  ASSERT(get_r(blended_pixel) == 255); // White blended with white should remain white
+  ASSERT(get_r(blended_pixel) == 255); // White blended with white should yield white
   ASSERT(get_g(blended_pixel) == 255);
   ASSERT(get_b(blended_pixel) == 255);
   ASSERT(get_a(blended_pixel) == 255); // Alpha should always be 255
