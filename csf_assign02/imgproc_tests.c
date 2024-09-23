@@ -435,10 +435,32 @@ void test_all_tiles_nonempty(TestObjs *objs)
 
 void test_determine_tile_w(TestObjs *objs)
 {
-  ASSERT(determine_tile_w(objs->smiley->width, 4, 0) == 4);
-  ASSERT(determine_tile_w(objs->smiley->width, 3, 1) == 6);
-  // ASSERT(determine_tile_w(objs->smiley->width, 20, 0) == );
-  // ASSERT(determine_tile_w(objs->smiley->width, 0, 20) == );
+  // Test 1: Basic case - width divisible by n
+  ASSERT(determine_tile_w(objs->smiley->width, 2, 0) == 8); // First tile
+  ASSERT(determine_tile_w(objs->smiley->width, 2, 1) == 8); // Second tile
+
+  // Test 2: Non-divisible width, distribute excess to leftmost tiles
+  ASSERT(determine_tile_w(objs->smiley->width, 3, 0) == 6); // First tile gets the excess
+  ASSERT(determine_tile_w(objs->smiley->width, 3, 1) == 5); // Second tile gets the remainder
+
+  // Test 3: n = 1, only one tile should span the entire width
+  ASSERT(determine_tile_w(objs->smiley->width, 1, 0) == objs->smiley->width); // One large tile
+
+  // Test 4: Edge case, width is zero
+  ASSERT(determine_tile_w(0, 3, 0) == 0); // Should return 0 for any tile
+
+  // Test 5: Edge case, n is zero (invalid n)
+  ASSERT(determine_tile_w(objs->smiley->width, 0, 0) == 0);
+
+  // Test 6: Edge case, tile_col out of bounds
+  ASSERT(determine_tile_w(objs->smiley->width, 3, -1) == 0); // Negative tile_col
+  ASSERT(determine_tile_w(objs->smiley->width, 3, 3) == 0);  // tile_col beyond the range
+
+  // Test 7: Small width, large n (some tiles may end up being 0)
+  ASSERT(determine_tile_w(objs->smiley->width, 20, 0) == 1); // First tile gets the excess
+  ASSERT(determine_tile_w(objs->smiley->width, 20, 1) == 1); // Second tile gets the excess
+  ASSERT(determine_tile_w(objs->smiley->width, 20, 2) == 1); // Third tile
+  ASSERT(determine_tile_w(objs->smiley->width, 20, 19) == 0); // Last tile gets nothing
 }
 
 void test_determine_tile_x_offset(TestObjs *objs)
