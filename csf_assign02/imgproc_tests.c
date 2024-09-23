@@ -566,7 +566,7 @@ void test_copy_tile(TestObjs *objs)
 
 void test_get_r(TestObjs *objs)
 {
-  // Test 1: Basic case, middle red value
+  // Test 1: Basic case, arbitrary red value
   uint32_t pixel = 0x7F000000; // Red component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
 
@@ -593,7 +593,7 @@ void test_get_r(TestObjs *objs)
 
 void test_get_g(TestObjs *objs)
 {
-  // Test 1: Basic case, middle green value
+  // Test 1: Basic case, arbitrary green value
   uint32_t pixel = 0x007F0000; // Green component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
 
@@ -620,7 +620,7 @@ void test_get_g(TestObjs *objs)
 
 void test_get_b(TestObjs *objs)
 {
-  // Test 1: Basic case, middle blue value
+  // Test 1: Basic case, arbitrary blue value
   uint32_t pixel = 0x00007F00; // Blue component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
 
@@ -647,7 +647,7 @@ void test_get_b(TestObjs *objs)
 
 void test_get_a(TestObjs *objs)
 {
-  // Test 1: Basic case, middle alpha value
+  // Test 1: Basic case, arbitrary alpha value
   uint32_t pixel = 0x0000007F; // Alpha component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
 
@@ -666,45 +666,90 @@ void test_get_a(TestObjs *objs)
 
 void test_make_pixel(TestObjs *objs)
 {
-  // Test 1: Basic case, random values for red, green, blue, and alpha
+  // Test 1: Basic case, arbitrary values for red, green, blue, and alpha
   uint32_t pixel = make_pixel(127, 63, 255, 128); // r = 127, g = 63, b = 255, a = 128
-  assert(pixel == 0x7F3FFF80); // Expected pixel value: 0x7F3FFF80
+  ASSERT(pixel == 0x7F3FFF80);                    // Expected pixel value: 0x7F3FFF80
 
   // Test 2: Edge case, all components at minimum value (0)
   pixel = make_pixel(0, 0, 0, 0); // r = 0, g = 0, b = 0, a = 0
-  assert(pixel == 0x00000000); // Expected pixel value: 0x00000000
+  ASSERT(pixel == 0x00000000);    // Expected pixel value: 0x00000000
 
   // Test 3: Edge case, all components at maximum value (255)
   pixel = make_pixel(255, 255, 255, 255); // r = 255, g = 255, b = 255, a = 255
-  assert(pixel == 0xFFFFFFFF); // Expected pixel value: 0xFFFFFFFF
+  ASSERT(pixel == 0xFFFFFFFF);            // Expected pixel value: 0xFFFFFFFF
 
   // Test 4: Verify red component is placed correctly
   pixel = make_pixel(255, 0, 0, 0); // r = 255, g = 0, b = 0, a = 0
-  assert(pixel == 0xFF000000); // Expected pixel value: 0xFF000000
+  ASSERT(pixel == 0xFF000000);      // Expected pixel value: 0xFF000000
 
   // Test 5: Verify green component is placed correctly
   pixel = make_pixel(0, 255, 0, 0); // r = 0, g = 255, b = 0, a = 0
-  assert(pixel == 0x00FF0000); // Expected pixel value: 0x00FF0000
+  ASSERT(pixel == 0x00FF0000);      // Expected pixel value: 0x00FF0000
 
   // Test 6: Verify blue component is placed correctly
   pixel = make_pixel(0, 0, 255, 0); // r = 0, g = 0, b = 255, a = 0
-  assert(pixel == 0x0000FF00); // Expected pixel value: 0x0000FF00
+  ASSERT(pixel == 0x0000FF00);      // Expected pixel value: 0x0000FF00
 
   // Test 7: Verify alpha component is placed correctly
   pixel = make_pixel(0, 0, 0, 255); // r = 0, g = 0, b = 0, a = 255
-  assert(pixel == 0x000000FF); // Expected pixel value: 0x000000FF
+  ASSERT(pixel == 0x000000FF);      // Expected pixel value: 0x000000FF
 }
 
 void test_to_grayscale(TestObjs *objs)
 {
-  uint32_t test_colors[] = {0x000000FF, 0xFF0000FF, 0x00FF00FF, 0x0000FFFF, 0x00FFFFFF, 0xFF00FFFF};
-  uint32_t expected_grayscale[] = {0x000000FF, 0x4E4E4EFF, 0x7F7F7FFF, 0x303030FF, 0xB0B0B0FF, 0x7F7F7FFF};
+  // Test 1: Basic case, arbitrary color pixel
+  uint32_t pixel = make_pixel(100, 150, 200, 128); // r = 100, g = 150, b = 200, a = 128
+  uint32_t gray_pixel = to_grayscale(pixel);
+  uint32_t expected_y = (79 * 100 + 128 * 150 + 49 * 200) / 256; // Grayscale formula
+  ASSERT(get_r(gray_pixel) == expected_y);
+  ASSERT(get_g(gray_pixel) == expected_y);
+  ASSERT(get_b(gray_pixel) == expected_y);
+  ASSERT(get_a(gray_pixel) == 128); // Alpha should remain unchanged
 
-  for (int i = 0; i < sizeof(test_colors) / sizeof(test_colors[0]); i++)
-  {
-    uint32_t gray_pixel = to_grayscale(test_colors[i]);
-    ASSERT(gray_pixel == expected_grayscale[i]);
-  }
+  // Test 2: Edge case, all components at 0
+  pixel = make_pixel(0, 0, 0, 255); // r = 0, g = 0, b = 0, a = 0
+  gray_pixel = to_grayscale(pixel);
+  expected_y = (79 * 0 + 128 * 0 + 49 * 0) / 256;
+  ASSERT(get_r(gray_pixel) == expected_y);
+  ASSERT(get_g(gray_pixel) == expected_y);
+  ASSERT(get_b(gray_pixel) == expected_y);
+  ASSERT(get_a(gray_pixel) == 0);
+
+  // Test 3: Edge case - all components at 255
+  pixel = make_pixel(255, 255, 255, 255); // r = 255, g = 255, b = 255, a = 255
+  gray_pixel = to_grayscale(pixel);
+  expected_y = (79 * 255 + 128 * 255 + 49 * 255) / 256;
+  ASSERT(get_r(gray_pixel) == expected_y);
+  ASSERT(get_g(gray_pixel) == expected_y);
+  ASSERT(get_b(gray_pixel) == expected_y);
+  ASSERT(get_a(gray_pixel) == 255);
+
+  // Test 4: Red component only
+  pixel = make_pixel(255, 0, 0, 128); // r = 255, g = 0, b = 0, a = 128
+  expected_y = (79 * 255 + 128 * 0 + 49 * 0) / 256;
+  gray_pixel = to_grayscale(pixel);
+  ASSERT(get_r(gray_pixel) == expected_y);
+  ASSERT(get_g(gray_pixel) == expected_y);
+  ASSERT(get_b(gray_pixel) == expected_y);
+  ASSERT(get_a(gray_pixel) == 128);
+
+  // Test 5: Green component only
+  pixel = make_pixel(0, 255, 0, 128); // r = 0, g = 255, b = 0, a = 128
+  expected_y = (79 * 0 + 128 * 255 + 49 * 0) / 256;
+  gray_pixel = to_grayscale(pixel);
+  ASSERT(get_r(gray_pixel) == expected_y);
+  ASSERT(get_g(gray_pixel) == expected_y);
+  ASSERT(get_b(gray_pixel) == expected_y);
+  ASSERT(get_a(gray_pixel) == 128);
+
+  // Test 6: Blue component only
+  pixel = make_pixel(0, 0, 255, 128); // r = 0, g = 0, b = 255, a = 128
+  expected_y = (79 * 0 + 128 * 0 + 49 * 255) / 256;
+  gray_pixel = to_grayscale(pixel);
+  ASSERT(get_r(gray_pixel) == expected_y);
+  ASSERT(get_g(gray_pixel) == expected_y);
+  ASSERT(get_b(gray_pixel) == expected_y);
+  ASSERT(get_a(gray_pixel) == 128);
 }
 
 void test_blend_components(TestObjs *objs)
