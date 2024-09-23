@@ -114,6 +114,7 @@ void test_get_b(TestObjs *objs);
 void test_get_a(TestObjs *objs);
 void test_make_pixel(TestObjs *objs);
 void test_to_grayscale(TestObjs *objs);
+void test_blend_components(TestObjs *objs);
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -144,6 +145,7 @@ int main( int argc, char **argv ) {
   TEST(test_get_a);
   TEST(test_make_pixel);
   TEST(test_to_grayscale);
+  TEST(test_blend_components);
 
   TEST_FINI();
 }
@@ -412,32 +414,32 @@ void test_determine_tile_w(TestObjs *objs)
 {
   ASSERT(determine_tile_w(objs->smiley->width, 4, 0) == 4);
   ASSERT(determine_tile_w(objs->smiley->width, 3, 1) == 6);
-  ASSERT(determine_tile_w(objs->smiley->width, 20, 0) == );
-  ASSERT(determine_tile_w(objs->smiley->width, 0, 20) == );
+  // ASSERT(determine_tile_w(objs->smiley->width, 20, 0) == );
+  // ASSERT(determine_tile_w(objs->smiley->width, 0, 20) == );
 }
 
 void test_determine_tile_x_offset(TestObjs *objs)
 {
   ASSERT(determine_tile_x_offset(objs->smiley->width, 4, 0) == 0);
   ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 2) == 11);
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 0) == );
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 0, 20) == );
+  // ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 0) == );
+  // ASSERT(determine_tile_x_offset(objs->smiley->width, 0, 20) == );
 }
 
 void test_determine_tile_h(TestObjs *objs)
 {
   ASSERT(determine_tile_h(objs->smiley->height, 4, 0) == 2);
   ASSERT(determine_tile_h(objs->smiley->height, 3, 1) == 4);
-  ASSERT(determine_tile_h(objs->smiley->height, 5, 0) ==  );
-  ASSERT(determine_tile_h(objs->smiley->height, 5, 4) ==  );
+  // ASSERT(determine_tile_h(objs->smiley->height, 5, 0) ==  );
+  // ASSERT(determine_tile_h(objs->smiley->height, 5, 4) ==  );
 }
 
 void test_determine_tile_y_offset(TestObjs *objs)
 {
-  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
-  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
-  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
-  ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
+  // ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
+  // ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
+  // ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
+  // ASSERT(determine_tile_y_offset(objs->smiley->height, , ) == );
 }
 
 void test_copy_tile(TestObjs *objs)
@@ -503,5 +505,7 @@ void test_blend_components(TestObjs *objs)
   smiley_color = objs->smiley->data[5];
 
   blended = blend_colors(overlay_color, smiley_color);
-  ASSERT(blended == get_r)
+  ASSERT(blended == blend_components(overlay_color, smiley_color, 0));
+
+  cleanup(objs);
 }
