@@ -566,8 +566,29 @@ void test_copy_tile(TestObjs *objs)
 
 void test_get_r(TestObjs *objs)
 {
-  ASSERT(get_r(0x11223344) == 0x11);
-  ASSERT(get_r(0x00000000) == 0);
+  // Test 1: Basic case, middle red value
+  uint32_t pixel = 0x7F000000; // Red component = 127 (0x7F), other components = 0
+  assert(get_r(pixel) == 127);
+
+  // Test 2: Edge case, red component = 0
+  pixel = 0x00000000; // Red component = 0, other components = 0
+  assert(get_r(pixel) == 0);
+
+  // Test 3: Edge case, red component = 255 (max value)
+  pixel = 0xFFFFFFFF; // Red component = 255 (0xFF), other components = 255
+  assert(get_r(pixel) == 255);
+
+  // Test 4: Red component with other color values set
+  pixel = 0x7F123456; // Red component = 127, green = 18, blue = 52, alpha = 86
+  assert(get_r(pixel) == 127);
+
+  // Test 5: Fully transparent pixel (alpha = 0), red component = 128
+  pixel = 0x80000000; // Red component = 128, fully transparent (alpha = 0)
+  assert(get_r(pixel) == 128);
+
+  // Test 6: Fully opaque pixel (alpha = 255), red component = 64
+  pixel = 0x400000FF; // Red component = 64, fully opaque (alpha = 255)
+  assert(get_r(pixel) == 64);
 }
 
 void test_get_g(TestObjs *objs)
