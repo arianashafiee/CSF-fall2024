@@ -500,7 +500,7 @@ void test_determine_tile_h(TestObjs *objs)
   ASSERT(determine_tile_w(objs->smiley->height, 2, 0) == 5); // First tile
   ASSERT(determine_tile_w(objs->smiley->height, 2, 1) == 5); // Second tile
 
-  // Test 2: Non-divisible height, distribute excess to leftmost tiles
+  // Test 2: Non-divisible height, distribute excess to topmost tiles
   ASSERT(determine_tile_w(objs->smiley->height, 3, 0) == 4); // First tile gets the excess
   ASSERT(determine_tile_w(objs->smiley->height, 3, 1) == 3); // Second tile gets the remainder
 
@@ -526,35 +526,33 @@ void test_determine_tile_h(TestObjs *objs)
 
 void test_determine_tile_y_offset(TestObjs *objs)
 {
-  // Test 1: Basic case - width divisible by n
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 2, 0) == 0); // First tile (offset 0)
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 2, 2) == 8); // Second tile (offset 8)
+  // Test 1: Basic case - height divisible by n
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 2, 0) == 0); // First tile (offset 0)
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 2, 2) == 5); // Second tile (offset 8)
 
-  // Test 2: Non-divisible width, distribute excess to leftmost tiles
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 0) == 0);  // First tile (offset 0)
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 1) == 6);  // Second tile (offset 6)
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 2) == 11); // Third tile (offset 11)
+  // Test 2: Non-divisible height, distribute excess to topmost tiles
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 3, 0) == 0); // First tile (offset 0)
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 3, 1) == 4); // Second tile (offset 6)
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 3, 2) == 3); // Third tile (offset 11)
 
-  // Test 3: n = 1, only one tile should cover the entire width, offset should always be 0
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 1, 0) == 0); // Only one tile, offset 0
+  // Test 3: n = 1, only one tile should cover the entire height, offset should always be 0
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 1, 0) == 0); // Only one tile, offset 0
 
-  // Test 4: Edge case, width is zero
-  ASSERT(determine_tile_x_offset(0, 3, 0) == 0); // Width 0, offset should be 0 for any tile
+  // Test 4: Edge case, height is zero
+  ASSERT(determine_tile_x_offset(0, 3, 0) == 0); // Height 0, offset should be 0 for any tile
 
   // Test 5: Edge case, n is zero (invalid n)
-  // Should handle invalid n and return 0 or an appropriate error
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 0, 0) == 0); // n is zero, should return 0
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 0, 0) == 0); // n is zero, should return 0
 
   // Test 6: Edge case, tile_col out of bounds
-  // Should handle tile_col being out of bounds and return 0 or an appropriate error
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, -1) == 0); // Negative tile_col
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 3) == 0);  // tile_col beyond the range
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 3, -1) == 0); // Negative tile_col
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 3, 3) == 0);  // tile_col beyond the range
 
-  // Test 7: Small width, large n (some tiles may have minimal width, but offset should be correct)
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 0) == 0);   // First tile, offset 0
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 1) == 1);   // Second tile, offset 1
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 2) == 2);   // Third tile, offset 2
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 19) == 10); // Last tile, offset 10
+  // Test 7: Small height, large n (some tiles may have minimal height, but offset should be correct)
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 20, 0) == 0);  // First tile, offset 0
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 20, 1) == 1);  // Second tile, offset 1
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 20, 2) == 2);  // Third tile, offset 2
+  ASSERT(determine_tile_x_offset(objs->smiley->height, 20, 19) == 10); // Last tile, offset 10
 }
 
 void test_copy_tile(TestObjs *objs)
