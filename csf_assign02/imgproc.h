@@ -62,8 +62,6 @@ void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
 //   and overlay image do not have the same dimensions
 int imgproc_composite( struct Image *base_img, struct Image *overlay_img, struct Image *output_img );
 
-// TODO: add prototypes for your helper functions
-
 int all_tiles_nonempty(int width, int height, int n);
 int determine_tile_w(int width, int n, int tile_col);
 int determine_tile_x_offset(int width, int n, int tile_col);
