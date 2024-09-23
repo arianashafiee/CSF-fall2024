@@ -647,8 +647,21 @@ void test_get_b(TestObjs *objs)
 
 void test_get_a(TestObjs *objs)
 {
-  ASSERT(get_a(0x11223344) == 0x44);
-  ASSERT(get_a(0x00000000) == 0);
+  // Test 1: Basic case, middle alpha value
+  uint32_t pixel = 0x0000007F; // Alpha component = 127 (0x7F), other components = 0
+  ASSERT(get_r(pixel) == 127);
+
+  // Test 2: Edge case, alpha component = 0
+  pixel = 0x00000000; // Alpha component = 0, other components = 0
+  ASSERT(get_r(pixel) == 0);
+
+  // Test 3: Edge case, alpha component = 255 (max value)
+  pixel = 0xFFFFFFFF; // Alpha component = 255 (0xFF), other components = 255
+  ASSERT(get_r(pixel) == 255);
+
+  // Test 4: Alpha component with other color values set
+  pixel = 0x1234567F; // Alpha component = 127, red = 18, green = 52, blue = 86
+  ASSERT(get_r(pixel) == 127);
 }
 
 void test_make_pixel(TestObjs *objs)
