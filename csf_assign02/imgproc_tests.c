@@ -666,8 +666,33 @@ void test_get_a(TestObjs *objs)
 
 void test_make_pixel(TestObjs *objs)
 {
-  uint32_t pixel = make_pixel(0x11, 0x22, 0x33, 0x44);
-  ASSERT(pixel == 0x11223344);
+  // Test 1: Basic case, random values for red, green, blue, and alpha
+  uint32_t pixel = make_pixel(127, 63, 255, 128); // r = 127, g = 63, b = 255, a = 128
+  assert(pixel == 0x7F3FFF80); // Expected pixel value: 0x7F3FFF80
+
+  // Test 2: Edge case, all components at minimum value (0)
+  pixel = make_pixel(0, 0, 0, 0); // r = 0, g = 0, b = 0, a = 0
+  assert(pixel == 0x00000000); // Expected pixel value: 0x00000000
+
+  // Test 3: Edge case, all components at maximum value (255)
+  pixel = make_pixel(255, 255, 255, 255); // r = 255, g = 255, b = 255, a = 255
+  assert(pixel == 0xFFFFFFFF); // Expected pixel value: 0xFFFFFFFF
+
+  // Test 4: Verify red component is placed correctly
+  pixel = make_pixel(255, 0, 0, 0); // r = 255, g = 0, b = 0, a = 0
+  assert(pixel == 0xFF000000); // Expected pixel value: 0xFF000000
+
+  // Test 5: Verify green component is placed correctly
+  pixel = make_pixel(0, 255, 0, 0); // r = 0, g = 255, b = 0, a = 0
+  assert(pixel == 0x00FF0000); // Expected pixel value: 0x00FF0000
+
+  // Test 6: Verify blue component is placed correctly
+  pixel = make_pixel(0, 0, 255, 0); // r = 0, g = 0, b = 255, a = 0
+  assert(pixel == 0x0000FF00); // Expected pixel value: 0x0000FF00
+
+  // Test 7: Verify alpha component is placed correctly
+  pixel = make_pixel(0, 0, 0, 255); // r = 0, g = 0, b = 0, a = 255
+  assert(pixel == 0x000000FF); // Expected pixel value: 0x000000FF
 }
 
 void test_to_grayscale(TestObjs *objs)
