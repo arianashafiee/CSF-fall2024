@@ -405,9 +405,32 @@ void test_composite_basic( TestObjs *objs ) {
 
 void test_all_tiles_nonempty(TestObjs *objs)
 {
-  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 4) == 1);
-  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 0) == 0);
-  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 200) == 0);
+  // Test 1: Basic case - perfectly divisible dimensions
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 2) == 1); // Should return true (1)
+
+  // Test 2: Non-divisible width, divisible height
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 5) == 1); // Should return true (1)
+
+  // Test 3: Divisible width, non-divisible height
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 4) == 1); // Should return true (1)
+
+  // Test 4: Both width and height non-divisible by n
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 3) == 1); // Should return true (1)
+
+  // Test 5: Width is zero
+  ASSERT(all_tiles_nonempty(0, objs->smiley->height, 3) == 0); // Should return false (0)
+
+  // Test 6: Height is zero
+  ASSERT(all_tiles_nonempty(objs->smiley->width, 0, 3) == 0); // Should return false (0)
+
+  // Test 7: Tiling factor n is zero
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 0) == 0); // Should return false (0)
+
+  // Test 8: Tiling factor n is negative
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, -1) == 0); // Should return false (0)
+
+  // Test 9: Tiling factor larger than width and height
+  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 20) == 1); // Should return true (1)
 }
 
 void test_determine_tile_w(TestObjs *objs)
