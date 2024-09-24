@@ -715,7 +715,7 @@ void test_get_r(TestObjs *objs) {
   // Test 7: Extract red component from a pixel in the smiley image
   uint32_t smiley_red_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'r' ? 4 : 0];  // First red pixel
   ASSERT(get_r(smiley_red_pixel) == 0xFF);  // Expected red component is 255 (0xFF)
-  
+
 
   // Test 8: Extract red component from a pixel in a smaller custom image
   Picture custom_picture = {
@@ -945,7 +945,7 @@ void test_to_grayscale(TestObjs *objs) {
   ASSERT(get_a(gray_pixel) == 128);
 }
 
-void test_blend_colors(TestObjs *objs) {
+void test_blend_components(TestObjs *objs) {
   // Test 1: Basic cases
   uint32_t fg = make_pixel(100, 150, 200, 128); // r = 100, g = 150, b = 200, a = 128 (semi-transparent)
   uint32_t bg = make_pixel(50, 50, 50, 255);    // r = 50, g = 50, b = 50, a = 255 (fully opaque background)
