@@ -7,29 +7,17 @@
 
 // Helper function to check if all tiles are non-empty
 int all_tiles_nonempty(int width, int height, int n) {
-<<<<<<< HEAD
     if (n <= 0 || width <= 0 || height <= 0) {
         return 0;  // Handle invalid input such as zero or negative dimensions.
     }
-=======
-    if (n <= 1) {
-        return 0;
-    }
->>>>>>> 6fa184dc868e7a5d25bcaa332db387aaa8702edc
     return (width / n > 0) && (height / n > 0);
 }
 
 // Helper function to determine the width of a tile in the output image
 int determine_tile_w(int width, int n, int tile_col) {
-<<<<<<< HEAD
     if (n <= 0 || width <= 0 || tile_col < 0 || tile_col >= n) {
         return 0;  // Invalid cases
     }
-=======
-    if (n <= 1) {
-        return 0;
-    }
->>>>>>> 6fa184dc868e7a5d25bcaa332db387aaa8702edc
     int base_tile_w = width / n;
     int remainder = width % n;
     return base_tile_w + (tile_col < remainder ? 1 : 0);
@@ -47,15 +35,9 @@ int determine_tile_x_offset(int width, int n, int tile_col) {
 
 // Helper function to determine the height of a tile in the output image
 int determine_tile_h(int height, int n, int tile_row) {
-<<<<<<< HEAD
     if (n <= 0 || width <= 0 || tile_col < 0 || tile_col >= n) {
         return 0;  // Invalid cases
     }
-=======
-    if (n <= 1) {
-        return 0;
-    }
->>>>>>> 6fa184dc868e7a5d25bcaa332db387aaa8702edc
     int base_tile_h = height / n;
     int remainder = height % n;
     return base_tile_h + (tile_row < remainder ? 1 : 0);
@@ -179,14 +161,10 @@ void imgproc_mirror_h(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-<<<<<<< HEAD
     
     // Edge case: Empty image or single-column image
     if (width <= 1 || height <= 0) return;
     
-=======
-
->>>>>>> 6fa184dc868e7a5d25bcaa332db387aaa8702edc
     // Iterate over each row
     for (int32_t y = 0; y < height; y++) {
         // Iterate over each column (only up to the middle of the image)
@@ -216,14 +194,10 @@ void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-<<<<<<< HEAD
     
     // Edge case: Empty image or single-row image
     if (height <= 1 || width <= 0) return;
 
-=======
-
->>>>>>> 6fa184dc868e7a5d25bcaa332db387aaa8702edc
     // Iterate over each column
     for (int32_t y = 0; y < height / 2; y++) {
         // Calculate the position of the mirrored row
@@ -284,14 +258,10 @@ void imgproc_grayscale(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-<<<<<<< HEAD
     
     // Edge case: Empty image
     if (width <= 0 || height <= 0) return;
 
-=======
-
->>>>>>> 6fa184dc868e7a5d25bcaa332db387aaa8702edc
     // Iterate over each pixel in the image
     for (int32_t y = 0; y < height; y++) {
         for (int32_t x = 0; x < width; x++) {
