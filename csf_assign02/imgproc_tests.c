@@ -800,27 +800,6 @@ void test_get_b(TestObjs *objs) {
   // Test 6: Fully opaque pixel (alpha = 255), blue component = 64
   pixel = 0x000040FF; // Blue component = 64, fully opaque (alpha = 255)
   ASSERT(get_r(pixel) == 64);
-<<<<<<< HEAD
-
-  // Test 7: Extract blue component from a pixel in the smiley image
-  uint32_t smiley_blue_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'b' ? 4 : 0];  // First blue pixel
-  ASSERT(get_b(smiley_blue_pixel) == 0xFF);  // Expected blue component is 255 (0xFF)
-
-  // Test 8: Extract blue component from a pixel in a smaller custom image
-  Picture custom_picture = {
-      TEST_COLORS,
-      3, 3,
-      "r  "
-      " g "
-      "  b"
-  };
-  struct Image *custom_img = picture_to_img(&custom_picture);
-  uint32_t custom_blue_pixel = custom_img->data[8];  // This should be the blue pixel in the bottom-right corner
-  ASSERT(get_b(custom_blue_pixel) == 0xFF);  // The blue component should be 0xFF
-
-  // Clean up memory
-  destroy_img(custom_img);
-=======
 
   // Test 7: Extract blue component from a pixel in the smiley image
   uint32_t smiley_blue_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'b' ? 4 : 0];  // First blue pixel
@@ -840,7 +819,6 @@ void test_get_b(TestObjs *objs) {
 
   // Clean up memory
   destroy_img(custom_img);
->>>>>>> f28d7d769fc3f0f452dabe46aaf5875c64cdb080
 }
 
 void test_get_a(TestObjs *objs) {
