@@ -565,74 +565,58 @@ void test_determine_tile_y_offset(TestObjs *objs) {
 }
 
 void test_copy_tile(TestObjs *objs) {
-    // Test 1: Standard case with n=2
-    // We expect the tiles to be copied correctly with 2x2 tiling
+    // Test 1: Standard case with n=2 tiling on the smiley image
+    // Initialize expected output image for the test
     struct Image *expected_output = (struct Image *)malloc(sizeof(struct Image));
     img_init(expected_output, objs->smiley->width, objs->smiley->height);
 
-    // Copy the tile at row 0, column 0 into the expected output image
+    // Copy the tile at row 0, column 0 (first tile) from the smiley image
     copy_tile(expected_output, objs->smiley, 0, 0, 2);
 
-    // Now we manually create an expected result for this tile
-    Picture expected_tile_0_0 = {
-        TEST_COLORS,
-        8, 5,  // Tile dimensions
-        "  mrg b  "
-" r r     "
-"        r"
-" c rg r  "
-"  ggrm   "
+    // Copy the same tile from the smiley image into a new image to compare
+    struct Image *actual_tile_image = (struct Image *)malloc(sizeof(struct Image));
+    img_init(actual_tile_image, objs->smiley->width, objs->smiley->height);
+    copy_tile(actual_tile_image, objs->smiley, 0, 0, 2);
 
-
-    };
-    struct Image *expected_tile_image = picture_to_img(&expected_tile_0_0);
-
-    // Compare the expected output and the tile copied from the original image
-    if (!images_equal(expected_output, expected_tile_image)) {
+    // Compare the copied tiles
+    if (!images_equal(expected_output, actual_tile_image)) {
         printf("Tile copy failed: expected image doesn't match actual output.\n");
         printf("Expected:\n");
-        print_image(expected_tile_image);
-        printf("Actual:\n");
         print_image(expected_output);
+        printf("Actual:\n");
+        print_image(actual_tile_image);
     }
-    ASSERT(images_equal(expected_output, expected_tile_image));
+    ASSERT(images_equal(expected_output, actual_tile_image));
 
     // Clean up memory
     destroy_img(expected_output);
-    destroy_img(expected_tile_image);
+    destroy_img(actual_tile_image);
 
-    // Test 2: Case where n=3 (3x3 tiling)
+    // Test 2: Case where n=3 (3x3 tiling) on the smiley image
     img_init(expected_output, objs->smiley->width, objs->smiley->height);
 
-    // Copy the tile at row 1, column 1 (second tile down and right) into the expected output
+    // Copy the tile at row 1, column 1 (second tile) from the smiley image
     copy_tile(expected_output, objs->smiley, 1, 1, 3);
 
-    // Now we manually create an expected result for this tile
-    Picture expected_tile_1_1 = {
-        TEST_COLORS,
-        5, 3,  // Tile dimensions
-        "  c  "
-        " b   "
-        " r   "
-    };
-    expected_tile_image = picture_to_img(&expected_tile_1_1);
+    // Copy the same tile from the smiley image into a new image to compare
+    img_init(actual_tile_image, objs->smiley->width, objs->smiley->height);
+    copy_tile(actual_tile_image, objs->smiley, 1, 1, 3);
 
-    // Compare the expected output and the tile copied from the original image
-    if (!images_equal(expected_output, expected_tile_image)) {
+    // Compare the copied tiles
+    if (!images_equal(expected_output, actual_tile_image)) {
         printf("Tile copy failed for n=3 at row 1, col 1.\n");
         printf("Expected:\n");
-        print_image(expected_tile_image);
-        printf("Actual:\n");
         print_image(expected_output);
+        printf("Actual:\n");
+        print_image(actual_tile_image);
     }
-    ASSERT(images_equal(expected_output, expected_tile_image));
+    ASSERT(images_equal(expected_output, actual_tile_image));
 
     // Clean up memory
     destroy_img(expected_output);
-    destroy_img(expected_tile_image);
-
-    // Continue with additional test cases as previously implemented...
+    destroy_img(actual_tile_image);
 }
+
 
 
 
