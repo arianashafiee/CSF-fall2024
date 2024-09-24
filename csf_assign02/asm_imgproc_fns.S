@@ -80,7 +80,7 @@ all_tiles_nonempty:
     popq %rbp                     # Restore base pointer
     ret                           # Return from the function
 
-    .globl determine_tile_w
+.globl determine_tile_w
 determine_tile_w:
     /* Prologue: Save base pointer and set up stack frame */
     pushq %rbp
@@ -115,8 +115,8 @@ determine_tile_w:
     movq %rax, %r8                # Store base_tile_w (quotient) in %r8
     movq %rdx, %r9                # Store remainder (width % n) in %r9
 
-    # Check if tile_col < remainder
-    cmpq %r9, %rdx                # Compare tile_col with remainder
+    # Compare tile_col with remainder
+    cmpq %r9, %rdx                # Compare tile_col (%rdx) with remainder (%r9)
     jge .Lno_remainder_add_tile_w # Jump if tile_col >= remainder
 
     # If tile_col < remainder, add 1 to base_tile_w
