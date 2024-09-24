@@ -800,6 +800,27 @@ void test_get_b(TestObjs *objs) {
   // Test 6: Fully opaque pixel (alpha = 255), blue component = 64
   pixel = 0x000040FF; // Blue component = 64, fully opaque (alpha = 255)
   ASSERT(get_r(pixel) == 64);
+<<<<<<< HEAD
+
+  // Test 7: Extract blue component from a pixel in the smiley image
+  uint32_t smiley_blue_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'b' ? 4 : 0];  // First blue pixel
+  ASSERT(get_b(smiley_blue_pixel) == 0xFF);  // Expected blue component is 255 (0xFF)
+
+  // Test 8: Extract blue component from a pixel in a smaller custom image
+  Picture custom_picture = {
+      TEST_COLORS,
+      3, 3,
+      "r  "
+      " g "
+      "  b"
+  };
+  struct Image *custom_img = picture_to_img(&custom_picture);
+  uint32_t custom_blue_pixel = custom_img->data[8];  // This should be the blue pixel in the bottom-right corner
+  ASSERT(get_b(custom_blue_pixel) == 0xFF);  // The blue component should be 0xFF
+
+  // Clean up memory
+  destroy_img(custom_img);
+=======
 
   // Test 7: Extract blue component from a pixel in the smiley image
   uint32_t smiley_blue_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'b' ? 4 : 0];  // First blue pixel
@@ -819,6 +840,7 @@ void test_get_b(TestObjs *objs) {
 
   // Clean up memory
   destroy_img(custom_img);
+>>>>>>> f28d7d769fc3f0f452dabe46aaf5875c64cdb080
 }
 
 void test_get_a(TestObjs *objs) {
@@ -837,6 +859,15 @@ void test_get_a(TestObjs *objs) {
   // Test 4: Alpha component with other color values set
   pixel = 0x1234567F; // Alpha component = 127, red = 18, green = 52, blue = 86
   ASSERT(get_r(pixel) == 127);
+
+  // Test 5: Create an image with a partially transparent pixel
+  uint32_t semi_transparent_pixel = 0xFF000080;  // Red pixel with 50% transparency
+  ASSERT(get_a(semi_transparent_pixel) == 0x80);  // Alpha component should be 128 (0x80)
+
+  // Test 6: Fully transparent pixel
+  uint32_t fully_transparent_pixel = 0x00000000;  // Fully transparent black pixel
+  ASSERT(get_a(fully_transparent_pixel) == 0x00);  // Alpha component should be 0 (fully transparent)
+
 }
 
 void test_make_pixel(TestObjs *objs) {
@@ -867,6 +898,16 @@ void test_make_pixel(TestObjs *objs) {
   // Test 7: Verify alpha component is placed correctly
   pixel = make_pixel(0, 0, 0, 255); // r = 0, g = 0, b = 0, a = 255
   ASSERT(pixel == 0x000000FF);      // Expected pixel value: 0x000000FF
+
+  // Test 4: Create a fully opaque white pixel
+  uint32_t expected_white_pixel = 0xFFFFFFFF;  // Red (0xFF), Green (0xFF), Blue (0xFF), Alpha (0xFF)
+  uint32_t white_pixel = make_pixel(0xFF, 0xFF, 0xFF, 0xFF);  // Fully white, fully opaque
+  ASSERT(white_pixel == expected_white_pixel);  // Expected value is 0xFFFFFFFF
+
+  // Test 5: Create a fully transparent black pixel
+  uint32_t expected_black_pixel = 0x00000000;  // Red (0x00), Green (0x00), Blue (0x00), Alpha (0x00)
+  uint32_t black_pixel = make_pixel(0x00, 0x00, 0x00, 0x00);  // Fully black, fully transparent
+  ASSERT(black_pixel == expected_black_pixel);  // Expected value is 0x00000000
 }
 
 void test_to_grayscale(TestObjs *objs) {
