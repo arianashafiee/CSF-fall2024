@@ -528,7 +528,7 @@ get_a:
     ret                           # Return, with result in %eax
 
 
-.globl make_pixel
+    .globl make_pixel
 make_pixel:
     # Prologue: Setup the stack frame
     pushq   %rbp                   # Save base pointer
@@ -546,7 +546,7 @@ make_pixel:
     shll    $8, %ecx               # Shift left blue component by 8 bits (b << 8)
     orl     %ecx, %eax             # OR it with %eax (combine with red and green)
 
-    movl    %r9d, %ecx             # Move the alpha component (a) into %ecx
+    movl    %r8d, %ecx             # Move the alpha component (a) into %ecx
     orl     %ecx, %eax             # OR it with %eax (combine with red, green, and blue)
 
     # %eax now holds the complete pixel
@@ -554,7 +554,7 @@ make_pixel:
     popq    %rbp                   # Restore base pointer
     ret                            # Return, with the pixel in %eax
 
-    .globl to_grayscale
+globl to_grayscale
 to_grayscale:
     # Prologue: Set up the stack frame
     pushq   %rbp
@@ -619,8 +619,8 @@ to_grayscale:
 
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
-    ret                         # Return with the grayscale pixel in %eax
-
+    ret                         # Return with the grayscale pixel in 
+    
 /*
  * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
  *
