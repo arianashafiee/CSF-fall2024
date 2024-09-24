@@ -601,9 +601,6 @@ void test_copy_tile(TestObjs *objs) {
     destroy_img(actual_tile_image);
 }
 
-
-
-
 void test_get_r(TestObjs *objs) {
   // Test 1: Basic case, arbitrary red value
   uint32_t pixel = 0x7F000000; // Red component = 127 (0x7F), other components = 0
