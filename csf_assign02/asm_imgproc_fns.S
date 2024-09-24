@@ -675,18 +675,18 @@ imgproc_mirror_v:
 
     # Edge case: If height <= 1 or width <= 0, return immediately
     cmpq    $1, %rcx
-    jle     .Lexit
+    jle     .Lexit_mirror
     cmpq    $0, %rax
-    jle     .Lexit
+    jle     .Lexit_mirror
 
     # Outer loop: Iterate over the rows (y)
     movq    $0, %r10             # Set y = 0
-.Louter_loop:
+.Louter_loop_mirror:
     # Check if y >= height / 2
     movq    %rcx, %r11           # r11 = height
     shrq    $1, %r11             # r11 = height / 2
     cmpq    %r11, %r10           # Compare y with height / 2
-    jge     .Lexit               # If y >= height / 2, exit
+    jge     .Lexit_mirror        # If y >= height / 2, exit
 
     # Calculate mirrored_y = height - 1 - y
     movq    %rcx, %r11           # r11 = height
@@ -695,10 +695,10 @@ imgproc_mirror_v:
 
     # Inner loop: Iterate over each column (x)
     movq    $0, %r12             # Set x = 0
-.Linner_loop:
+.Linner_loop_mirror:
     # Check if x >= width
     cmpq    %rax, %r12           # Compare x with width
-    jge     .Lnext_row           # If x >= width, go to the next row
+    jge     .Lnext_row_mirror    # If x >= width, go to the next row
 
     # Load the top pixel: input_img->data[y * width + x]
     movq    %r12, %r13           # r13 = x
@@ -725,17 +725,18 @@ imgproc_mirror_v:
 
     # Increment x and go to the next column
     incq    %r12
-    jmp     .Linner_loop
+    jmp     .Linner_loop_mirror
 
-.Lnext_row:
+.Lnext_row_mirror:
     # Increment y and go to the next row
     incq    %r10
-    jmp     .Louter_loop
+    jmp     .Louter_loop_mirror
 
-.Lexit:
+.Lexit_mirror:
     # Epilogue: Restore the stack and return
     popq    %rbp
     ret
+
 
 
 /*
@@ -772,7 +773,7 @@ imgproc_tile:
  *   %rdi - pointer to original struct Image
  *   %rsi - pointer to output struct Image
  */
-    .globl imgproc_grayscale
+.globl imgproc_grayscale
 imgproc_grayscale:
     # Prologue: set up the stack frame
     pushq   %rbp
@@ -794,21 +795,21 @@ imgproc_grayscale:
 
     # Edge case: If width <= 0 or height <= 0, return immediately
     cmpq    $0, %rax
-    jle     .Lexit
+    jle     .Lexit_grayscale
     cmpq    $0, %rcx
-    jle     .Lexit
+    jle     .Lexit_grayscale
 
     # Outer loop: Iterate over the rows (y)
     movq    $0, %r8              # Set y = 0
-.Louter_loop:
+.Louter_loop_grayscale:
     cmpq    %rcx, %r8            # Compare y with height
-    jge     .Lexit               # If y >= height, exit
+    jge     .Lexit_grayscale     # If y >= height, exit
 
     # Inner loop: Iterate over the columns (x)
     movq    $0, %rdx             # Set x = 0
-.Linner_loop:
+.Linner_loop_grayscale:
     cmpq    %rax, %rdx           # Compare x with width
-    jge     .Lnext_row           # If x >= width, go to the next row
+    jge     .Lnext_row_grayscale # If x >= width, go to the next row
 
     # Load the pixel from input_img->data[y * width + x]
     movq    %rdx, %r9            # r9 = x
@@ -827,14 +828,14 @@ imgproc_grayscale:
 
     # Increment x and go to the next column
     incq    %rdx
-    jmp     .Linner_loop
+    jmp     .Linner_loop_grayscale
 
-.Lnext_row:
+.Lnext_row_grayscale:
     # Increment y and go to the next row
     incq    %r8
-    jmp     .Louter_loop
+    jmp     .Louter_loop_grayscale
 
-.Lexit:
+.Lexit_grayscale:
     # Epilogue: Restore the stack and return
     popq    %rbp
     ret
