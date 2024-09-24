@@ -9,7 +9,7 @@
 // Helper function to check if all tiles are non-empty
 int all_tiles_nonempty(int width, int height, int n) {
     if (n <= 1) {
-        return 0
+        return 0;
     }
     return (width / n > 0) && (height / n > 0);
 }
@@ -17,7 +17,7 @@ int all_tiles_nonempty(int width, int height, int n) {
 // Helper function to determine the width of a tile in the output image
 int determine_tile_w(int width, int n, int tile_col) {
     if (n <= 1) {
-        return 0
+        return 0;
     }
     int base_tile_w = width / n;
     int remainder = width % n;
@@ -34,7 +34,7 @@ int determine_tile_x_offset(int width, int n, int tile_col) {
 // Helper function to determine the height of a tile in the output image
 int determine_tile_h(int height, int n, int tile_row) {
     if (n <= 1) {
-        return 0
+        return 0;
     }
     int base_tile_h = height / n;
     int remainder = height % n;
