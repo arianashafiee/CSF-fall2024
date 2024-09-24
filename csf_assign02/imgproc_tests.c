@@ -577,11 +577,12 @@ void test_copy_tile(TestObjs *objs) {
     Picture expected_tile_0_0 = {
         TEST_COLORS,
         8, 5,  // Tile dimensions
-        "  mrgb  "
-" r r    "
-"       r"
-" crg r  "
-"  gg rm "
+        "  mrg b  "
+" r r     "
+"        r"
+" c rg r  "
+"  ggrm   "
+
 
     };
     struct Image *expected_tile_image = picture_to_img(&expected_tile_0_0);
