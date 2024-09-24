@@ -220,4 +220,25 @@ uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha);
 //   The blended 32-bit pixel in RGBA format, with alpha set to 255 (fully opaque).
 uint32_t blend_colors(uint32_t fg, uint32_t bg);
 
+extern int all_tiles_nonempty(int width, int height, int n);
+extern int determine_tile_w(int width, int n, int tile_col);
+extern int determine_tile_x_offset(int width, int n, int tile_col);
+extern int determine_tile_h(int height, int n, int tile_row);
+extern int determine_tile_y_offset(int height, int n, int tile_row);
+extern void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_col, int n);
+
+extern uint32_t get_r(uint32_t pixel);
+extern uint32_t get_g(uint32_t pixel);
+extern uint32_t get_b(uint32_t pixel);
+extern uint32_t get_a(uint32_t pixel);
+extern uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
+extern uint32_t to_grayscale(uint32_t pixel);
+
+/* API functions implemented in assembly */
+extern void imgproc_mirror_h(struct Image *input_img, struct Image *output_img);
+extern void imgproc_mirror_v(struct Image *input_img, struct Image *output_img);
+extern int imgproc_tile(struct Image *input_img, int n, struct Image *output_img);
+extern void imgproc_grayscale(struct Image *input_img, struct Image *output_img);
+extern int imgproc_composite(struct Image *base_img, struct Image *overlay_img, struct Image *output_img);
+
 #endif // IMGPROC_H 
