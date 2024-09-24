@@ -312,52 +312,48 @@ to_grayscale:
 
     .globl imgproc_mirror_h
 imgproc_mirror_h:
-    push %rbp               # Save base pointer
-    mov %rsp, %rbp           # Set stack frame
+    push %rbp                   # Save base pointer
+    mov %rsp, %rbp               # Set stack frame
 
-    # Load width and height from the input image
-    mov 0(%rdi), %eax        # Load width (input_img->width) into eax
-    mov 4(%rdi), %edx        # Load height (input_img->height) into edx
+    # Load image width and height
+    mov 0(%rdi), %eax            # Load input_img->width into eax
+    mov 4(%rdi), %edx            # Load input_img->height into edx
 
-    test %eax, %eax          # Test if width is zero
-    jle end_mirror_h         # Jump to end if width <= 0
+    # Check for zero width or height
+    test %eax, %eax
+    jle end_mirror_h
+    test %edx, %edx
+    jle end_mirror_h
 
-    test %edx, %edx          # Test if height is zero
-    jle end_mirror_h         # Jump to end if height <= 0
+    # Iterate over each row (y-axis)
+    mov %edx, %ecx               # Save height in ecx for row loop
+    mov %eax, %ebx               # Save width in ebx for column loop
+    shr $1, %ebx                 # Divide width by 2 for swapping
 
-    # Loop over each row (height)
 mirror_h_row_loop:
-    mov %edx, %ebx           # Save height in ebx (loop counter)
-    dec %ebx                 # Start from height - 1
-    test %ebx, %ebx
-    jl end_mirror_h          # If no more rows, exit
+    dec %ecx                     # Decrement row counter
+    jl end_mirror_h              # If no more rows, exit
 
-    mov %eax, %ecx           # Save width in ecx
-    shr $1, %ecx             # Divide width by 2 (loop through half)
+    mov %ebx, %edi               # Copy column limit (width / 2)
 
 mirror_h_col_loop:
-    test %ecx, %ecx
-    jle next_row_h           # If no more columns, go to next row
+    dec %edi                     # Decrement column counter
+    jl next_row_h                # If no more columns, go to next row
 
-    # Calculate index of left and right pixels
-    mov %eax, %esi           # Save width in esi
-    dec %esi                 # esi = width - 1
-    sub %ecx, %esi           # Index for the right side pixel
-
-    # Load left and right pixels
-    mov (%rdi,%ecx,4), %r8d   # Load left pixel into r8d
-    mov (%rdi,%esi,4), %r9d   # Load right pixel into r9d
+    # Calculate pixel positions (left and right side)
+    mov %ebx, %esi               # esi = width - column
+    sub %edi, %esi               # Index for right side pixel
+    mov (%rdi,%edi,4), %r8d      # Load left pixel
+    mov (%rdi,%esi,4), %r9d      # Load right pixel
 
     # Swap pixels
-    mov %r9d, (%rdi,%ecx,4)  # Store right pixel in left
-    mov %r8d, (%rdi,%esi,4)  # Store left pixel in right
+    mov %r9d, (%rsi,%edi,4)      # Store right pixel in left
+    mov %r8d, (%rsi,%esi,4)      # Store left pixel in right
 
-    dec %ecx                 # Decrement column counter
-    jmp mirror_h_col_loop     # Continue column loop
+    jmp mirror_h_col_loop        # Continue column loop
 
 next_row_h:
-    dec %ebx                 # Decrement row counter
-    jmp mirror_h_row_loop     # Go to next row
+    jmp mirror_h_row_loop        # Continue row loop
 
 end_mirror_h:
     leave
@@ -376,43 +372,38 @@ end_mirror_h:
  */
 	    .globl imgproc_mirror_v
 imgproc_mirror_v:
-    push %rbp               # Save base pointer
-    mov %rsp, %rbp           # Set stack frame
+    push %rbp                   # Save base pointer
+    mov %rsp, %rbp               # Set stack frame
 
-    # Load width and height from the input image
-    mov 0(%rdi), %eax        # Load width (input_img->width) into eax
-    mov 4(%rdi), %edx        # Load height (input_img->height) into edx
+    # Load image width and height
+    mov 0(%rdi), %eax            # Load input_img->width into eax
+    mov 4(%rdi), %edx            # Load input_img->height into edx
 
-    test %eax, %eax          # Test if width is zero
-    jle end_mirror_v         # Jump to end if width <= 0
+    # Check for zero width or height
+    test %eax, %eax
+    jle end_mirror_v
+    test %edx, %edx
+    jle end_mirror_v
 
-    test %edx, %edx          # Test if height is zero
-    jle end_mirror_v         # Jump to end if height <= 0
-
-    # Loop over each row (height / 2)
-    mov %edx, %ecx           # Save height in ecx
-    shr $1, %ecx             # Divide height by 2 (mirror half)
+    # Iterate over each column (x-axis)
+    mov %edx, %ecx               # Save height in ecx for row loop
+    shr $1, %ecx                 # Divide height by 2
 
 mirror_v_row_loop:
-    test %ecx, %ecx
-    jle end_mirror_v         # If no more rows, exit
+    dec %ecx                     # Decrement row counter
+    jl end_mirror_v              # If no more rows, exit
 
-    # Calculate top and bottom pixel rows to swap
-    mov %edx, %esi           # Save height in esi
-    dec %esi                 # esi = height - 1
-    sub %ecx, %esi           # Index for bottom row pixel
+    # Calculate top and bottom row
+    mov %edx, %esi               # esi = height - row
+    sub %ecx, %esi               # Index for bottom row
+    mov (%rdi,%ecx,4), %r8d      # Load top row pixel
+    mov (%rdi,%esi,4), %r9d      # Load bottom row pixel
 
-    # Load top and bottom pixels
-mirror_v_col_loop:
-    mov (%rdi,%ecx,4), %r8d   # Load top row pixel into r8d
-    mov (%rdi,%esi,4), %r9d   # Load bottom row pixel into r9d
+    # Swap rows
+    mov %r9d, (%rsi,%ecx,4)      # Store bottom row in top row
+    mov %r8d, (%rsi,%esi,4)      # Store top row in bottom row
 
-    # Swap pixels
-    mov %r9d, (%rdi,%ecx,4)  # Store bottom pixel in top row
-    mov %r8d, (%rdi,%esi,4)  # Store top pixel in bottom row
-
-    dec %ecx                 # Decrement row counter
-    jmp mirror_v_row_loop     # Continue row loop
+    jmp mirror_v_row_loop        # Continue row loop
 
 end_mirror_v:
     leave
@@ -454,35 +445,34 @@ imgproc_tile:
  */
 	    .globl imgproc_grayscale
 imgproc_grayscale:
-    push %rbp                # Save base pointer
-    mov %rsp, %rbp            # Set stack frame
+    push %rbp                   # Save base pointer
+    mov %rsp, %rbp               # Set stack frame
 
-    # Load width and height from the input image
-    mov 0(%rdi), %eax         # Load width (input_img->width) into eax
-    mov 4(%rdi), %edx         # Load height (input_img->height) into edx
+    # Load image width and height
+    mov 0(%rdi), %eax            # Load input_img->width into eax
+    mov 4(%rdi), %edx            # Load input_img->height into edx
 
-    test %eax, %eax           # Test if width is zero
-    jle end_grayscale         # Jump to end if width <= 0
-
-    test %edx, %edx           # Test if height is zero
-    jle end_grayscale         # Jump to end if height <= 0
+    # Check for zero width or height
+    test %eax, %eax
+    jle end_grayscale
+    test %edx, %edx
+    jle end_grayscale
 
 grayscale_pixel_loop:
-    test %eax, %eax           # Test if there are pixels left
-    jle end_grayscale         # Exit if no pixels
+    test %eax, %eax              # Test if there are pixels left
+    jle end_grayscale            # Exit if no pixels
 
-    mov (%rdi), %r8d          # Load pixel from input image
-    call to_grayscale         # Convert to grayscale
+    mov (%rdi), %r8d             # Load pixel from input image
+    call to_grayscale            # Convert to grayscale
 
-    mov %r8d, (%rsi)          # Store the grayscale pixel in output
+    mov %r8d, (%rsi)             # Store the grayscale pixel in output image
 
-    dec %eax                  # Decrement pixel counter
-    jmp grayscale_pixel_loop   # Repeat for each pixel
+    dec %eax                     # Decrement pixel counter
+    jmp grayscale_pixel_loop     # Repeat for each pixel
 
 end_grayscale:
     leave
     ret
-
 
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
