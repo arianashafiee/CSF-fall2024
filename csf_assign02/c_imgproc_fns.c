@@ -35,7 +35,7 @@ int determine_tile_x_offset(int width, int n, int tile_col) {
 
 // Helper function to determine the height of a tile in the output image
 int determine_tile_h(int height, int n, int tile_row) {
-    if (n <= 0 || width <= 0 || tile_col < 0 || tile_col >= n) {
+    if (n <= 0 || height <= 0 || tile_row < 0 || tile_row >= n) {
         return 0;  // Invalid cases
     }
     int base_tile_h = height / n;
@@ -45,7 +45,7 @@ int determine_tile_h(int height, int n, int tile_row) {
 
 // Helper function to determine the y-offset of a tile in the output image
 int determine_tile_y_offset(int height, int n, int tile_row) {
-    if (n <= 0 || width <= 0 || tile_col < 0 || tile_col >= n) {
+    if (n <= 0 || height <= 0 || tile_row < 0 || tile_row >= n) {
         return 0;  // Invalid cases
     }
     int base_tile_h = height / n;
@@ -58,7 +58,7 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
     if (n <= 0 || img->width <= 0 || img->height <= 0) {
         return;  // Invalid case, no operation
     }
-    
+
     int tile_w = determine_tile_w(img->width, n, tile_col);
     int tile_h = determine_tile_h(img->height, n, tile_row);
     int tile_x_offset = determine_tile_x_offset(img->width, n, tile_col);
@@ -161,10 +161,10 @@ void imgproc_mirror_h(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-    
+
     // Edge case: Empty image or single-column image
     if (width <= 1 || height <= 0) return;
-    
+
     // Iterate over each row
     for (int32_t y = 0; y < height; y++) {
         // Iterate over each column (only up to the middle of the image)
@@ -194,7 +194,7 @@ void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-    
+
     // Edge case: Empty image or single-row image
     if (height <= 1 || width <= 0) return;
 
@@ -258,7 +258,7 @@ void imgproc_grayscale(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-    
+
     // Edge case: Empty image
     if (width <= 0 || height <= 0) return;
 
