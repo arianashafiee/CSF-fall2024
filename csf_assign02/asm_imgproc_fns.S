@@ -824,7 +824,7 @@ imgproc_grayscale:
 
     # Store the grayscale pixel in output_img->data[y * width + x]
     movq    (%rsi), %r10         # r10 = output_img->data
-    movl    %rax, (%r10, %r8, 4) # Store the grayscale pixel
+    movq    %rax, (%r10, %r8, 4) # Store the grayscale pixel
 
     # Increment x and go to the next column
     incq    %rdx
