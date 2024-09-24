@@ -249,7 +249,7 @@ imgproc_mirror_h:
     cmpq    %rbx, %rcx              # if y >= height, exit loop
     jge     .done_mirror_h
 
-    movl    %edx, %r8               # r8 = width
+    movl    %edx, %r8d              # r8d = width (use 32-bit for width)
     shrq    $1, %r8                 # r8 = width / 2 (for mirrored columns)
     xorq    %rax, %rax              # Initialize column index x = 0
 
@@ -258,20 +258,20 @@ imgproc_mirror_h:
     jge     .next_row_h
 
     # Calculate mirrored_x = width - 1 - x
-    movl    %edx, %r9               # r9 = width
+    movl    %edx, %r9d              # r9d = width (use 32-bit for width)
     decq    %r9                     # r9 = width - 1
     subq    %rax, %r9               # mirrored_x = width - 1 - x
 
     # Calculate the left pixel index: input_img->data[y * width + x]
-    movl    %edx, %r10              # r10 = width
-    imulq   %rbx, %r10              # r10 = y * width
+    movl    %edx, %r10d             # r10d = width (use 32-bit for width)
+    imulq   %rbx, %r10              # r10 = y * width (64-bit multiplication)
     addq    %rax, %r10              # r10 = y * width + x
     movq    8(%rdi), %r11           # Load pointer to input_img->data
     movl    (%r11,%r10,4), %r12d    # Load the left pixel
 
     # Calculate the right pixel index: input_img->data[y * width + mirrored_x]
-    movl    %edx, %r13              # r13 = width
-    imulq   %rbx, %r13              # r13 = y * width
+    movl    %edx, %r13d             # r13d = width (use 32-bit for width)
+    imulq   %rbx, %r13              # r13 = y * width (64-bit multiplication)
     addq    %r9, %r13               # r13 = y * width + mirrored_x
     movl    (%r11,%r13,4), %r14d    # Load the right pixel
 
@@ -296,7 +296,6 @@ imgproc_mirror_h:
     ret
 
 
-
 /*
  * Mirror vertically
  */
@@ -309,8 +308,8 @@ imgproc_mirror_v:
     pushq   %rbx                    # Save callee-saved register
 
     # Load input image width and height
-    movl    (%rdi), %edx            # input_img->width
-    movl    4(%rdi), %ecx           # input_img->height
+    movl    (%rdi), %edx            # input_img->width (32-bit)
+    movl    4(%rdi), %ecx           # input_img->height (32-bit)
 
     # Check if height <= 1 or width <= 0
     cmpq    $1, %rcx                # if height <= 1, no need to mirror
@@ -325,9 +324,9 @@ imgproc_mirror_v:
     jge     .done_mirror_v
 
     # Calculate mirrored_y = height - 1 - y
-    movl    %ecx, %r8               # r8 = height
-    decq    %r8                     # r8 = height - 1
-    subq    %rbx, %r8               # r8 = mirrored_y = height - 1 - y
+    movl    %ecx, %r8d              # r8d = height (32-bit)
+    decl    %r8d                    # r8d = height - 1
+    subl    %ebx, %r8d              # r8d = mirrored_y = height - 1 - y
 
     xorq    %rax, %rax              # Initialize column index (x = 0)
 
@@ -336,16 +335,16 @@ imgproc_mirror_v:
     jge     .next_row_v
 
     # Calculate the top pixel index: input_img->data[y * width + x]
-    movl    %rdx, %r9               # r9 = width
-    imulq   %rbx, %r9               # r9 = y * width
-    addq    %rax, %r9               # r9 = y * width + x
+    movl    %edx, %r9d              # r9d = width (32-bit)
+    imull   %ebx, %r9d              # r9d = y * width (32-bit multiplication)
+    addq    %rax, %r9               # r9 = y * width + x (64-bit result)
     movq    8(%rdi), %r10           # Load pointer to input_img->data
     movl    (%r10,%r9,4), %r11d     # Load the top pixel
 
     # Calculate the bottom pixel index: input_img->data[mirrored_y * width + x]
-    movl    %rdx, %r12              # r12 = width
-    imulq   %r8, %r12               # r12 = mirrored_y * width
-    addq    %rax, %r12              # r12 = mirrored_y * width + x
+    movl    %edx, %r12d             # r12d = width (32-bit)
+    imull   %r8d, %r12d             # r12d = mirrored_y * width (32-bit multiplication)
+    addq    %rax, %r12              # r12 = mirrored_y * width + x (64-bit result)
     movl    (%r10,%r12,4), %r13d    # Load the bottom pixel
 
     # Write the bottom pixel to the top and the top pixel to the bottom
