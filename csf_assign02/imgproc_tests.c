@@ -500,6 +500,7 @@ void test_determine_tile_x_offset(TestObjs *objs) {
   ASSERT(determine_tile_x_offset(large_width, 4, 3) == 750);  // Fourth tile starts at 750
 }
 
+
 void test_determine_tile_h(TestObjs *objs) {
   // Test 1: Basic case - height divisible by n
   ASSERT(determine_tile_w(objs->smiley->height, 2, 0) == 5); // First tile
