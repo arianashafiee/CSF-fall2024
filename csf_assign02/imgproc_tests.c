@@ -114,7 +114,8 @@ void test_get_b(TestObjs *objs);
 void test_get_a(TestObjs *objs);
 void test_make_pixel(TestObjs *objs);
 void test_to_grayscale(TestObjs *objs);
-void test_blend_components(TestObjs *objs);
+// void test_blend_components(TestObjs *objs);
+void test_blend_colors(TestObjs *objs);
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -145,7 +146,8 @@ int main( int argc, char **argv ) {
   TEST(test_get_a);
   TEST(test_make_pixel);
   TEST(test_to_grayscale);
-  TEST(test_blend_components);
+  // TEST(test_blend_components);
+  TEST(test_blend_colors);
 
   TEST_FINI();
 }
@@ -581,7 +583,7 @@ void test_copy_tile(TestObjs *objs) {
 
     // Copy the tile at row 0, column 0 into the expected output image
     copy_tile(expected_output, objs->smiley, 0, 0, 2);
-    
+
     // Now we manually create an expected result for this tile
     Picture expected_tile_0_0 = {
         TEST_COLORS,
@@ -628,7 +630,7 @@ void test_copy_tile(TestObjs *objs) {
     // Test 3: Case where n is larger than the image dimensions
     // n=10 for a 16x10 image means one large tile covering the entire image
     img_init(expected_output, objs->smiley->width, objs->smiley->height);
-    
+
     copy_tile(expected_output, objs->smiley, 0, 0, 10);
 
     // Expected output should match the entire smiley image
