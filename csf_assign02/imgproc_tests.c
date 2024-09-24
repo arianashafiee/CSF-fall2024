@@ -867,18 +867,12 @@ void test_to_grayscale(TestObjs *objs) {
   ASSERT(get_a(gray_pixel) == 128);
 }
 
-<<<<<<< HEAD
-void test_blend_components(TestObjs *objs) {
-  uint32_t overlay_color = objs->overlay->data[0];
-  uint32_t smiley_color = objs->smiley->data[0];
-=======
 void test_blend_components(TestObjs *objs)
 {
   // Test 1: Basic case
   uint32_t fg = make_pixel(100, 150, 200, 128); // r = 100, g = 150, b = 200, a = 128 (semi-transparent)
   uint32_t bg = make_pixel(50, 50, 50, 255); // r = 50, g = 50, b = 50, a = 255 (fully opaque background)
   uint32_t blended_pixel = blend_components(fg, bg, 128); // a = 128 (semi-transparent)
->>>>>>> 84b71eae37174de0cb4f1fdba5c6f504078e4b90
 
   uint32_t expected_r = (128 * 100 + (255 - 128) * 50) / 255; // Expected blended r component
   uint32_t expected_g = (128 * 150 + (255 - 128) * 50) / 255; // Expected blended g component
