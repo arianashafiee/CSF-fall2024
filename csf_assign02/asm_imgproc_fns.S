@@ -180,26 +180,46 @@ to_grayscale:
     pushq   %rbp
     movq    %rsp, %rbp
 
+    # Argument: pixel = %rdi (32-bit pixel in RGBA format)
+
+    # Call get_r to extract the red component
     call    get_r
-    movq    %rax, %rsi        
+    movq    %rax, %rsi            # Move red component to %rsi
+
+    # Call get_g to extract the green component
     call    get_g
-    movq    %rax, %rdx         
+    movq    %rax, %rdx            # Move green component to %rdx
+
+    # Call get_b to extract the blue component
     call    get_b
-    movq    %rax, %rcx         
+    movq    %rax, %rcx            # Move blue component to %rcx
 
-    movq    $77, %rax          
-    imulq   %rsi, %rax         
-    movq    $150, %rsi         
-    imulq   %rdx, %rsi         
-    addq    %rsi, %rax         
-    movq    $29, %rsi          
-    imulq   %rcx, %rsi         
-    addq    %rsi, %rax         
+    # Call get_a to extract the alpha component
+    call    get_a
+    movq    %rax, %rdi            # Move alpha component to %rdi (to preserve)
 
-    shrq    $8, %rax           
+    # Compute the grayscale value:
+    # y = (79 * r + 128 * g + 49 * b) / 256
+    movq    $79, %rax             # Load 79
+    imulq   %rsi, %rax            # Multiply 79 * red
+    movq    $128, %rsi            # Load 128
+    imulq   %rdx, %rsi            # Multiply 128 * green
+    addq    %rsi, %rax            # Add the result to (79 * red)
+    movq    $49, %rsi             # Load 49
+    imulq   %rcx, %rsi            # Multiply 49 * blue
+    addq    %rsi, %rax            # Add the result to (79 * red + 128 * green)
+    shrq    $8, %rax              # Divide by 256 (right shift by 8)
+
+    # Now we have grayscale value in %rax.
+    # Call make_pixel to create the grayscale pixel with the original alpha.
+    movq    %rax, %rsi            # Grayscale value for red
+    movq    %rax, %rdx            # Grayscale value for green
+    movq    %rax, %rcx            # Grayscale value for blue
+    call    make_pixel            # Make pixel (r = y, g = y, b = y, a = original alpha)
+
+    # Return the result (grayscale pixel with alpha)
     popq    %rbp
     ret
-
 
 
 /*
@@ -362,109 +382,58 @@ imgproc_tile:
  *   %rdi - pointer to original struct Image
  *   %rsi - pointer to output struct Image
  */
-    .globl imgproc_grayscale
+ .globl imgproc_grayscale
 imgproc_grayscale:
-    # Prologue - Set up stack frame
     pushq   %rbp
     movq    %rsp, %rbp
-    pushq   %rbx         # Save callee-saved registers
+    pushq   %rbx        
     pushq   %r12
     pushq   %r13
     pushq   %r14
     pushq   %r15
 
-    # Arguments:
-    # %rdi - input_img (pointer to struct Image)
-    # %rsi - output_img (pointer to struct Image)
+    movl    (%rdi), %edx           
+    movl    4(%rdi), %ecx         
 
-    # Load width and height of input image
-    movl    (%rdi), %edx            # Load input_img->width into %edx
-    movl    4(%rdi), %ecx           # Load input_img->height into %ecx
-
-    # Edge case: if width <= 0 or height <= 0, return early
     cmpq    $0, %rdx
     jle     .done
     cmpq    $0, %rcx
     jle     .done
 
-    # Set up outer loop (y loop - iterating over rows)
-    xorq    %rbx, %rbx              # Set y = 0
+    xorq    %rbx, %rbx              
 
 .outer_loop:
-    cmpq    %rbx, %rcx              # Check if y < height
-    jge     .done                   # If y >= height, we're done
+    cmpq    %rbx, %rcx              
+    jge     .done                 
 
-    # Set up inner loop (x loop - iterating over columns)
-    xorq    %rax, %rax              # Set x = 0
+    xorq    %rax, %rax             
 
 .inner_loop:
-    cmpq    %rax, %rdx              # Check if x < width
-    jge     .next_row               # If x >= width, go to the next row
+    cmpq    %rax, %rdx             
+    jge     .next_row             
 
-    # Calculate the index for input_img->data[y * width + x]
-    movl    %rdx, %r8d              # r8d = width
-    imulq   %rbx, %r8d              # r8d = y * width
-    addq    %rax, %r8d              # r8d = y * width + x
+    movl    %rdx, %r8d             
+    imulq   %rbx, %r8d             
+    addq    %rax, %r8d              
 
-    # Load the pixel from input_img->data[y * width + x]
-    movq    8(%rdi), %r9            # Load pointer to input_img->data into %r9
-    movl    (%r9,%r8,4), %r10d      # Load the pixel into %r10d
+    movq    8(%rdi), %r9            
+    movl    (%r9,%r8,4), %r10d      
 
-    # Call to_grayscale - Convert pixel to grayscale
-    # Grayscale formula: gray = (79 * r + 128 * g + 49 * b) / 256
+    movq    %r10d, %rdi             
+    call    to_grayscale           
+    movl    %eax, %r12d            
 
-    # Extract the red component (get_r)
-    movl    %r10d, %r11d            # Copy pixel to r11d
-    shrl    $24, %r11d              # Shift right 24 bits to extract red
-    movl    $79, %r12d              # Load 79 (grayscale weight for red)
-    imull   %r12d, %r11d            # Multiply red component by 79
+    movq    8(%rsi), %r15          
+    movl    %r12d, (%r15,%r8,4)     
 
-    # Extract the green component (get_g)
-    movl    %r10d, %r13d            # Copy pixel to r13d
-    shrl    $16, %r13d              # Shift right 16 bits to extract green
-    andl    $0xFF, %r13d            # Mask to get the green value
-    movl    $128, %r12d             # Load 128 (grayscale weight for green)
-    imull   %r12d, %r13d            # Multiply green component by 128
-
-    # Extract the blue component (get_b)
-    movl    %r10d, %r14d            # Copy pixel to r14d
-    shrl    $8, %r14d               # Shift right 8 bits to extract blue
-    andl    $0xFF, %r14d            # Mask to get the blue value
-    movl    $49, %r12d              # Load 49 (grayscale weight for blue)
-    imull   %r12d, %r14d            # Multiply blue component by 49
-
-    # Sum r, g, and b values
-    addl    %r11d, %r13d            # r13d = (79 * r) + (128 * g)
-    addl    %r14d, %r13d            # r13d = (79 * r) + (128 * g) + (49 * b)
-    shrl    $8, %r13d               # Divide by 256 to get the final grayscale value
-
-    # Extract the alpha component (get_a)
-    andl    $0xFF, %r10d            # Mask to get the alpha value
-
-    # Make the new grayscale pixel (make_pixel)
-    movl    %r13d, %r12d            # Copy grayscale value to r12d
-    shll    $8, %r12d               # Shift left 8 bits
-    orl     %r13d, %r12d            # Combine the grayscale value for the green
-    shll    $8, %r12d               # Shift left 8 bits
-    orl     %r13d, %r12d            # Combine the grayscale value for the blue
-    shll    $8, %r12d               # Shift left 8 bits
-    orl     %r10d, %r12d            # Combine the alpha value
-
-    # Store the grayscale pixel in the output image
-    movq    8(%rsi), %r15           # Load pointer to output_img->data into %r15
-    movl    %r12d, (%r15,%r8,4)     # Store the grayscale pixel
-
-    # Increment x and continue inner loop
     incq    %rax
     jmp     .inner_loop
 
 .next_row:
-    # Increment y and continue outer loop
     incq    %rbx
     jmp     .outer_loop
 
 .done:
-    # Epilogue - Restore callee-saved registers and return
     popq    %r15
     popq    %r14
     popq    %r13
