@@ -715,6 +715,7 @@ void test_get_r(TestObjs *objs) {
   // Test 7: Extract red component from a pixel in the smiley image
   uint32_t smiley_red_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'r' ? 4 : 0];  // First red pixel
   ASSERT(get_r(smiley_red_pixel) == 0xFF);  // Expected red component is 255 (0xFF)
+  
 
   // Test 8: Extract red component from a pixel in a smaller custom image
   Picture custom_picture = {
