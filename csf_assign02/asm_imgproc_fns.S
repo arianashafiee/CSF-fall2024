@@ -31,8 +31,48 @@
  */
 	.globl imgproc_mirror_h
 imgproc_mirror_h:
-	/* TODO: implement */
-	ret
+    pushq %rbp
+    movq %rsp, %rbp
+
+    movq 8(%rdi), %r8  # input_img->data
+    movq 8(%rsi), %r9  # output_img->data
+    movl (%rdi), %r10d # input_img->width
+    movl 4(%rdi), %r11d # input_img->height
+
+    xorq %r12, %r12    # r12 = y (row index)
+
+mirror_h_outer_loop:
+    cmpq %r12, %r11    # if y >= height, exit
+    jge mirror_h_done
+
+    xorq %r13, %r13    # r13 = x (column index)
+
+mirror_h_inner_loop:
+    cmpq %r13, %r10    # if x >= width / 2, next row
+    jge mirror_h_next_row
+
+    # Calculate indices for the swap
+    movq %r13, %rax    # rax = x
+    movq %r10, %rbx    # rbx = width - 1 - x
+    subq %r13, %rbx
+
+    # Swap pixels
+    movl (%r8, %rax, 4), %eax
+    movl (%r8, %rbx, 4), %edx
+    movl %edx, (%r9, %rax, 4)
+    movl %eax, (%r9, %rbx, 4)
+
+    incq %r13          # x++
+    jmp mirror_h_inner_loop
+
+mirror_h_next_row:
+    incq %r12          # y++
+    jmp mirror_h_outer_loop
+
+mirror_h_done:
+    popq %rbp
+    ret
+
 
 /*
  * void imgproc_mirror_v( struct Image *input_img, struct Image *output_img );
@@ -46,8 +86,42 @@ imgproc_mirror_h:
  */
 	.globl imgproc_mirror_v
 imgproc_mirror_v:
-	/* TODO: implement */
-	ret
+    pushq %rbp
+    movq %rsp, %rbp
+
+    movq 8(%rdi), %r8  # input_img->data
+    movq 8(%rsi), %r9  # output_img->data
+    movl (%rdi), %r10d # input_img->width
+    movl 4(%rdi), %r11d # input_img->height
+
+    xorq %r12, %r12    # r12 = y (row index)
+
+mirror_v_outer_loop:
+    cmpq %r12, %r11    # if y >= height / 2, exit
+    jge mirror_v_done
+
+    movq %r11, %rax    # rax = height - 1 - y
+    subq %r12, %rax
+
+mirror_v_inner_loop:
+    xorq %r13, %r13    # r13 = x (column index)
+    cmpq %r13, %r10    # if x >= width, next row
+    jge mirror_v_next_row
+
+    # Swap pixels
+    movl (%r8, %r12, 4), %eax
+    movl (%r8, %rax, 4), %edx
+    movl %edx, (%r9, %r12, 4)
+    movl %eax, (%r9, %rax, 4)
+
+mirror_v_next_row:
+    incq %r12          # y++
+    jmp mirror_v_inner_loop
+
+mirror_v_done:
+    popq %rbp
+    ret
+
 
 /*
  * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
@@ -85,8 +159,37 @@ imgproc_tile:
  */
 	.globl imgproc_grayscale
 imgproc_grayscale:
-	/* TODO: implement */
-	ret
+    pushq %rbp
+    movq %rsp, %rbp
+
+    movq 8(%rdi), %r8  # input_img->data
+    movq 8(%rsi), %r9  # output_img->data
+    movl (%rdi), %r10d # input_img->width
+    movl 4(%rdi), %r11d # input_img->height
+
+    xorq %r12, %r12    # r12 = y (row index)
+
+grayscale_outer_loop:
+    cmpq %r12, %r11    # if y >= height, exit
+    jge grayscale_done
+
+    xorq %r13, %r13    # r13 = x (column index)
+
+grayscale_inner_loop:
+    cmpq %r13, %r10    # if x >= width, next row
+    jge grayscale_next_row
+
+    # Get pixel at current index
+    movl (%r8, %r13, 4), %eax
+
+    # Extract components (r = %al, g = %ah, b = byte in %rax[16:24])
+    shrq $24, %eax     # Get red
+    andl $0xFF, %eax   # Red
+    addl %eax
+
+grayscale_done:
+    popq %rbp
+    ret
 
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
