@@ -403,8 +403,7 @@ void test_composite_basic( TestObjs *objs ) {
   ASSERT( 0x000080FF == objs->smiley_out->data[87] );
 }
 
-void test_all_tiles_nonempty(TestObjs *objs)
-{
+void test_all_tiles_nonempty(TestObjs *objs) {
   // Test 1: Basic case - perfectly divisible dimensions
   ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 2) == 1); // Should return true (1)
 
@@ -433,8 +432,7 @@ void test_all_tiles_nonempty(TestObjs *objs)
   ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 20) == 1); // Should return true (1)
 }
 
-void test_determine_tile_w(TestObjs *objs)
-{
+void test_determine_tile_w(TestObjs *objs) {
   // Test 1: Basic case - width divisible by n
   ASSERT(determine_tile_w(objs->smiley->width, 2, 0) == 8); // First tile
   ASSERT(determine_tile_w(objs->smiley->width, 2, 1) == 8); // Second tile
@@ -461,10 +459,15 @@ void test_determine_tile_w(TestObjs *objs)
   ASSERT(determine_tile_w(objs->smiley->width, 20, 1) == 1); // Second tile gets the excess
   ASSERT(determine_tile_w(objs->smiley->width, 20, 2) == 1); // Third tile
   ASSERT(determine_tile_w(objs->smiley->width, 20, 19) == 0); // Last tile gets nothing
+
+  // Test 8: Case with a very large width image
+  int large_width = 1000;
+  ASSERT(determine_tile_w(large_width, 4, 0) == 250);  // Each tile is 250 pixels wide
+  ASSERT(determine_tile_w(large_width, 4, 3) == 250);  // Last tile is also 250 pixels wide
+
 }
 
-void test_determine_tile_x_offset(TestObjs *objs)
-{
+void test_determine_tile_x_offset(TestObjs *objs) {
   // Test 1: Basic case - width divisible by n
   ASSERT(determine_tile_x_offset(objs->smiley->width, 2, 0) == 0); // First tile (offset 0)
   ASSERT(determine_tile_x_offset(objs->smiley->width, 2, 2) == 8); // Second tile (offset 8)
@@ -492,10 +495,16 @@ void test_determine_tile_x_offset(TestObjs *objs)
   ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 1) == 1); // Second tile, offset 1
   ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 2) == 2); // Third tile, offset 2
   ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 19) == 10); // Last tile, offset 10
+
+  // Test 8: Case with a large image width (1000 pixels) and n=4 for tiling
+  int large_width = 1000;
+  ASSERT(determine_tile_x_offset(large_width, 4, 0) == 0);    // First tile starts at 0
+  ASSERT(determine_tile_x_offset(large_width, 4, 1) == 250);  // Second tile starts at 250
+  ASSERT(determine_tile_x_offset(large_width, 4, 2) == 500);  // Third tile starts at 500
+  ASSERT(determine_tile_x_offset(large_width, 4, 3) == 750);  // Fourth tile starts at 750
 }
 
-void test_determine_tile_h(TestObjs *objs)
-{
+void test_determine_tile_h(TestObjs *objs) {
   // Test 1: Basic case - height divisible by n
   ASSERT(determine_tile_w(objs->smiley->height, 2, 0) == 5); // First tile
   ASSERT(determine_tile_w(objs->smiley->height, 2, 1) == 5); // Second tile
@@ -522,10 +531,12 @@ void test_determine_tile_h(TestObjs *objs)
   ASSERT(determine_tile_w(objs->smiley->height, 20, 1) == 1); // Second tile gets the excess
   ASSERT(determine_tile_w(objs->smiley->height, 20, 2) == 1); // Third tile
   ASSERT(determine_tile_w(objs->smiley->height, 20, 19) == 0); // Last tile gets nothing
+  int large_height = 1000;
+  ASSERT(determine_tile_h(large_height, 4, 0) == 250);  // First tile
+  ASSERT(determine_tile_h(large_height, 4, 3) == 250);  // Last tile
 }
 
-void test_determine_tile_y_offset(TestObjs *objs)
-{
+void test_determine_tile_y_offset(TestObjs *objs) {
   // Test 1: Basic case - height divisible by n
   ASSERT(determine_tile_x_offset(objs->smiley->height, 2, 0) == 0); // First tile (offset 0)
   ASSERT(determine_tile_x_offset(objs->smiley->height, 2, 2) == 5); // Second tile (offset 8)
@@ -553,19 +564,128 @@ void test_determine_tile_y_offset(TestObjs *objs)
   ASSERT(determine_tile_x_offset(objs->smiley->height, 20, 1) == 1);  // Second tile, offset 1
   ASSERT(determine_tile_x_offset(objs->smiley->height, 20, 2) == 2);  // Third tile, offset 2
   ASSERT(determine_tile_x_offset(objs->smiley->height, 20, 19) == 10); // Last tile, offset 10
+
+  // Test 8: Case with a large image height (1000 pixels) and n=4 for tiling
+  int large_height = 1000;
+  ASSERT(determine_tile_y_offset(large_height, 4, 0) == 0);    // First tile starts at 0
+  ASSERT(determine_tile_y_offset(large_height, 4, 1) == 250);  // Second tile starts at 250
+  ASSERT(determine_tile_y_offset(large_height, 4, 2) == 500);  // Third tile starts at 500
+  ASSERT(determine_tile_y_offset(large_height, 4, 3) == 750);  // Fourth tile starts at 750
 }
 
-void test_copy_tile(TestObjs *objs)
-{
-  copy_tile(objs->smiley_out, objs->smiley, 0, 0, 2);
-  ASSERT(objs->smiley_out->data[0] == objs->smiley->data[0]);
-  ASSERT(objs->smiley_out->data[1] == objs->smiley->data[2 * 2]);
+void test_copy_tile(TestObjs *objs) {
+    // Test 1: Standard case with n=2
+    // We expect the tiles to be copied correctly with 2x2 tiling
+    struct Image *expected_output = (struct Image *)malloc(sizeof(struct Image));
+    img_init(expected_output, objs->smiley->width, objs->smiley->height);
 
-  cleanup(objs);
+    // Copy the tile at row 0, column 0 into the expected output image
+    copy_tile(expected_output, objs->smiley, 0, 0, 2);
+    
+    // Now we manually create an expected result for this tile
+    Picture expected_tile_0_0 = {
+        TEST_COLORS,
+        8, 5,  // Tile dimensions
+        "    mrrr"
+        "   c    "
+        "  r   r "
+        " b      "
+        " b      "
+    };
+    struct Image *expected_tile_image = picture_to_img(&expected_tile_0_0);
+
+    // Compare the expected output and the tile copied from the original image
+    ASSERT(images_equal(expected_output, expected_tile_image));
+
+    // Clean up memory
+    destroy_img(expected_output);
+    destroy_img(expected_tile_image);
+
+    // Test 2: Case where n=3 (3x3 tiling)
+    // We expect the tiles to be copied correctly into a 3x3 grid
+    img_init(expected_output, objs->smiley->width, objs->smiley->height);
+
+    // Copy the tile at row 1, column 1 (second tile down and right) into the expected output
+    copy_tile(expected_output, objs->smiley, 1, 1, 3);
+
+    // Now we manually create an expected result for this tile
+    Picture expected_tile_1_1 = {
+        TEST_COLORS,
+        5, 3,  // Tile dimensions
+        "  c  "
+        " b   "
+        " r   "
+    };
+    expected_tile_image = picture_to_img(&expected_tile_1_1);
+
+    // Compare the expected output and the tile copied from the original image
+    ASSERT(images_equal(expected_output, expected_tile_image));
+
+    // Clean up memory
+    destroy_img(expected_output);
+    destroy_img(expected_tile_image);
+
+    // Test 3: Case where n is larger than the image dimensions
+    // n=10 for a 16x10 image means one large tile covering the entire image
+    img_init(expected_output, objs->smiley->width, objs->smiley->height);
+    
+    copy_tile(expected_output, objs->smiley, 0, 0, 10);
+
+    // Expected output should match the entire smiley image
+    ASSERT(images_equal(expected_output, objs->smiley));
+
+    // Clean up memory
+    destroy_img(expected_output);
+
+    // Test 4: Case with smaller image (5x5) and n=2
+    // Create a smaller image and tile from it
+    Picture small_picture = {
+        TEST_COLORS,
+        5, 5,  // Small image
+        "r    "
+        " g g "
+        "  b  "
+        " g g "
+        "    r"
+    };
+    struct Image *small_img = picture_to_img(&small_picture);
+    struct Image *small_out = (struct Image *)malloc(sizeof(struct Image));
+    img_init(small_out, small_img->width, small_img->height);
+
+    // Copy the first tile from this smaller image
+    copy_tile(small_out, small_img, 0, 0, 2);
+
+    // Manually construct the expected tile
+    Picture expected_small_tile = {
+        TEST_COLORS,
+        3, 3,  // Tile size with remainder
+        "r  "
+        " g "
+        "  b"
+    };
+    expected_tile_image = picture_to_img(&expected_small_tile);
+
+    // Compare the expected tile with the result of the tile copy
+    ASSERT(images_equal(small_out, expected_tile_image));
+
+    // Clean up memory
+    destroy_img(small_img);
+    destroy_img(small_out);
+    destroy_img(expected_tile_image);
+
+    // Test 5: Edge case with invalid parameters (n=0)
+    // We expect no tiles to be copied in this invalid scenario
+    img_init(expected_output, objs->smiley->width, objs->smiley->height);
+
+    copy_tile(expected_output, objs->smiley, 0, 0, 0);  // Invalid n, expect no change
+    ASSERT(images_equal(expected_output, objs->smiley_out));  // Expecting the output to remain empty
+
+    // Clean up memory
+    destroy_img(expected_output);
 }
 
-void test_get_r(TestObjs *objs)
-{
+
+void test_get_r(TestObjs *objs) {
   // Test 1: Basic case, arbitrary red value
   uint32_t pixel = 0x7F000000; // Red component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
@@ -591,8 +711,7 @@ void test_get_r(TestObjs *objs)
   ASSERT(get_r(pixel) == 64);
 }
 
-void test_get_g(TestObjs *objs)
-{
+void test_get_g(TestObjs *objs) {
   // Test 1: Basic case, arbitrary green value
   uint32_t pixel = 0x007F0000; // Green component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
@@ -618,8 +737,7 @@ void test_get_g(TestObjs *objs)
   ASSERT(get_r(pixel) == 64);
 }
 
-void test_get_b(TestObjs *objs)
-{
+void test_get_b(TestObjs *objs) {
   // Test 1: Basic case, arbitrary blue value
   uint32_t pixel = 0x00007F00; // Blue component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
@@ -645,8 +763,7 @@ void test_get_b(TestObjs *objs)
   ASSERT(get_r(pixel) == 64);
 }
 
-void test_get_a(TestObjs *objs)
-{
+void test_get_a(TestObjs *objs) {
   // Test 1: Basic case, arbitrary alpha value
   uint32_t pixel = 0x0000007F; // Alpha component = 127 (0x7F), other components = 0
   ASSERT(get_r(pixel) == 127);
@@ -664,8 +781,7 @@ void test_get_a(TestObjs *objs)
   ASSERT(get_r(pixel) == 127);
 }
 
-void test_make_pixel(TestObjs *objs)
-{
+void test_make_pixel(TestObjs *objs) {
   // Test 1: Basic case, arbitrary values for red, green, blue, and alpha
   uint32_t pixel = make_pixel(127, 63, 255, 128); // r = 127, g = 63, b = 255, a = 128
   ASSERT(pixel == 0x7F3FFF80);                    // Expected pixel value: 0x7F3FFF80
@@ -695,8 +811,7 @@ void test_make_pixel(TestObjs *objs)
   ASSERT(pixel == 0x000000FF);      // Expected pixel value: 0x000000FF
 }
 
-void test_to_grayscale(TestObjs *objs)
-{
+void test_to_grayscale(TestObjs *objs) {
   // Test 1: Basic case, arbitrary color pixel
   uint32_t pixel = make_pixel(100, 150, 200, 128); // r = 100, g = 150, b = 200, a = 128
   uint32_t gray_pixel = to_grayscale(pixel);
