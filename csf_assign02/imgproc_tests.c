@@ -713,7 +713,7 @@ void test_get_r(TestObjs *objs) {
   ASSERT(get_r(pixel) == 64);
 
   // Test 7: Extract red component from a pixel in the smiley image
-  uint32_t smiley_red_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'r' ? 4 : 0];  // First red pixel
+  uint32_t smiley_red_pixel = objs->smiley->data[objs->smiley_pic.data[5] == 'r' ? 5 : 0];  // First red pixel
   ASSERT(get_r(smiley_red_pixel) == 0xFF);  // Expected red component is 255 (0xFF)
 
 
@@ -758,7 +758,7 @@ void test_get_g(TestObjs *objs) {
   ASSERT(get_g(pixel) == 64);
 
   // Test 7: Extract green component from a pixel in the smiley image
-  uint32_t smiley_green_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'g' ? 4 : 0];  // First green pixel
+  uint32_t smiley_green_pixel = objs->smiley->data[objs->smiley_pic.data[8] == 'g' ? 8 : 0];  // First green pixel
   ASSERT(get_g(smiley_green_pixel) == 0xFF);  // Expected green component is 255 (0xFF)
 
   // Test 8: Extract green component from a pixel in a smaller custom image
@@ -803,7 +803,7 @@ void test_get_b(TestObjs *objs) {
   ASSERT(get_b(pixel) == 64);
 
   // Test 7: Extract blue component from a pixel in the smiley image
-  uint32_t smiley_blue_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'b' ? 4 : 0];  // First blue pixel
+  uint32_t smiley_blue_pixel = objs->smiley->data[objs->smiley_pic.data[10] == 'b' ? 10 : 0];  // First blue pixel
   ASSERT(get_b(smiley_blue_pixel) == 0xFF);  // Expected blue component is 255 (0xFF)
 
   // Test 8: Extract blue component from a pixel in a smaller custom image
