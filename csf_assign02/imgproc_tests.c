@@ -755,6 +755,25 @@ void test_get_g(TestObjs *objs) {
   // Test 6: Fully opaque pixel (alpha = 255), green component = 64
   pixel = 0x004000FF; // Green component = 64, fully opaque (alpha = 255)
   ASSERT(get_r(pixel) == 64);
+
+  // Test 7: Extract green component from a pixel in the smiley image
+  uint32_t smiley_green_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'g' ? 4 : 0];  // First green pixel
+  ASSERT(get_g(smiley_green_pixel) == 0xFF);  // Expected green component is 255 (0xFF)
+
+  // Test 8: Extract green component from a pixel in a smaller custom image
+  Picture custom_picture = {
+      TEST_COLORS,
+      3, 3,
+      "r  "
+      " g "
+      "  b"
+    };
+  struct Image *custom_img = picture_to_img(&custom_picture);
+  uint32_t custom_green_pixel = custom_img->data[4];  // This should be the green pixel in the center
+  ASSERT(get_g(custom_green_pixel) == 0xFF);  // The green component should be 0xFF
+
+  // Clean up memory
+  destroy_img(custom_img);
 }
 
 void test_get_b(TestObjs *objs) {
