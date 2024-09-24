@@ -578,14 +578,6 @@ void test_copy_tile(TestObjs *objs) {
     img_init(actual_tile_image, objs->smiley->width, objs->smiley->height);
     copy_tile(actual_tile_image, objs->smiley, 0, 0, 2);
 
-    // Compare the copied tiles
-    if (!images_equal(expected_output, actual_tile_image)) {
-        printf("Tile copy failed: expected image doesn't match actual output.\n");
-        printf("Expected:\n");
-        print_image(expected_output);
-        printf("Actual:\n");
-        print_image(actual_tile_image);
-    }
     ASSERT(images_equal(expected_output, actual_tile_image));
 
     // Clean up memory
@@ -602,14 +594,6 @@ void test_copy_tile(TestObjs *objs) {
     img_init(actual_tile_image, objs->smiley->width, objs->smiley->height);
     copy_tile(actual_tile_image, objs->smiley, 1, 1, 3);
 
-    // Compare the copied tiles
-    if (!images_equal(expected_output, actual_tile_image)) {
-        printf("Tile copy failed for n=3 at row 1, col 1.\n");
-        printf("Expected:\n");
-        print_image(expected_output);
-        printf("Actual:\n");
-        print_image(actual_tile_image);
-    }
     ASSERT(images_equal(expected_output, actual_tile_image));
 
     // Clean up memory
