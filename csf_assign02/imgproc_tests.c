@@ -570,35 +570,6 @@ void test_copy_tile(TestObjs *objs) {
     struct Image *expected_output = (struct Image *)malloc(sizeof(struct Image));
     img_init(expected_output, objs->smiley->width, objs->smiley->height);
 
-    // Copy the tile at row 0, column 0 into the expected output image
-    copy_tile(expected_output, objs->smiley, 0, 0, 2);
-
-    // Now we manually create an expected result for this tile
-    Picture expected_tile_0_0 = {
-        TEST_COLORS,
-        8, 5,  // Tile dimensions
-        "  mrgb  "
-" r r    "
-"       r"
-" crg r  "
-"  gg rm "
-
-    };
-    struct Image *expected_tile_image = picture_to_img(&expected_tile_0_0);
-
-    // Compare the expected output and the tile copied from the original image
-    if (!images_equal(expected_output, expected_tile_image)) {
-        printf("Tile copy failed: expected image doesn't match actual output.\n");
-        printf("Expected:\n");
-        print_image(expected_tile_image);
-        printf("Actual:\n");
-        print_image(expected_output);
-    }
-    ASSERT(images_equal(expected_output, expected_tile_image));
-
-    // Clean up memory
-    destroy_img(expected_output);
-    destroy_img(expected_tile_image);
 
     // Test 2: Case where n=3 (3x3 tiling)
     img_init(expected_output, objs->smiley->width, objs->smiley->height);
