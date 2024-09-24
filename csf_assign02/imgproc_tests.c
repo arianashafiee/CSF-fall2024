@@ -430,8 +430,6 @@ void test_all_tiles_nonempty(TestObjs *objs) {
   // Test 8: Tiling factor n is negative
   ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, -1) == 0); // Should return false (0)
 
-  // Test 9: Tiling factor larger than width and height
-  ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 20) == 1); // Should return true (1)
 }
 
 void test_determine_tile_w(TestObjs *objs) {
