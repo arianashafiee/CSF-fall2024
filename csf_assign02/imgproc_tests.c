@@ -709,6 +709,24 @@ void test_get_r(TestObjs *objs) {
   // Test 6: Fully opaque pixel (alpha = 255), red component = 64
   pixel = 0x400000FF; // Red component = 64, fully opaque (alpha = 255)
   ASSERT(get_r(pixel) == 64);
+
+  // Test 7: Extract red component from a pixel in the smiley image
+  uint32_t smiley_red_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'r' ? 4 : 0];  // First red pixel
+  ASSERT(get_r(smiley_red_pixel) == 0xFF);  // Expected red component is 255 (0xFF)
+
+  // Test 8: Extract red component from a pixel in a smaller custom image
+  Picture custom_picture = {
+    TEST_COLORS,
+    3, 3,
+    "r  "
+    " g "
+    "  b"
+  };
+  struct Image *custom_img = picture_to_img(&custom_picture);
+  uint32_t custom_red_pixel = custom_img->data[0];  // This should be the red pixel
+  ASSERT(get_r(custom_red_pixel) == 0xFF);  // The red component should be 0xFF
+  // Clean up memory
+  destroy_img(custom_img);
 }
 
 void test_get_g(TestObjs *objs) {
