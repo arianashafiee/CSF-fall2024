@@ -114,7 +114,7 @@ void test_get_b(TestObjs *objs);
 void test_get_a(TestObjs *objs);
 void test_make_pixel(TestObjs *objs);
 void test_to_grayscale(TestObjs *objs);
-// void test_blend_components(TestObjs *objs);
+void test_blend_components(TestObjs *objs);
 void test_blend_colors(TestObjs *objs);
 
 int main( int argc, char **argv ) {
@@ -146,7 +146,7 @@ int main( int argc, char **argv ) {
   TEST(test_get_a);
   TEST(test_make_pixel);
   TEST(test_to_grayscale);
-  // TEST(test_blend_components);
+  TEST(test_blend_components);
   TEST(test_blend_colors);
 
   TEST_FINI();
@@ -923,6 +923,67 @@ void test_to_grayscale(TestObjs *objs) {
   ASSERT(get_g(gray_pixel) == expected_y);
   ASSERT(get_b(gray_pixel) == expected_y);
   ASSERT(get_a(gray_pixel) == 128);
+}
+
+void test_blend_colors(TestObjs *objs) {
+  // Test 1: Basic cases
+  uint32_t fg = make_pixel(100, 150, 200, 128); // r = 100, g = 150, b = 200, a = 128 (semi-transparent)
+  uint32_t bg = make_pixel(50, 50, 50, 255);    // r = 50, g = 50, b = 50, a = 255 (fully opaque background)
+  uint32_t blended_r = blend_components(get_r(fg), get_r(bg), get_a(fg)); // Blend r component
+  uint32_t blended_g = blend_components(get_g(fg), get_g(bg), get_a(fg)); // Blend g component
+  uint32_t blended_b = blend_components(get_b(fg), get_b(bg), get_a(fg)); // Blend b component
+
+  uint32_t expected_r = (128 * 100 + (255 - 128) * 50) / 255; // Expected blended r component
+  uint32_t expected_g = (128 * 150 + (255 - 128) * 50) / 255; // Expected blended g component
+  uint32_t expected_b = (128 * 200 + (255 - 128) * 50) / 255; // Expected blended b component
+
+  ASSERT(blended_r == expected_r);
+  ASSERT(blended_g == expected_g);
+  ASSERT(blended_b == expected_b);
+
+  // Test 2: Edge cases, fully transparent foreground (a = 0)
+  fg = make_pixel(255, 255, 255, 0); // r = 255, g = 255, b = 255, a = 0 (fully transparent)
+  bg = make_pixel(50, 50, 50, 255);  // r = 50, g = 50, b = 50, a = 255
+  blended_r = blend_components(get_r(fg), get_r(bg), get_a(fg)); // Blend r component
+  blended_g = blend_components(get_g(fg), get_g(bg), get_a(fg)); // Blend g component
+  blended_b = blend_components(get_b(fg), get_b(bg), get_a(fg)); // Blend b component
+
+  ASSERT(blended_r == 50); // Should return the background color
+  ASSERT(blended_g == 50);
+  ASSERT(blended_b == 50);
+
+  // Test 3: Edge cases, fully opaque foreground (alpha = 255)
+  fg = make_pixel(255, 255, 255, 255); // r = 255, g = 0, b = 0, a = 255 (fully opaque)
+  bg = make_pixel(50, 50, 50, 255);    // r = 50, g = 50, b = 50, a = 255
+  blended_r = blend_components(get_r(fg), get_r(bg), get_a(fg)); // Blend r component
+  blended_g = blend_components(get_g(fg), get_g(bg), get_a(fg)); // Blend g component
+  blended_b = blend_components(get_b(fg), get_b(bg), get_a(fg)); // Blend b component
+
+  ASSERT(blended_r == 255); // Should return the foreground color
+  ASSERT(blended_g == 255);
+  ASSERT(blended_b == 255);
+
+  // Test 4: Extreme case, foreground and background components both 0
+  fg = make_pixel(0, 0, 0, 128); // r = 0, g = 0, b = 0, a = 128 (black foreground)
+  bg = make_pixel(0, 0, 0, 255); // r = 0, g = 0, b = 0, a = 255 (black background)
+  blended_r = blend_components(get_r(fg), get_r(bg), get_a(fg)); // Blend r component
+  blended_g = blend_components(get_g(fg), get_g(bg), get_a(fg)); // Blend g component
+  blended_b = blend_components(get_b(fg), get_b(bg), get_a(fg)); // Blend b component
+
+  ASSERT(blended_r == 0); // Black blended with black should yield black
+  ASSERT(blended_g == 0);
+  ASSERT(blended_b == 0);
+
+  // Test 5: Extreme case, foreground and background components both 255
+  fg = make_pixel(255, 255, 255, 128); // r = 255, g = 255, b = 255, a = 128 (white foreground)
+  bg = make_pixel(255, 255, 255, 255); // r = 255, g = 255, b = 255, a = 255 (white background)
+  blended_r = blend_components(get_r(fg), get_r(bg), get_a(fg)); // Blend r component
+  blended_g = blend_components(get_g(fg), get_g(bg), get_a(fg)); // Blend g component
+  blended_b = blend_components(get_b(fg), get_b(bg), get_a(fg)); // Blend b component
+
+  ASSERT(blended_r == 255); // White blended with white should yield white
+  ASSERT(blended_g == 255);
+  ASSERT(blended_b == 255);
 }
 
 void test_blend_colors(TestObjs *objs) {
