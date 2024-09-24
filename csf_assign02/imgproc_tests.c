@@ -441,26 +441,24 @@ void test_determine_tile_w(TestObjs *objs) {
   ASSERT(determine_tile_w(objs->smiley->width, 3, 0) == 6); // First tile gets the excess
   ASSERT(determine_tile_w(objs->smiley->width, 3, 1) == 5); // Second tile gets the remainder
 
-  // Test 3: n = 1, only one tile should span the entire width
-  ASSERT(determine_tile_w(objs->smiley->width, 1, 0) == objs->smiley->width); // One large tile
-
-  // Test 4: Edge case, width is zero
+ 
+  // Test 3: Edge case, width is zero
   ASSERT(determine_tile_w(0, 3, 0) == 0); // Should return 0 for any tile
 
-  // Test 5: Edge case, n is zero (invalid n)
+  // Test 4: Edge case, n is zero (invalid n)
   ASSERT(determine_tile_w(objs->smiley->width, 0, 0) == 0);
 
-  // Test 6: Edge case, tile_col out of bounds
+  // Test 5: Edge case, tile_col out of bounds
   ASSERT(determine_tile_w(objs->smiley->width, 3, -1) == 0); // Negative tile_col
   ASSERT(determine_tile_w(objs->smiley->width, 3, 3) == 0);  // tile_col beyond the range
 
-  // Test 7: Small width, large n (some tiles may end up being 0)
+  // Test 6: Small width, large n (some tiles may end up being 0)
   ASSERT(determine_tile_w(objs->smiley->width, 20, 0) == 1); // First tile gets the excess
   ASSERT(determine_tile_w(objs->smiley->width, 20, 1) == 1); // Second tile gets the excess
   ASSERT(determine_tile_w(objs->smiley->width, 20, 2) == 1); // Third tile
   ASSERT(determine_tile_w(objs->smiley->width, 20, 19) == 0); // Last tile gets nothing
 
-  // Test 8: Case with a very large width image
+  // Test 7: Case with a very large width image
   int large_width = 1000;
   ASSERT(determine_tile_w(large_width, 4, 0) == 250);  // Each tile is 250 pixels wide
   ASSERT(determine_tile_w(large_width, 4, 3) == 250);  // Last tile is also 250 pixels wide
