@@ -228,62 +228,73 @@ to_grayscale:
 
 .globl imgproc_mirror_h
 imgproc_mirror_h:
+    # Prologue
     pushq   %rbp
     movq    %rsp, %rbp
-    pushq   %rbx
+    pushq   %rbx                    # Save callee-saved registers
 
-    movl    (%rdi), %edx
-    movl    4(%rdi), %ecx
+    # Load input image width and height
+    movl    (%rdi), %edx            # input_img->width
+    movl    4(%rdi), %ecx           # input_img->height
 
-    cmpq    $1, %rdx
+    # Check if width <= 1 or height <= 0
+    cmpq    $1, %rdx                # if width <= 1, exit (no mirroring necessary)
     jle     .done_mirror_h
-    cmpq    $0, %rcx
+    cmpq    $0, %rcx                # if height <= 0, exit
     jle     .done_mirror_h
 
-    xorq    %rbx, %rbx
+    xorq    %rbx, %rbx              # Initialize row index y = 0
 
 .loop_rows_h:
-    cmpq    %rbx, %rcx
+    cmpq    %rbx, %rcx              # if y >= height, exit loop
     jge     .done_mirror_h
 
-    movl    %edx, %r8d
-    shrq    $1, %r8d
-    xorq    %rax, %rax
+    movl    %edx, %r8               # r8 = width
+    shrq    $1, %r8                 # r8 = width / 2 (for mirrored columns)
+    xorq    %rax, %rax              # Initialize column index x = 0
 
 .loop_columns_h:
-    cmpq    %rax, %r8
+    cmpq    %rax, %r8               # if x >= width / 2, exit column loop
     jge     .next_row_h
 
-    movl    %edx, %r9d
-    decq    %r9d
-    subq    %rax, %r9d
+    # Calculate mirrored_x = width - 1 - x
+    movl    %edx, %r9               # r9 = width
+    decq    %r9                     # r9 = width - 1
+    subq    %rax, %r9               # mirrored_x = width - 1 - x
 
-    movl    %edx, %r10d
-    imulq   %rbx, %r10d
-    addq    %rax, %r10d
-    movq    8(%rdi), %r11
-    movl    (%r11,%r10,4), %r12d
+    # Calculate the left pixel index: input_img->data[y * width + x]
+    movl    %edx, %r10              # r10 = width
+    imulq   %rbx, %r10              # r10 = y * width
+    addq    %rax, %r10              # r10 = y * width + x
+    movq    8(%rdi), %r11           # Load pointer to input_img->data
+    movl    (%r11,%r10,4), %r12d    # Load the left pixel
 
-    movl    %edx, %r13d
-    imulq   %rbx, %r13d
-    addq    %r9, %r13d
-    movl    (%r11,%r13,4), %r14d
+    # Calculate the right pixel index: input_img->data[y * width + mirrored_x]
+    movl    %edx, %r13              # r13 = width
+    imulq   %rbx, %r13              # r13 = y * width
+    addq    %r9, %r13               # r13 = y * width + mirrored_x
+    movl    (%r11,%r13,4), %r14d    # Load the right pixel
 
-    movq    8(%rsi), %r15
-    movl    %r14d, (%r15,%r10,4)
-    movl    %r12d, (%r15,%r13,4)
+    # Write the right pixel to the left side and left pixel to the right side
+    movq    8(%rsi), %r15           # Load pointer to output_img->data
+    movl    %r14d, (%r15,%r10,4)    # output_img->data[y * width + x] = right_pixel
+    movl    %r12d, (%r15,%r13,4)    # output_img->data[y * width + mirrored_x] = left_pixel
 
+    # Increment column index x
     incq    %rax
     jmp     .loop_columns_h
 
 .next_row_h:
+    # Increment row index y
     incq    %rbx
     jmp     .loop_rows_h
 
 .done_mirror_h:
-    popq    %rbx
-    popq    %rbp
+    # Epilogue
+    popq    %rbx                    # Restore callee-saved registers
+    popq    %rbp                    # Restore base pointer
     ret
+
 
 
 /*
@@ -292,59 +303,69 @@ imgproc_mirror_h:
 
 .globl imgproc_mirror_v
 imgproc_mirror_v:
+    # Prologue
     pushq   %rbp
     movq    %rsp, %rbp
-    pushq   %rbx
+    pushq   %rbx                    # Save callee-saved register
 
-    movl    (%rdi), %edx
-    movl    4(%rdi), %ecx
+    # Load input image width and height
+    movl    (%rdi), %edx            # input_img->width
+    movl    4(%rdi), %ecx           # input_img->height
 
-    cmpq    $1, %rcx
+    # Check if height <= 1 or width <= 0
+    cmpq    $1, %rcx                # if height <= 1, no need to mirror
     jle     .done_mirror_v
-    cmpq    $0, %rdx
+    cmpq    $0, %rdx                # if width <= 0, no need to mirror
     jle     .done_mirror_v
 
-    xorq    %rbx, %rbx
+    xorq    %rbx, %rbx              # Initialize row index (y = 0)
 
 .loop_rows_v:
-    cmpq    %rbx, %rcx
+    cmpq    %rbx, %rcx              # if y >= height / 2, exit loop
     jge     .done_mirror_v
 
-    movl    %ecx, %r8d
-    decq    %r8d
-    subq    %rbx, %r8d
+    # Calculate mirrored_y = height - 1 - y
+    movl    %ecx, %r8               # r8 = height
+    decq    %r8                     # r8 = height - 1
+    subq    %rbx, %r8               # r8 = mirrored_y = height - 1 - y
 
-    xorq    %rax, %rax
+    xorq    %rax, %rax              # Initialize column index (x = 0)
 
 .loop_columns_v:
-    cmpq    %rax, %rdx
+    cmpq    %rax, %rdx              # if x >= width, exit column loop
     jge     .next_row_v
 
-    movl    %rdx, %r9d
-    imulq   %rbx, %r9d
-    addq    %rax, %r9d
-    movq    8(%rdi), %r10
-    movl    (%r10,%r9,4), %r11d
+    # Calculate the top pixel index: input_img->data[y * width + x]
+    movl    %rdx, %r9               # r9 = width
+    imulq   %rbx, %r9               # r9 = y * width
+    addq    %rax, %r9               # r9 = y * width + x
+    movq    8(%rdi), %r10           # Load pointer to input_img->data
+    movl    (%r10,%r9,4), %r11d     # Load the top pixel
 
-    movl    %rdx, %r12d
-    imulq   %r8d, %r12d
-    addq    %rax, %r12d
-    movl    (%r10,%r12,4), %r13d
+    # Calculate the bottom pixel index: input_img->data[mirrored_y * width + x]
+    movl    %rdx, %r12              # r12 = width
+    imulq   %r8, %r12               # r12 = mirrored_y * width
+    addq    %rax, %r12              # r12 = mirrored_y * width + x
+    movl    (%r10,%r12,4), %r13d    # Load the bottom pixel
 
-    movq    8(%rsi), %r14
-    movl    %r13d, (%r14,%r9,4)
-    movl    %r11d, (%r14,%r12,4)
+    # Write the bottom pixel to the top and the top pixel to the bottom
+    movq    8(%rsi), %r14           # Load pointer to output_img->data
+    movl    %r13d, (%r14,%r9,4)     # output_img->data[y * width + x] = bottom_pixel
+    movl    %r11d, (%r14,%r12,4)    # output_img->data[mirrored_y * width + x] = top_pixel
 
+    # Increment column index (x)
     incq    %rax
     jmp     .loop_columns_v
 
 .next_row_v:
+    # Increment row index (y)
     incq    %rbx
     jmp     .loop_rows_v
 
 .done_mirror_v:
-    popq    %rbx
-    popq    %rbp
+    # Epilogue
+    popq    %rbx                    # Restore callee-saved register
+    popq    %rbp                    # Restore base pointer
     ret
 
 
@@ -382,58 +403,68 @@ imgproc_tile:
  *   %rdi - pointer to original struct Image
  *   %rsi - pointer to output struct Image
  */
- .globl imgproc_grayscale
+.globl imgproc_grayscale
 imgproc_grayscale:
+    # Prologue
     pushq   %rbp
     movq    %rsp, %rbp
-    pushq   %rbx        
+    pushq   %rbx
     pushq   %r12
     pushq   %r13
     pushq   %r14
     pushq   %r15
 
-    movl    (%rdi), %edx           
-    movl    4(%rdi), %ecx         
+    # Load input image width and height
+    movl    (%rdi), %edx            # input_img->width
+    movl    4(%rdi), %ecx           # input_img->height
 
-    cmpq    $0, %rdx
+    # Edge case: if width <= 0 or height <= 0, return early
+    cmpq    $0, %rdx                # if width <= 0, exit
     jle     .done
-    cmpq    $0, %rcx
+    cmpq    $0, %rcx                # if height <= 0, exit
     jle     .done
 
-    xorq    %rbx, %rbx              
+    xorq    %rbx, %rbx              # Set y = 0 (row index)
 
 .outer_loop:
-    cmpq    %rbx, %rcx              
-    jge     .done                 
+    cmpq    %rbx, %rcx              # Check if y >= height
+    jge     .done                   # If y >= height, we're done
 
-    xorq    %rax, %rax             
+    xorq    %rax, %rax              # Set x = 0 (column index)
 
 .inner_loop:
-    cmpq    %rax, %rdx             
-    jge     .next_row             
+    cmpq    %rax, %rdx              # Check if x >= width
+    jge     .next_row               # If x >= width, go to next row
 
-    movl    %rdx, %r8d             
-    imulq   %rbx, %r8d             
-    addq    %rax, %r8d              
+    # Calculate the index: y * width + x
+    movq    %rdx, %r8               # r8 = width (64-bit)
+    imulq   %rbx, %r8               # r8 = y * width (64-bit)
+    addq    %rax, %r8               # r8 = y * width + x
 
-    movq    8(%rdi), %r9            
-    movl    (%r9,%r8,4), %r10d      
+    # Load the pixel from input_img->data[y * width + x]
+    movq    8(%rdi), %r9            # Load input_img->data pointer into %r9
+    movl    (%r9,%r8,4), %r10d      # Load the pixel into %r10d (32-bit)
 
-    movq    %r10d, %rdi             
-    call    to_grayscale           
-    movl    %eax, %r12d            
+    # Convert the pixel to grayscale
+    movl    %r10d, %edi             # Pass pixel as argument to `to_grayscale`
+    call    to_grayscale            # Call to_grayscale function
+    movl    %eax, %r12d             # Get the returned grayscale pixel
 
-    movq    8(%rsi), %r15          
-    movl    %r12d, (%r15,%r8,4)     
+    # Store the grayscale pixel in output_img->data[y * width + x]
+    movq    8(%rsi), %r15           # Load output_img->data pointer into %r15
+    movl    %r12d, (%r15,%r8,4)     # Store grayscale pixel in output_img->data
 
+    # Increment x and continue inner loop
     incq    %rax
     jmp     .inner_loop
 
 .next_row:
+    # Increment y and continue outer loop
     incq    %rbx
     jmp     .outer_loop
 
 .done:
+    # Epilogue
     popq    %r15
     popq    %r14
     popq    %r13
@@ -441,6 +472,7 @@ imgproc_grayscale:
     popq    %rbx
     popq    %rbp
     ret
+
 
 
 /*
