@@ -8,11 +8,17 @@
 // TODO: define your helper functions here
 // Helper function to check if all tiles are non-empty
 int all_tiles_nonempty(int width, int height, int n) {
+    if (n <= 1) {
+        return 0
+    }
     return (width / n > 0) && (height / n > 0);
 }
 
 // Helper function to determine the width of a tile in the output image
 int determine_tile_w(int width, int n, int tile_col) {
+    if (n <= 1) {
+        return 0
+    }
     int base_tile_w = width / n;
     int remainder = width % n;
     return base_tile_w + (tile_col < remainder ? 1 : 0);
@@ -27,6 +33,9 @@ int determine_tile_x_offset(int width, int n, int tile_col) {
 
 // Helper function to determine the height of a tile in the output image
 int determine_tile_h(int height, int n, int tile_row) {
+    if (n <= 1) {
+        return 0
+    }
     int base_tile_h = height / n;
     int remainder = height % n;
     return base_tile_h + (tile_row < remainder ? 1 : 0);
@@ -136,18 +145,18 @@ void imgproc_mirror_h(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-    
+
     // Iterate over each row
     for (int32_t y = 0; y < height; y++) {
         // Iterate over each column (only up to the middle of the image)
         for (int32_t x = 0; x < width / 2; x++) {
             // Calculate the position of the mirrored pixel
             int32_t mirrored_x = width - 1 - x;
-            
+
             // Get the pixels from both sides
             uint32_t left_pixel = input_img->data[y * width + x];
             uint32_t right_pixel = input_img->data[y * width + mirrored_x];
-            
+
             // Swap the pixels
             output_img->data[y * width + x] = right_pixel;
             output_img->data[y * width + mirrored_x] = left_pixel;
@@ -166,18 +175,18 @@ void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-    
+
     // Iterate over each column
     for (int32_t y = 0; y < height / 2; y++) {
         // Calculate the position of the mirrored row
         int32_t mirrored_y = height - 1 - y;
-        
+
         // Swap pixels in each column between the current row and the mirrored row
         for (int32_t x = 0; x < width; x++) {
             // Get the pixels from both rows
             uint32_t top_pixel = input_img->data[y * width + x];
             uint32_t bottom_pixel = input_img->data[mirrored_y * width + x];
-            
+
             // Swap the pixels
             output_img->data[y * width + x] = bottom_pixel;
             output_img->data[mirrored_y * width + x] = top_pixel;
@@ -227,16 +236,16 @@ void imgproc_grayscale(struct Image *input_img, struct Image *output_img) {
     // Ensure the output image has the same dimensions as the input image
     int32_t width = input_img->width;
     int32_t height = input_img->height;
-    
+
     // Iterate over each pixel in the image
     for (int32_t y = 0; y < height; y++) {
         for (int32_t x = 0; x < width; x++) {
             // Get the current pixel from the input image
             uint32_t pixel = input_img->data[y * width + x];
-            
+
             // Convert the pixel to grayscale
             uint32_t gray_pixel = to_grayscale(pixel);
-            
+
             // Store the grayscale pixel in the output image
             output_img->data[y * width + x] = gray_pixel;
         }
