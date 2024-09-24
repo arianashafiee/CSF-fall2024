@@ -181,23 +181,22 @@ to_grayscale:
     movq    %rsp, %rbp
 
     call    get_r
-    movq    %rax, %rsi         ; Store red component in %rsi
+    movq    %rax, %rsi        
     call    get_g
-    movq    %rax, %rdx         ; Store green component in %rdx
+    movq    %rax, %rdx         
     call    get_b
-    movq    %rax, %rcx         ; Store blue component in %rcx
+    movq    %rax, %rcx         
 
-    movq    $77, %rax          ; Load multiplier for red (0.3 approximated as 77/256)
-    imulq   %rsi, %rax         ; Multiply red by 77
-    movq    $150, %rsi         ; Load multiplier for green (0.59 approximated as 150/256)
-    imulq   %rdx, %rsi         ; Multiply green by 150
-    addq    %rsi, %rax         ; Add to red contribution
-    movq    $29, %rsi          ; Load multiplier for blue (0.11 approximated as 29/256)
-    imulq   %rcx, %rsi         ; Multiply blue by 29
-    addq    %rsi, %rax         ; Add to the total grayscale value
+    movq    $77, %rax          
+    imulq   %rsi, %rax         
+    movq    $150, %rsi         
+    imulq   %rdx, %rsi         
+    addq    %rsi, %rax         
+    movq    $29, %rsi          
+    imulq   %rcx, %rsi         
+    addq    %rsi, %rax         
 
-    shrq    $8, %rax           ; Divide by 256 to normalize
-
+    shrq    $8, %rax           
     popq    %rbp
     ret
 
