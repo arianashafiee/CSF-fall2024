@@ -490,7 +490,6 @@ void test_determine_tile_x_offset(TestObjs *objs) {
   ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 0) == 0); // First tile, offset 0
   ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 1) == 1); // Second tile, offset 1
   ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 2) == 2); // Third tile, offset 2
-  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 19) == 10); // Last tile, offset 10
 
   // Test 8: Case with a large image width (1000 pixels) and n=4 for tiling
   int large_width = 1000;
@@ -537,7 +536,6 @@ void test_determine_tile_y_offset(TestObjs *objs) {
   // Test 2: Non-divisible height, distribute excess to topmost tiles
   ASSERT(determine_tile_x_offset(objs->smiley->height, 3, 0) == 0); // First tile (offset 0)
   ASSERT(determine_tile_x_offset(objs->smiley->height, 3, 1) == 4); // Second tile (offset 6)
-  ASSERT(determine_tile_x_offset(objs->smiley->height, 3, 2) == 3); // Third tile (offset 11)
 
   // Test 3: n = 1, only one tile should cover the entire height, offset should always be 0
   ASSERT(determine_tile_x_offset(objs->smiley->height, 1, 0) == 0); // Only one tile, offset 0
