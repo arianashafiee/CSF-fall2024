@@ -885,12 +885,7 @@ void test_to_grayscale(TestObjs *objs) {
   ASSERT(get_a(gray_pixel) == 128);
 }
 
-<<<<<<< HEAD
-void test_blend_components(TestObjs *objs) {
-=======
-void test_blend_colors(TestObjs *objs)
-{
->>>>>>> 309e56b1de4dc52d20f87d9c4c543e3ef66b9d01
+void test_blend_colors(TestObjs *objs) {
   // Test 1: Basic case
   uint32_t fg = make_pixel(100, 150, 200, 128); // r = 100, g = 150, b = 200, a = 128 (semi-transparent)
   uint32_t bg = make_pixel(50, 50, 50, 255); // r = 50, g = 50, b = 50, a = 255 (fully opaque background)
