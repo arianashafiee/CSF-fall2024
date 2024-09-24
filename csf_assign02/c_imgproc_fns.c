@@ -1,11 +1,19 @@
-
 // C implementations of image processing functions
 
 #include <stdlib.h>
 #include <assert.h>
 #include "imgproc.h"
 
-// Helper function to check if all tiles are non-empty
+// Check if all tiles are non-empty based on the dimensions of the image
+// and the tiling factor.
+//
+// Parameters:
+//   width  - width of the input image
+//   height - height of the input image
+//   n      - tiling factor (number of rows and columns of tiles)
+//
+// Returns:
+//   1 if all tiles are non-empty (have positive width and height), 0 otherwise.
 int all_tiles_nonempty(int width, int height, int n) {
     if (n <= 0 || width <= 0 || height <= 0) {
         return 0;  // Handle invalid input such as zero or negative dimensions.
@@ -13,7 +21,17 @@ int all_tiles_nonempty(int width, int height, int n) {
     return (width / n > 0) && (height / n > 0);
 }
 
-// Helper function to determine the width of a tile in the output image
+// Determine the width of a tile in the output image based on the image width,
+// tiling factor, and column index.
+//
+// Parameters:
+//   width     - width of the input image
+//   n         - tiling factor (number of columns of tiles)
+//   tile_col  - index of the tile column being processed
+//
+// Returns:
+//   The width of the tile, accounting for any remainder when dividing the
+//   image width by the tiling factor.
 int determine_tile_w(int width, int n, int tile_col) {
     if (n <= 0 || width <= 0 || tile_col < 0 || tile_col >= n) {
         return 0;  // Invalid cases
@@ -23,7 +41,17 @@ int determine_tile_w(int width, int n, int tile_col) {
     return base_tile_w + (tile_col < remainder ? 1 : 0);
 }
 
-// Helper function to determine the x-offset of a tile in the output image
+// Determine the x-offset of a tile in the output image based on the image width,
+// tiling factor, and column index.
+//
+// Parameters:
+//   width     - width of the input image
+//   n         - tiling factor (number of columns of tiles)
+//   tile_col  - index of the tile column being processed
+//
+// Returns:
+//   The x-offset for the tile in the output image, accounting for any
+//   remainder when dividing the image width by the tiling factor.
 int determine_tile_x_offset(int width, int n, int tile_col) {
     if (n <= 0 || width <= 0 || tile_col < 0 || tile_col >= n) {
         return 0;  // Invalid cases
@@ -33,7 +61,17 @@ int determine_tile_x_offset(int width, int n, int tile_col) {
     return tile_col * base_tile_w + (tile_col < remainder ? tile_col : remainder);
 }
 
-// Helper function to determine the height of a tile in the output image
+// Determine the height of a tile in the output image based on the image height,
+// tiling factor, and row index.
+//
+// Parameters:
+//   height    - height of the input image
+//   n         - tiling factor (number of rows of tiles)
+//   tile_row  - index of the tile row being processed
+//
+// Returns:
+//   The height of the tile, accounting for any remainder when dividing the
+//   image height by the tiling factor.
 int determine_tile_h(int height, int n, int tile_row) {
     if (n <= 0 || height <= 0 || tile_row < 0 || tile_row >= n) {
         return 0;  // Invalid cases
@@ -43,7 +81,17 @@ int determine_tile_h(int height, int n, int tile_row) {
     return base_tile_h + (tile_row < remainder ? 1 : 0);
 }
 
-// Helper function to determine the y-offset of a tile in the output image
+// Determine the y-offset of a tile in the output image based on the image height,
+// tiling factor, and row index.
+//
+// Parameters:
+//   height    - height of the input image
+//   n         - tiling factor (number of rows of tiles)
+//   tile_row  - index of the tile row being processed
+//
+// Returns:
+//   The y-offset for the tile in the output image, accounting for any
+//   remainder when dividing the image height by the tiling factor.
 int determine_tile_y_offset(int height, int n, int tile_row) {
     if (n <= 0 || height <= 0 || tile_row < 0 || tile_row >= n) {
         return 0;  // Invalid cases
@@ -53,7 +101,17 @@ int determine_tile_y_offset(int height, int n, int tile_row) {
     return tile_row * base_tile_h + (tile_row < remainder ? tile_row : remainder);
 }
 
-// Helper function to copy a tile from input to output image, downsampling pixels
+// Copy a tile from the input image to the output image, downsampling pixels
+// based on the tiling factor.
+//
+// Parameters:
+//   out_img   - pointer to the output Image (in which the tile should be copied)
+//   img       - pointer to the input Image (from which the tile should be copied)
+//   tile_row  - index of the tile row being processed
+//   tile_col  - index of the tile column being processed
+//   n         - tiling factor (how many rows and columns of tiles to generate)
+//
+// This function copies a tile from the input image, sampling every n'th pixel.
 void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_col, int n) {
     if (n <= 0 || img->width <= 0 || img->height <= 0) {
         return;  // Invalid case, no operation
@@ -79,32 +137,72 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
 }
 
 
-// Helper function to get the red component from a pixel
+// Extract the red component from a pixel.
+//
+// Parameters:
+//   pixel - 32-bit pixel in RGBA format
+//
+// Returns:
+//   The red component (0-255) of the pixel.
 uint32_t get_r(uint32_t pixel) {
     return (pixel >> 24) & 0xFF;
 }
 
-// Helper function to get the green component from a pixel
+// Extract the green component from a pixel.
+//
+// Parameters:
+//   pixel - 32-bit pixel in RGBA format
+//
+// Returns:
+//   The green component (0-255) of the pixel.
 uint32_t get_g(uint32_t pixel) {
     return (pixel >> 16) & 0xFF;
 }
 
-// Helper function to get the blue component from a pixel
+// Extract the blue component from a pixel.
+//
+// Parameters:
+//   pixel - 32-bit pixel in RGBA format
+//
+// Returns:
+//   The blue component (0-255) of the pixel.
 uint32_t get_b(uint32_t pixel) {
     return (pixel >> 8) & 0xFF;
 }
 
-// Helper function to get the alpha component from a pixel
+// Extract the alpha component from a pixel.
+//
+// Parameters:
+//   pixel - 32-bit pixel in RGBA format
+//
+// Returns:
+//   The alpha component (0-255) of the pixel.
 uint32_t get_a(uint32_t pixel) {
     return pixel & 0xFF;
 }
 
-// Helper function to create a pixel from r, g, b, and a components
+// Create a pixel from the red, green, blue, and alpha components.
+//
+// Parameters:
+//   r - red component (0-255)
+//   g - green component (0-255)
+//   b - blue component (0-255)
+//   a - alpha component (0-255)
+//
+// Returns:
+//   A 32-bit pixel in RGBA format.
 uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {
     return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
-// Helper function to convert a pixel to grayscale
+// Convert a pixel to grayscale by computing the weighted average
+// of the red, green, and blue components.
+//
+// Parameters:
+//   pixel - 32-bit pixel in RGBA format
+//
+// Returns:
+//   A grayscale 32-bit pixel with the same alpha value as the input pixel.
 uint32_t to_grayscale(uint32_t pixel) {
     uint32_t r = get_r(pixel);
     uint32_t g = get_g(pixel);
@@ -118,14 +216,31 @@ uint32_t to_grayscale(uint32_t pixel) {
     return make_pixel(y, y, y, a);
 }
 
-// Helper function to blend a single color component (red, green, or blue)
+// Blend two color components (red, green, or blue) based on the alpha value
+// of the foreground pixel.
+//
+// Parameters:
+//   fg    - foreground color component (0-255)
+//   bg    - background color component (0-255)
+//   alpha - alpha value (0-255) of the foreground pixel
+//
+// Returns:
+//   The blended color component value.
 uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha) {
     if (alpha == 0) return bg;  // Fully transparent
     if (alpha == 255) return fg;  // Fully opaque
     return (alpha * fg + (255 - alpha) * bg) / 255;
 }
 
-// Helper function to blend two pixels (foreground and background).
+// Blend two pixels (foreground and background) using the alpha value
+// of the foreground pixel.
+//
+// Parameters:
+//   fg - 32-bit foreground pixel in RGBA format
+//   bg - 32-bit background pixel in RGBA format
+//
+// Returns:
+//   The blended 32-bit pixel in RGBA format, with alpha set to 255 (fully opaque).
 uint32_t blend_colors(uint32_t fg, uint32_t bg) {
     // Extract the red, green, blue, and alpha components from both pixels
     uint32_t fg_r = (fg >> 24); // & 0xFF;
