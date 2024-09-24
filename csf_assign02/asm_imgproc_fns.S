@@ -554,9 +554,7 @@ make_pixel:
     popq    %rbp                   # Restore base pointer
     ret                            # Return, with the pixel in %eax
 
-
-
-.globl to_grayscale
+    .globl to_grayscale
 to_grayscale:
     # Prologue: Set up the stack frame
     pushq   %rbp
