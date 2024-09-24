@@ -735,27 +735,27 @@ void test_get_r(TestObjs *objs) {
 void test_get_g(TestObjs *objs) {
   // Test 1: Basic case, arbitrary green value
   uint32_t pixel = 0x007F0000; // Green component = 127 (0x7F), other components = 0
-  ASSERT(get_r(pixel) == 127);
+  ASSERT(get_g(pixel) == 127);
 
   // Test 2: Edge case, green component = 0
   pixel = 0x00000000; // Green component = 0, other components = 0
-  ASSERT(get_r(pixel) == 0);
+  ASSERT(get_g(pixel) == 0);
 
   // Test 3: Edge case, green component = 255 (max value)
   pixel = 0xFFFFFFFF; // Green component = 255 (0xFF), other components = 255
-  ASSERT(get_r(pixel) == 255);
+  ASSERT(get_g(pixel) == 255);
 
   // Test 4: Green component with other color values set
   pixel = 0x127F3456; // Green component = 127, red = 18, blue = 52, alpha = 86
-  ASSERT(get_r(pixel) == 127);
+  ASSERT(get_g(pixel) == 127);
 
   // Test 5: Fully transparent pixel (alpha = 0), green component = 128
   pixel = 0x00800000; // Green component = 128, fully transparent (alpha = 0)
-  ASSERT(get_r(pixel) == 128);
+  ASSERT(get_g(pixel) == 128);
 
   // Test 6: Fully opaque pixel (alpha = 255), green component = 64
   pixel = 0x004000FF; // Green component = 64, fully opaque (alpha = 255)
-  ASSERT(get_r(pixel) == 64);
+  ASSERT(get_g(pixel) == 64);
 
   // Test 7: Extract green component from a pixel in the smiley image
   uint32_t smiley_green_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'g' ? 4 : 0];  // First green pixel
@@ -780,27 +780,27 @@ void test_get_g(TestObjs *objs) {
 void test_get_b(TestObjs *objs) {
   // Test 1: Basic case, arbitrary blue value
   uint32_t pixel = 0x00007F00; // Blue component = 127 (0x7F), other components = 0
-  ASSERT(get_r(pixel) == 127);
+  ASSERT(get_b(pixel) == 127);
 
   // Test 2: Edge case, blue component = 0
   pixel = 0x00000000; // Blue component = 0, other components = 0
-  ASSERT(get_r(pixel) == 0);
+  ASSERT(get_b(pixel) == 0);
 
   // Test 3: Edge case, blue component = 255 (max value)
   pixel = 0xFFFFFFFF; // Blue component = 255 (0xFF), other components = 255
-  ASSERT(get_r(pixel) == 255);
+  ASSERT(get_b(pixel) == 255);
 
   // Test 4: Blue component with other color values set
   pixel = 0x12347F56; // Blue component = 127, red = 18, green = 52, alpha = 86
-  ASSERT(get_r(pixel) == 127);
+  ASSERT(get_b(pixel) == 127);
 
   // Test 5: Fully transparent pixel (alpha = 0), blue component = 128
   pixel = 0x00008000; // Blue component = 128, fully transparent (alpha = 0)
-  ASSERT(get_r(pixel) == 128);
+  ASSERT(get_b(pixel) == 128);
 
   // Test 6: Fully opaque pixel (alpha = 255), blue component = 64
   pixel = 0x000040FF; // Blue component = 64, fully opaque (alpha = 255)
-  ASSERT(get_r(pixel) == 64);
+  ASSERT(get_b(pixel) == 64);
 
   // Test 7: Extract blue component from a pixel in the smiley image
   uint32_t smiley_blue_pixel = objs->smiley->data[objs->smiley_pic.data[4] == 'b' ? 4 : 0];  // First blue pixel
@@ -825,19 +825,19 @@ void test_get_b(TestObjs *objs) {
 void test_get_a(TestObjs *objs) {
   // Test 1: Basic case, arbitrary alpha value
   uint32_t pixel = 0x0000007F; // Alpha component = 127 (0x7F), other components = 0
-  ASSERT(get_r(pixel) == 127);
+  ASSERT(get_a(pixel) == 127);
 
   // Test 2: Edge case, alpha component = 0
   pixel = 0x00000000; // Alpha component = 0, other components = 0
-  ASSERT(get_r(pixel) == 0);
+  ASSERT(get_a(pixel) == 0);
 
   // Test 3: Edge case, alpha component = 255 (max value)
   pixel = 0xFFFFFFFF; // Alpha component = 255 (0xFF), other components = 255
-  ASSERT(get_r(pixel) == 255);
+  ASSERT(get_a(pixel) == 255);
 
   // Test 4: Alpha component with other color values set
   pixel = 0x1234567F; // Alpha component = 127, red = 18, green = 52, blue = 86
-  ASSERT(get_r(pixel) == 127);
+  ASSERT(get_a(pixel) == 127);
 
   // Test 5: Create an image with a partially transparent pixel
   uint32_t semi_transparent_pixel = 0xFF000080;  // Red pixel with 50% transparency
