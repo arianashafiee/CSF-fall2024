@@ -848,7 +848,7 @@ void test_to_grayscale(TestObjs *objs) {
   ASSERT(get_r(gray_pixel) == expected_y);
   ASSERT(get_g(gray_pixel) == expected_y);
   ASSERT(get_b(gray_pixel) == expected_y);
-  ASSERT(get_a(gray_pixel) == 0);
+  ASSERT(get_a(gray_pixel) == 255);
 
   // Test 3: Edge case - all components at 255
   pixel = make_pixel(255, 255, 255, 255); // r = 255, g = 255, b = 255, a = 255
