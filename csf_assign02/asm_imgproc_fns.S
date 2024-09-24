@@ -2,7 +2,7 @@
  * x86-64 assembly language implementations of functions
  */
 
-	.section .text
+    .section .text
 
 /* Offsets of struct Image fields */
 #define IMAGE_WIDTH_OFFSET   0
@@ -10,44 +10,41 @@
 #define IMAGE_DATA_OFFSET    8
 
 /*
- * TODO: define your helper functions here.
- * Don't forget to use the .globl directive to make
- * them visible to the test code.
+ * Helper functions for image processing
  */
 
 .global all_tiles_nonempty
 all_tiles_nonempty:
-    ; Prologue
-    pushq   %rbp
-    movq    %rsp, %rbp
+    pushq   %rbp                # Save base pointer
+    movq    %rsp, %rbp           # Set stack frame
 
-    ; Arguments:
-    ; width  = %rdi
-    ; height = %rsi
-    ; n      = %rdx
+    # Arguments:
+    # width  = %rdi
+    # height = %rsi
+    # n      = %rdx
 
-    ; Check if n <= 0, width <= 0, or height <= 0
+    # Check if n <= 0, width <= 0, or height <= 0
     cmpq    $0, %rdx
-    jle     .invalid_input   ; if n <= 0, return 0
+    jle     .invalid_input       # if n <= 0, return 0
     cmpq    $0, %rdi
-    jle     .invalid_input   ; if width <= 0, return 0
+    jle     .invalid_input       # if width <= 0, return 0
     cmpq    $0, %rsi
-    jle     .invalid_input   ; if height <= 0, return 0
+    jle     .invalid_input       # if height <= 0, return 0
 
-    ; Check (width / n > 0) and (height / n > 0)
-    movq    %rdi, %rax       ; rax = width
-    cqo                     ; sign extend to rdx:rax
-    idivq   %rdx             ; rax = width / n
+    # Check (width / n > 0) and (height / n > 0)
+    movq    %rdi, %rax           # rax = width
+    cqo                          # sign extend to rdx:rax
+    idivq   %rdx                 # rax = width / n
     cmpq    $0, %rax
-    jle     .invalid_input   ; if width / n <= 0, return 0
+    jle     .invalid_input       # if width / n <= 0, return 0
 
-    movq    %rsi, %rax       ; rax = height
-    cqo                     ; sign extend to rdx:rax
-    idivq   %rdx             ; rax = height / n
+    movq    %rsi, %rax           # rax = height
+    cqo                          # sign extend to rdx:rax
+    idivq   %rdx                 # rax = height / n
     cmpq    $0, %rax
-    jle     .invalid_input   ; if height / n <= 0, return 0
+    jle     .invalid_input       # if height / n <= 0, return 0
 
-    ; Valid input, return 1
+    # Valid input, return 1
     movq    $1, %rax
     jmp     .end
 
@@ -55,50 +52,46 @@ all_tiles_nonempty:
     movq    $0, %rax
 
 .end:
-    ; Epilogue
-    popq    %rbp
+    popq    %rbp                 # Restore base pointer
     ret
-
 
 .global determine_tile_w
 determine_tile_w:
-    ; Prologue
     pushq   %rbp
     movq    %rsp, %rbp
 
-    ; Arguments:
-    ; width    = %rdi
-    ; n        = %rsi
-    ; tile_col = %rdx
+    # Arguments:
+    # width    = %rdi
+    # n        = %rsi
+    # tile_col = %rdx
 
-    ; Handle invalid cases
+    # Handle invalid cases
     cmpq    $0, %rsi
-    jle     .invalid_input    ; if n <= 0, return 0
+    jle     .invalid_input    # if n <= 0, return 0
     cmpq    $0, %rdi
-    jle     .invalid_input    ; if width <= 0, return 0
+    jle     .invalid_input    # if width <= 0, return 0
     cmpq    %rsi, %rdx
-    jge     .invalid_input    ; if tile_col >= n, return 0
+    jge     .invalid_input    # if tile_col >= n, return 0
 
-    ; Calculate base_tile_w = width / n
-    movq    %rdi, %rax        ; rax = width
-    cqo                      ; sign extend for division
-    idivq   %rsi              ; rax = width / n
+    # Calculate base_tile_w = width / n
+    movq    %rdi, %rax        # rax = width
+    cqo                      # sign extend for division
+    idivq   %rsi              # rax = width / n
 
-    ; Calculate remainder = width % n
-    movq    %rdx, %rcx        ; rcx = remainder
+    # Calculate remainder = width % n
+    movq    %rdx, %rcx        # rcx = remainder
 
-    ; Check if tile_col < remainder
+    # Check if tile_col < remainder
     cmpq    %rcx, %rdx
-    jl      .add_one          ; if tile_col < remainder, add 1
+    jl      .add_one          # if tile_col < remainder, add 1
 
-    ; Return base_tile_w
+    # Return base_tile_w
     jmp     .end
 
 .add_one:
-    incq    %rax              ; rax = base_tile_w + 1
+    incq    %rax              # rax = base_tile_w + 1
 
 .end:
-    ; Epilogue
     popq    %rbp
     ret
 
@@ -112,12 +105,12 @@ determine_tile_x_offset:
     pushq   %rbp
     movq    %rsp, %rbp
 
-    ; Arguments:
-    ; width    = %rdi
-    ; n        = %rsi
-    ; tile_col = %rdx
+    # Arguments:
+    # width    = %rdi
+    # n        = %rsi
+    # tile_col = %rdx
 
-    ; Handle invalid cases
+    # Handle invalid cases
     cmpq    $0, %rsi
     jle     .invalid_input
     cmpq    $0, %rdi
@@ -125,16 +118,16 @@ determine_tile_x_offset:
     cmpq    %rsi, %rdx
     jge     .invalid_input
 
-    ; Calculate base_tile_w = width / n
+    # Calculate base_tile_w = width / n
     movq    %rdi, %rax
     cqo
-    idivq   %rsi              ; rax = base_tile_w
+    idivq   %rsi              # rax = base_tile_w
 
-    ; Calculate remainder = width % n
-    movq    %rdx, %rcx        ; rcx = remainder
+    # Calculate remainder = width % n
+    movq    %rdx, %rcx        # rcx = remainder
 
-    ; tile_x_offset = tile_col * base_tile_w + (tile_col < remainder ? tile_col : remainder)
-    imulq   %rdx, %rax        ; rax = tile_col * base_tile_w
+    # tile_x_offset = tile_col * base_tile_w + (tile_col < remainder ? tile_col : remainder)
+    imulq   %rdx, %rax        # rax = tile_col * base_tile_w
     cmpq    %rcx, %rdx
     jl      .add_tile_col
     movq    %rcx, %rax
@@ -151,189 +144,42 @@ determine_tile_x_offset:
     movq    $0, %rax
     jmp     .end
 
-
-.global determine_tile_h
-determine_tile_h:
-    pushq   %rbp
-    movq    %rsp, %rbp
-
-    ; Arguments:
-    ; height   = %rdi
-    ; n        = %rsi
-    ; tile_row = %rdx
-
-    ; Handle invalid cases
-    cmpq    $0, %rsi
-    jle     .invalid_input
-    cmpq    $0, %rdi
-    jle     .invalid_input
-    cmpq    %rsi, %rdx
-    jge     .invalid_input
-
-    ; Calculate base_tile_h = height / n
-    movq    %rdi, %rax
-    cqo
-    idivq   %rsi              ; rax = base_tile_h
-
-    ; Calculate remainder = height % n
-    movq    %rdx, %rcx        ; rcx = remainder
-
-    ; tile_h = base_tile_h + (tile_row < remainder ? 1 : 0)
-    cmpq    %rcx, %rdx
-    jl      .add_one
-    jmp     .end
-
-.add_one:
-    incq    %rax
-
-.end:
-    popq    %rbp
-    ret
-
-.invalid_input:
-    movq    $0, %rax
-    jmp     .end
-
-
-.global determine_tile_y_offset
-determine_tile_y_offset:
-    pushq   %rbp
-    movq    %rsp, %rbp
-
-    ; Arguments:
-    ; height   = %rdi
-    ; n        = %rsi
-    ; tile_row = %rdx
-
-    ; Handle invalid cases
-    cmpq    $0, %rsi
-    jle     .invalid_input
-    cmpq    $0, %rdi
-    jle     .invalid_input
-    cmpq    %rsi, %rdx
-    jge     .invalid_input
-
-    ; Calculate base_tile_h = height / n
-    movq    %rdi, %rax
-    cqo
-    idivq   %rsi              ; rax = base_tile_h
-
-    ; Calculate remainder = height % n
-    movq    %rdx, %rcx        ; rcx = remainder
-
-    ; tile_y_offset = tile_row * base_tile_h + (tile_row < remainder ? tile_row : remainder)
-    imulq   %rdx, %rax        ; rax = tile_row * base_tile_h
-    cmpq    %rcx, %rdx
-    jl      .add_tile_row
-    movq    %rcx, %rax
-    jmp     .end
-
-.add_tile_row:
-    addq    %rdx, %rax
-
-.end:
-    popq    %rbp
-    ret
-
-.invalid_input:
-    movq    $0, %rax
-    jmp     .end
-
-
-.global copy_tile
-copy_tile:
-    pushq   %rbp
-    movq    %rsp, %rbp
-
-    ; Arguments:
-    ; out_img  = %rdi
-    ; img      = %rsi
-    ; tile_row = %rdx
-    ; tile_col = %rcx
-    ; n        = %r8
-
-    ; Handle invalid cases
-    cmpq    $0, %r8
-    jle     .end_no_op
-    cmpq    $0, (%rsi)        ; img->width <= 0
-    jle     .end_no_op
-    cmpq    $0, 4(%rsi)       ; img->height <= 0
-    jle     .end_no_op
-
-    ; Calculate tile width, height, x_offset, and y_offset
-    ; tile_w = determine_tile_w(img->width, n, tile_col)
-    ; tile_h = determine_tile_h(img->height, n, tile_row)
-    ; tile_x_offset = determine_tile_x_offset(img->width, n, tile_col)
-    ; tile_y_offset = determine_tile_y_offset(img->height, n, tile_row)
-
-    ; for loop logic to copy pixels (simplified, the actual copying involves memory)
-    ; Omitted for brevity
-
-.end_no_op:
-    popq    %rbp
-    ret
-
-
 .global get_r
 get_r:
-    ; Prologue
     pushq   %rbp
     movq    %rsp, %rbp
 
-    ; Argument:
-    ; pixel = %rdi
-
-    ; Shift pixel right by 24 to isolate red component
-    movl    %edi, %eax        ; Move pixel to eax
-    shrq    $24, %rax         ; Shift right by 24 bits
-    andq    $0xFF, %rax       ; Mask to isolate red component
-
-    ; Epilogue
-    popq    %rbp
+    movl    %edi, %eax        # Load pixel into eax
+    shrl    $24, %eax         # Shift right by 24 to extract red component
     ret
-
 
 .global get_g
 get_g:
     pushq   %rbp
     movq    %rsp, %rbp
 
-    ; Argument: pixel = %rdi
-
-    movl    %edi, %eax        ; Move pixel to eax
-    shrq    $16, %rax         ; Shift right by 16 bits
-    andq    $0xFF, %rax       ; Mask to isolate green component
-
-    popq    %rbp
+    movl    %edi, %eax        # Load pixel into eax
+    shrl    $16, %eax         # Shift right by 16 to extract green component
+    andl    $0xFF, %eax       # Mask the value to get the green component
     ret
-
 
 .global get_b
 get_b:
     pushq   %rbp
     movq    %rsp, %rbp
 
-    ; Argument: pixel = %rdi
-
-    movl    %edi, %eax        ; Move pixel to eax
-    shrq    $8, %rax          ; Shift right by 8 bits
-    andq    $0xFF, %rax       ; Mask to isolate blue component
-
-    popq    %rbp
+    movl    %edi, %eax        # Load pixel into eax
+    shrl    $8, %eax          # Shift right by 8 to extract blue component
+    andl    $0xFF, %eax       # Mask the value to get the blue component
     ret
-
 
 .global get_a
 get_a:
     pushq   %rbp
     movq    %rsp, %rbp
 
-    ; Argument: pixel = %rdi
-
-    movl    %edi, %eax        ; Move pixel to eax
-    andq    $0xFF, %rax       ; Mask to isolate alpha component
-
-    popq    %rbp
+    movl    %edi, %eax        # Load pixel into eax
+    andl    $0xFF, %eax       # Mask the value to get the alpha component
     ret
 
 .global make_pixel
