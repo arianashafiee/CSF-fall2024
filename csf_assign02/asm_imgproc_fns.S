@@ -28,7 +28,7 @@
  * Helper functions for image processing
  */
 
-    .globl all_tiles_nonempty
+.globl all_tiles_nonempty
 all_tiles_nonempty:
     /* Prologue to set up the stack frame */
     pushq %rbp                    # Save base pointer
@@ -53,16 +53,17 @@ all_tiles_nonempty:
     jle .Lreturn_zero_all_tiles   # Jump if height <= 0
 
     # Perform width / n
+    movq %rdx, %rcx               # Save n into %rcx (since idiv overwrites %rdx)
     movq %rdi, %rax               # Move width to %rax (for division)
-    cqto                          # Sign-extend %rax into %rdx (division setup)
-    idivq %rdx                    # Divide width by n
+    xorq %rdx, %rdx               # Clear %rdx for division (cqto equivalent)
+    divq %rcx                     # Divide width by n
     cmpq $0, %rax                 # Check if width / n > 0
     jle .Lreturn_zero_all_tiles   # Jump if width / n <= 0
 
     # Perform height / n
     movq %rsi, %rax               # Move height to %rax (for division)
-    cqto                          # Sign-extend %rax into %rdx (division setup)
-    idivq %rdx                    # Divide height by n
+    xorq %rdx, %rdx               # Clear %rdx for division (cqto equivalent)
+    divq %rcx                     # Divide height by n
     cmpq $0, %rax                 # Check if height / n > 0
     jle .Lreturn_zero_all_tiles   # Jump if height / n <= 0
 
@@ -109,11 +110,9 @@ determine_tile_w:
 
     # Calculate base_tile_w = width / n
     movq %rdi, %rax               # Move width into %rax
-    cqto                          # Sign extend %rax to prepare for division
-    idivq %rsi                    # Divide width by n (width / n)
-    movq %rax, %r8                # Store base_tile_w in %r8
-
-    # Calculate remainder = width % n
+    xorq %rdx, %rdx               # Clear %rdx (to avoid leftovers from previous operations)
+    divq %rsi                     # Divide width by n (width / n), quotient in %rax, remainder in %rdx
+    movq %rax, %r8                # Store base_tile_w (quotient) in %r8
     movq %rdx, %r9                # Store remainder (width % n) in %r9
 
     # Check if tile_col < remainder
@@ -138,7 +137,7 @@ determine_tile_w:
     ret
 
 
-    .globl determine_tile_x_offset
+.globl determine_tile_x_offset
 determine_tile_x_offset:
     /* Prologue: Save base pointer and set up stack frame */
     pushq %rbp
@@ -168,25 +167,25 @@ determine_tile_x_offset:
 
     # Calculate base_tile_w = width / n
     movq %rdi, %rax               # Move width into %rax
-    cqto                          # Sign extend %rax for division
-    idivq %rsi                    # Divide width by n, quotient in %rax, remainder in %rdx
-    movq %rax, %r8                # Store base_tile_w in %r8
-    movq %rdx, %r9                # Store remainder in %r9
+    xorq %rdx, %rdx               # Clear %rdx (to avoid leftover from previous operations)
+    divq %rsi                     # Divide width by n (width / n), quotient in %rax, remainder in %rdx
+    movq %rax, %r8                # Store base_tile_w (quotient) in %r8
+    movq %rdx, %r9                # Store remainder (width % n) in %r9
 
     # Calculate tile_col * base_tile_w
-    movq %rdx, %rax               # Move tile_col into %rax
-    imulq %r8, %rax               # Multiply tile_col by base_tile_w (tile_col * base_tile_w)
+    movq %rdx, %r10               # Move tile_col into %r10 for multiplication
+    imulq %r8, %r10               # Multiply tile_col by base_tile_w (tile_col * base_tile_w)
 
-    # Compare tile_col with remainder
+    # Check if tile_col < remainder
     cmpq %r9, %rdx                # Compare tile_col with remainder
     jge .Luse_remainder_offset    # Jump if tile_col >= remainder
 
     # Add tile_col to the offset if tile_col < remainder
-    addq %rdx, %rax               # Add tile_col to the offset
+    addq %rdx, %r10               # Add tile_col to the offset
 
 .Luse_remainder_offset:
     # Return the calculated offset
-    movq %rax, %rax               # Move the result back for return
+    movq %r10, %rax               # Move the result into %rax for return
 
     # Epilogue: Restore stack and return
     popq %rbp
@@ -197,7 +196,7 @@ determine_tile_x_offset:
     popq %rbp
     ret
 
-    .globl determine_tile_h
+.globl determine_tile_h
 determine_tile_h:
     /* Prologue: Save base pointer and set up stack frame */
     pushq %rbp
@@ -227,8 +226,8 @@ determine_tile_h:
 
     # Calculate base_tile_h = height / n
     movq %rdi, %rax               # Move height into %rax
-    cqto                          # Sign extend %rax for division
-    idivq %rsi                    # Divide height by n, quotient in %rax, remainder in %rdx
+    xorq %rdx, %rdx               # Clear %rdx before division
+    divq %rsi                     # Divide height by n, quotient in %rax, remainder in %rdx
     movq %rax, %r8                # Store base_tile_h in %r8
     movq %rdx, %r9                # Store remainder in %r9
 
@@ -283,13 +282,14 @@ determine_tile_y_offset:
 
     # Calculate base_tile_h = height / n
     movq %rdi, %rax               # Move height into %rax
-    cqto                          # Sign extend %rax for division
-    idivq %rsi                    # Divide height by n, quotient in %rax (base_tile_h), remainder in %rdx
+    xorq %rdx, %rdx               # Clear %rdx before division
+    divq %rsi                     # Divide height by n, quotient in %rax (base_tile_h), remainder in %rdx
     movq %rax, %r8                # Store base_tile_h in %r8
     movq %rdx, %r9                # Store remainder in %r9
 
     # Multiply tile_row by base_tile_h
-    imulq %r8, %rdx, %rax         # Multiply tile_row by base_tile_h, result in %rax
+    movq %r8, %rax                # Move base_tile_h to %rax
+    imulq %rdx, %rax, %rdx        # Multiply tile_row by base_tile_h, result in %rdx
 
     # Compare tile_row with remainder
     cmpq %r9, %rdx                # Compare tile_row with remainder
@@ -316,7 +316,6 @@ determine_tile_y_offset:
     movq $0, %rax                 # Set return value to 0
     popq %rbp                     # Restore the base pointer
     ret                           # Return
-
 
 .globl copy_tile
 copy_tile:
@@ -529,7 +528,7 @@ get_a:
     ret                           # Return, with result in %eax
 
 
-    .globl make_pixel
+.globl make_pixel
 make_pixel:
     # Prologue: Setup the stack frame
     pushq   %rbp                   # Save base pointer
@@ -547,7 +546,7 @@ make_pixel:
     shll    $8, %ecx               # Shift left blue component by 8 bits (b << 8)
     orl     %ecx, %eax             # OR it with %eax (combine with red and green)
 
-    movl    %r8d, %ecx             # Move the alpha component (a) into %ecx
+    movl    %r9d, %ecx             # Move the alpha component (a) into %ecx
     orl     %ecx, %eax             # OR it with %eax (combine with red, green, and blue)
 
     # %eax now holds the complete pixel
@@ -557,7 +556,7 @@ make_pixel:
 
 
 
-    .globl to_grayscale
+.globl to_grayscale
 to_grayscale:
     # Prologue: Set up the stack frame
     pushq   %rbp
