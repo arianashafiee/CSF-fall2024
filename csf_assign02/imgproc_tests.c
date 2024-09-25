@@ -509,7 +509,7 @@ void test_determine_tile_x_offset(TestObjs *objs) {
     result = determine_tile_x_offset(large_width, 4, 3);
     printf("Test 8: determine_tile_x_offset(1000, 4, 3) = %d\n", result);
     ASSERT(result == 750);  // Fourth tile starts at 750}
-
+}
 
 void test_determine_tile_h(TestObjs *objs) {
   // Test 1: Basic case - height divisible by n
