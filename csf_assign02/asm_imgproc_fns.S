@@ -168,35 +168,34 @@ determine_tile_x_offset:
 
     # Calculate base_tile_w = width / n
     movq %rdi, %rax               # Move width into %rax
-    xorq %rdx, %rdx               # Clear %rdx (to avoid leftover from previous operations)
-    divq %rsi                     # Divide width by n (width / n), quotient in %rax, remainder in %rdx
+    cqto                          # Sign extend %rax for division
+    idivq %rsi                    # Divide width by n (width / n), quotient in %rax, remainder in %rdx
     movq %rax, %r8                # Store base_tile_w (quotient) in %r8
     movq %rdx, %r9                # Store remainder (width % n) in %r9
 
-    # Calculate tile_col * base_tile_w
-    movq %rdx, %r10               # Move tile_col into %r10 for multiplication
-    imulq %r8, %r10               # Multiply tile_col by base_tile_w (tile_col * base_tile_w)
+    # Calculate base offset: tile_col * base_tile_w
+    imulq %r8, %rdx               # tile_col * base_tile_w (rdx holds tile_col)
 
-    # Check if tile_col < remainder
+    # Compare tile_col with remainder
     cmpq %r9, %rdx                # Compare tile_col with remainder
-    jge .Luse_remainder_offset    # Jump if tile_col >= remainder
+    jge .Lno_remainder_adjust     # If tile_col >= remainder, no extra addition
 
-    # Add tile_col to the offset if tile_col < remainder
-    addq %rdx, %r10               # Add tile_col to the offset
+    # If tile_col < remainder, add tile_col
+    addq %rdx, %rax               # Add tile_col to the base offset
 
-.Luse_remainder_offset:
+.Lno_remainder_adjust:
     # Return the calculated offset
-    movq %r10, %rax               # Move the result into %rax for return
+    movq %rax, %rax               # Move result into %rax
 
     # Epilogue: Restore stack and return
     popq %rbp
     ret
 
 .Lreturn_zero_x_offset:
-    movq $0, %rax                 # Return 0 for invalid cases
+    # Return 0 for invalid cases
+    movq $0, %rax                 # Return 0 in %rax
     popq %rbp
     ret
-
 .globl determine_tile_h
 determine_tile_h:
     /* Prologue: Save base pointer and set up stack frame */
