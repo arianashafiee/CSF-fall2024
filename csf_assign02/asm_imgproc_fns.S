@@ -141,72 +141,62 @@ determine_tile_w:
 .globl determine_tile_x_offset
 determine_tile_x_offset:
     /* Prologue: Save base pointer and set up stack frame */
-    pushq   %rbp                    # Save old base pointer
-    movq    %rsp, %rbp              # Set up new base pointer
+    pushq   %rbp
+    movq    %rsp, %rbp
 
-    # Register use:
-    #   %rdi - width (input image width)
-    #   %rsi - n (tiling factor)
-    #   %rdx - tile_col (column index)
-    # Memory use:
-    #   -8(%rbp) - base_tile_w (local variable)
-    #   -16(%rbp) - remainder (local variable)
-    #   -24(%rbp) - x_offset (local variable)
+    /* Parameters:
+     * %edi - width (passed as first argument)
+     * %esi - n (tiling factor, second argument)
+     * %edx - tile_col (third argument)
+     */
 
-    # Save space on the stack for local variables (24 bytes: 3 variables * 8 bytes)
-    subq    $24, %rsp
+    # Check if n <= 0
+    cmpq $0, %rsi                 # Compare n with 0
+    jle .Lreturn_zero_x_offset    # Jump if n <= 0
 
-    # Check if n <= 0 (invalid case)
-    cmpq    $0, %rsi                 # Compare n with 0
-    jle     .Lreturn_zero_x_offset    # Jump if n <= 0
+    # Check if width <= 0
+    cmpq $0, %rdi                 # Compare width with 0
+    jle .Lreturn_zero_x_offset    # Jump if width <= 0
 
-    # Check if width <= 0 (invalid case)
-    cmpq    $0, %rdi                 # Compare width with 0
-    jle     .Lreturn_zero_x_offset    # Jump if width <= 0
+    # Check if tile_col < 0
+    cmpq $0, %rdx                 # Compare tile_col with 0
+    jl .Lreturn_zero_x_offset     # Jump if tile_col < 0
 
-    # Check if tile_col < 0 (invalid case)
-    cmpq    $0, %rdx                 # Compare tile_col with 0
-    jl      .Lreturn_zero_x_offset    # Jump if tile_col < 0
-
-    # Check if tile_col >= n (invalid case)
-    cmpq    %rsi, %rdx               # Compare tile_col with n
-    jge     .Lreturn_zero_x_offset    # Jump if tile_col >= n
+    # Check if tile_col >= n
+    cmpq %rsi, %rdx               # Compare tile_col with n
+    jge .Lreturn_zero_x_offset    # Jump if tile_col >= n
 
     # Calculate base_tile_w = width / n
-    movq    %rdi, %rax               # Move width into %rax
-    cqto                             # Sign extend for division
-    idivq   %rsi                     # Divide width by n, quotient in %rax, remainder in %rdx
-    movq    %rax, -8(%rbp)           # Store base_tile_w (quotient) in memory at -8(%rbp)
-    movq    %rdx, -16(%rbp)          # Store remainder (width % n) in memory at -16(%rbp)
+    movq %rdi, %rax               # Move width into %rax
+    cqto                          # Sign extend %rax for division
+    idivq %rsi                    # Divide width by n (width / n), quotient in %rax, remainder in %rdx
+    movq %rax, %r8                # Store base_tile_w (quotient) in %r8
+    movq %rdx, %r9                # Store remainder (width % n) in %r9
 
-    # Calculate base x offset: tile_col * base_tile_w
-    movq    %rdx, %rax               # Move tile_col to %rax (temporary register for calculation)
-    imulq   -8(%rbp), %rax           # Multiply tile_col by base_tile_w (rax = tile_col * base_tile_w)
-    movq    %rax, -24(%rbp)          # Store x_offset in memory at -24(%rbp)
+    # Calculate the base offset: tile_col * base_tile_w
+    movq %rdx, %rax               # Move tile_col into %rax
+    imulq %r8, %rax               # Multiply tile_col by base_tile_w (tile_col * base_tile_w)
 
     # Compare tile_col with remainder
-    movq    -16(%rbp), %rax          # Load remainder from memory
-    cmpq    %rax, %rdx               # Compare tile_col with remainder
-    jge     .Lno_remainder_adjust    # Jump if tile_col >= remainder
+    cmpq %r9, %rdx                # Compare tile_col with remainder
+    jge .Luse_remainder_adjust    # If tile_col >= remainder, no extra addition
 
-    # If tile_col < remainder, add tile_col to the offset
-    addq    %rdx, -24(%rbp)          # Add tile_col to the base offset
+    # If tile_col < remainder, add tile_col
+    addq %rdx, %rax               # Add tile_col to the base offset
 
-.Lno_remainder_adjust:
-    # Move the result (x_offset) into %rax for return
-    movq    -24(%rbp), %rax
+.Luse_remainder_adjust:
+    # Return the calculated offset
+    movq %rax, %rax               # Move the result back for return
 
-    # Epilogue: Restore the stack and return
-    addq    $24, %rsp                # Restore stack space
-    popq    %rbp                     # Restore old base pointer
-    ret                              # Return with x_offset in %rax
+    # Epilogue: Restore stack and return
+    popq %rbp
+    ret
 
 .Lreturn_zero_x_offset:
     # Return 0 for invalid cases
-    movq    $0, %rax                 # Set return value to 0
-    addq    $24, %rsp                # Restore stack space
-    popq    %rbp                     # Restore old base pointer
-    ret                              # Return
+    movq $0, %rax                 # Return 0 in %rax
+    popq %rbp
+    ret
 
 
 .globl determine_tile_h
