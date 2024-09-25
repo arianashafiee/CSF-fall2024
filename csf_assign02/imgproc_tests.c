@@ -291,6 +291,7 @@ void test_mirror_h_basic( TestObjs *objs ) {
   printf("Expected image after horizontal mirroring:\n");
   print_image(smiley_mirror_h_expected);
 
+
   printf("\nActual image after horizontal mirroring:\n");
   print_image(objs->smiley_out);
 
