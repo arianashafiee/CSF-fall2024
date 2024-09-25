@@ -255,69 +255,71 @@ determine_tile_h:
     ret
 
 
+
 .globl determine_tile_y_offset
 determine_tile_y_offset:
-    /* Prologue: Set up the stack frame */
-    pushq %rbp                      # Save the base pointer
-    movq %rsp, %rbp                 # Set the new base pointer
+    /* Prologue: Save base pointer and set up stack frame */
+    pushq %rbp
+    movq %rsp, %rbp
 
     /* Parameters:
-     * %edi - height (height of the input image)
-     * %esi - n (tiling factor, number of rows of tiles)
-     * %edx - tile_row (index of the tile row being processed)
+     * %edi - height (passed as first argument)
+     * %esi - n (tiling factor, second argument)
+     * %edx - tile_row (third argument)
      */
 
-    # Check if n <= 0 (invalid case)
-    cmpq $0, %rsi                   # Compare n with 0
-    jle .Lreturn_zero_tile_y_offset  # Jump if n <= 0
+    # Check if n <= 0
+    cmpq $0, %rsi                 # Compare n with 0
+    jle .Lreturn_zero_tile_y_offset # Jump if n <= 0
 
-    # Check if height <= 0 (invalid case)
-    cmpq $0, %rdi                   # Compare height with 0
-    jle .Lreturn_zero_tile_y_offset  # Jump if height <= 0
+    # Check if height <= 0
+    cmpq $0, %rdi                 # Compare height with 0
+    jle .Lreturn_zero_tile_y_offset # Jump if height <= 0
 
-    # Check if tile_row < 0 (invalid case)
-    cmpq $0, %rdx                   # Compare tile_row with 0
-    jl .Lreturn_zero_tile_y_offset   # Jump if tile_row < 0
+    # Check if tile_row < 0
+    cmpq $0, %rdx                 # Compare tile_row with 0
+    jl .Lreturn_zero_tile_y_offset # Jump if tile_row < 0
 
-    # Check if tile_row >= n (invalid case)
-    cmpq %rsi, %rdx                 # Compare tile_row with n
-    jge .Lreturn_zero_tile_y_offset  # Jump if tile_row >= n
+    # Check if tile_row >= n
+    cmpq %rsi, %rdx               # Compare tile_row with n
+    jge .Lreturn_zero_tile_y_offset # Jump if tile_row >= n
 
     # Calculate base_tile_h = height / n
-    movq %rdi, %rax                 # Move height into %rax (dividend)
-    cqto                            # Sign extend %rax into %rdx for division
-    idivq %rsi                      # Divide height by n, quotient in %rax (base_tile_h), remainder in %rdx
-    movq %rax, %r8                  # Store base_tile_h in %r8
-    movq %rdx, %r9                  # Store remainder in %r9 (remainder = height % n)
+    movq %rdi, %rax               # Move height into %rax
+    xorq %rdx, %rdx               # Clear %rdx before division
+    divq %rsi                     # Divide height by n, quotient in %rax (base_tile_h), remainder in %rdx
+    movq %rax, %r8                # Store base_tile_h in %r8
+    movq %rdx, %r9                # Store remainder in %r9
 
-    # Calculate tile_row * base_tile_h
-    imulq %r8, %rdx                 # Multiply tile_row by base_tile_h, store in %rdx
+    # Multiply tile_row by base_tile_h
+    movq %r8, %rax                # Move base_tile_h to %rax
+    imulq %rdx, %rax, %rdx        # Multiply tile_row by base_tile_h, result in %rdx
 
-    # Check if tile_row < remainder
-    cmpq %r9, %rdx                  # Compare tile_row with remainder
+    # Compare tile_row with remainder
+    cmpq %r9, %rdx                # Compare tile_row with remainder
     jge .Ladd_remainder_tile_y_offset # Jump if tile_row >= remainder
 
     # If tile_row < remainder, add tile_row to base_tile_h * tile_row
-    addq %rdx, %rax                 # Add tile_row to the result
+    addq %rdx, %rax               # Add tile_row to the result
     jmp .Lreturn_result_tile_y_offset # Jump to return the result
 
 .Ladd_remainder_tile_y_offset:
     # If tile_row >= remainder, add remainder to base_tile_h * tile_row
-    addq %r9, %rax                  # Add remainder to the result
+    addq %r9, %rax                # Add remainder to the result
 
 .Lreturn_result_tile_y_offset:
     # Return the result
-    movq %rax, %rax                 # Move the final result into %rax (return value)
+    movq %rax, %rax               # Move the final result into %rax (return value)
 
     # Epilogue: Restore stack and return
-    popq %rbp                       # Restore the base pointer
-    ret                             # Return
+    popq %rbp                     # Restore the base pointer
+    ret                           # Return
 
 .Lreturn_zero_tile_y_offset:
     # Return 0 for invalid cases
-    movq $0, %rax                   # Set return value to 0
-    popq %rbp                       # Restore the base pointer
-    ret                             # Return
+    movq $0, %rax                 # Set return value to 0
+    popq %rbp                     # Restore the base pointer
+    ret                           # Return
 
 .globl copy_tile
 copy_tile:
