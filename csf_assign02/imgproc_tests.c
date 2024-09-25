@@ -468,10 +468,10 @@ void test_determine_tile_x_offset(TestObjs *objs) {
   ASSERT(determine_tile_x_offset(objs->smiley->width, 2, 0) == 0); // First tile (offset 0)
 
  
-  // Test 2: Non-divisible width, distribute excess to leftmost tiles
- // ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 0) == 0); // First tile (offset 0)
-  //ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 1) == 6); // Second tile (offset 6)
-  //ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 2) == 11); // Third tile (offset 11)
+   Test 2: Non-divisible width, distribute excess to leftmost tiles
+  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 0) == 0); // First tile (offset 0)
+  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 1) == 6); // Second tile (offset 6)
+ ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 2) == 11); // Third tile (offset 11)
 
   // Test 3: n = 1, only one tile should cover the entire width, offset should always be 0
   ASSERT(determine_tile_x_offset(objs->smiley->width, 1, 0) == 0); // Only one tile, offset 0
@@ -487,9 +487,9 @@ void test_determine_tile_x_offset(TestObjs *objs) {
   ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 3) == 0);  // tile_col beyond the range
 
   // Test 7: Small width, large n (some tiles may have minimal width, but offset should be correct)
-  //ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 0) == 0); // First tile, offset 0
-  //ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 1) == 1); // Second tile, offset 1
-  //ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 2) == 2); // Third tile, offset 2
+  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 0) == 0); // First tile, offset 0
+  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 1) == 1); // Second tile, offset 1
+  ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 2) == 2); // Third tile, offset 2
 
   // Test 8: Case with a large image width (1000 pixels) and n=4 for tiling
   int large_width = 1000;
