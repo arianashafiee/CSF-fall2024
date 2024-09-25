@@ -116,7 +116,7 @@ determine_tile_w:
     movq %rdx, %r9                # Store remainder (width % n) in %r9
 
     # Compare tile_col with remainder
-    cmpq %r9, %rdx                # Compare tile_col (%rdx) with remainder (%r9)
+    cmpq %r9, %rdx                # Compare tile_col with remainder
     jge .Lno_remainder_add_tile_w # Jump if tile_col >= remainder
 
     # If tile_col < remainder, add 1 to base_tile_w
