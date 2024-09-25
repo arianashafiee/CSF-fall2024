@@ -631,8 +631,8 @@ imgproc_mirror_h:
     movq %rsp, %rbp               # Set up base pointer for this function
     
     # Load input image's width and height from the struct Image
-    movl (%rdi), %r8d             # Load width from input_img->width into %r8d (32-bit)
-    movl 4(%rdi), %r9d            # Load height from input_img->height into %r9d (32-bit)
+    movl (%rdi), %r8d             # Load width from input_img->width into %r8d
+    movl 4(%rdi), %r9d            # Load height from input_img->height into %r9d
 
     # Check for edge case: width <= 1 or height <= 0
     cmpl $1, %r8d                 # Compare width with 1
@@ -640,11 +640,17 @@ imgproc_mirror_h:
     testl %r9d, %r9d              # Check if height is 0 or negative
     jle return                    # If height <= 0, return
 
+    # Load input image data pointer into %r13
+    movq 8(%rdi), %r13            # Load input_img->data (pointer to pixel array)
+
+    # Load output image data pointer into %r14
+    movq 8(%rsi), %r14            # Load output_img->data (pointer to pixel array)
+
     # Initialize y loop counter (row iteration)
     xorl %r10d, %r10d             # y = 0 (initialize row index)
 
 y_loop:
-    cmpl %r10d, %r9d              # Compare y with height
+    cmpl %r9d, %r10d              # Compare y with height
     jge end_y_loop                # If y >= height, end loop
 
     # Initialize x loop counter (column iteration)
@@ -655,7 +661,7 @@ y_loop:
     shrl $1, %r12d                # Divide width by 2 (shift right by 1)
 
 x_loop:
-    cmpl %r11d, %r12d             # Compare x with width / 2
+    cmpl %r12d, %r11d             # Compare x with width / 2
     jge end_x_loop                # If x >= width / 2, end x loop
 
     # Calculate mirrored_x = width - 1 - x
@@ -669,7 +675,7 @@ x_loop:
     addl %r11d, %eax              # eax += x (left pixel offset)
 
     # Load left pixel: left_pixel = input_img->data[y * width + x]
-    movl (%rdi,%rax,4), %r14d     # left_pixel = input_img->data[y * width + x]
+    movl (%r13,%rax,4), %r15d     # left_pixel = input_img->data[y * width + x]
 
     # Calculate right pixel position: y * width + mirrored_x
     movl %r10d, %edx              # edx = y (row index)
@@ -677,14 +683,14 @@ x_loop:
     addl %r13d, %edx              # edx += mirrored_x (right pixel offset)
 
     # Load right pixel: right_pixel = input_img->data[y * width + mirrored_x]
-    movl (%rdi,%rdx,4), %r15d     # right_pixel = input_img->data[y * width + mirrored_x]
+    movl (%r13,%rdx,4), %r14d     # right_pixel = input_img->data[y * width + mirrored_x]
 
     # Swap the pixels in the output image
     # Store right_pixel in output_img->data[y * width + x]
-    movl %r15d, (%rsi,%rax,4)     # output_img->data[y * width + x] = right_pixel
+    movl %r14d, (%r14,%rax,4)     # output_img->data[y * width + x] = right_pixel
 
     # Store left_pixel in output_img->data[y * width + mirrored_x]
-    movl %r14d, (%rsi,%rdx,4)     # output_img->data[y * width + mirrored_x] = left_pixel
+    movl %r15d, (%r14,%rdx,4)     # output_img->data[y * width + mirrored_x] = left_pixel
 
     # Increment x and continue the loop
     incl %r11d                    # x++
