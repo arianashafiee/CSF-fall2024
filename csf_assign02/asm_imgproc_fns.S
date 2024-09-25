@@ -192,7 +192,7 @@ determine_tile_h:
     popq %rbp
     ret
 
-].globl determine_tile_x_offset
+.globl determine_tile_x_offset
 determine_tile_x_offset:
     # Input: 
     #   width in %rdi (image width)
@@ -626,66 +626,85 @@ to_grayscale:
  */
     .globl imgproc_mirror_h
 imgproc_mirror_h:
-    # Prologue: Set up stack frame
-    pushq   %rbp
-    movq    %rsp, %rbp
+    # Prologue
+    pushq %rbp                    # Save base pointer
+    movq %rsp, %rbp               # Set up base pointer for this function
+    
+    # Load input image's width and height from the struct Image
+    movq (%rdi), %r8d             # Load width from input_img->width into %r8d
+    movq 4(%rdi), %r9d            # Load height from input_img->height into %r9d
 
-    # Register use:
-    # %rdi - pointer to original struct Image (input_img)
-    # %rsi - pointer to output struct Image (output_img)
-    # %rax - width of the image (input_img->width)
-    # %rcx - height of the image (input_img->height)
-    # %r10 - x coordinate (used to iterate over width)
-    # %r11 - y coordinate (used to iterate over height)
-    # %r12 - pixel in input_img
-    # %r13 - pixel in output_img
-    # %r14 - mirrored pixel column (width - x - 1)
+    # Check for edge case: width <= 1 or height <= 0
+    cmp $1, %r8d                  # Compare width with 1
+    jle return                    # If width <= 1, return
+    test %r9d, %r9d               # Check if height is 0 or negative
+    jle return                    # If height <= 0, return
 
-    # Load the width and height of the input image into registers
-    movq    8(%rdi), %rax       # Load width (input_img->width)
-    movq    16(%rdi), %rcx      # Load height (input_img->height)
+    # Initialize y loop counter (row iteration)
+    xor %r10d, %r10d              # y = 0 (initialize row index)
 
-    # Loop through each row (y coordinate)
-.Louter_loop:
-    movq    $0, %r10            # Set x = 0 for each new row
+y_loop:
+    cmp %r10d, %r9d               # Compare y with height
+    jge end_y_loop                # If y >= height, end loop
 
-.Linner_loop:
-    # Calculate the mirrored column (width - x - 1)
-    movq    %rax, %r14          # r14 = width
-    subq    %r10, %r14          # r14 = width - x
-    subq    $1, %r14            # r14 = width - x - 1 (mirror position)
+    # Initialize x loop counter (column iteration)
+    xor %r11d, %r11d              # x = 0 (initialize column index)
+    
+    # Calculate half width (width / 2)
+    mov %r8d, %r12d               # Move width to r12d
+    shr $1, %r12d                 # Divide width by 2 (shift right by 1)
 
-    # Calculate pixel address in input image: input_img->data[y * width + x]
-    movq    %r10, %r12          # r12 = x
-    imulq   %rax, %r11          # r11 = y * width
-    addq    %r12, %r11          # r11 = y * width + x (input pixel offset)
-    movq    (%rdi), %r12        # r12 = input_img->data
-    addq    %r11, %r12          # r12 = input_img->data[y * width + x]
+x_loop:
+    cmp %r11d, %r12d              # Compare x with width / 2
+    jge end_x_loop                # If x >= width / 2, end x loop
 
-    # Calculate pixel address in output image: output_img->data[y * width + (width - x - 1)]
-    movq    %r14, %r13          # r13 = width - x - 1
-    imulq   %rax, %r11          # r11 = y * width (reuse calculation)
-    addq    %r13, %r11          # r11 = y * width + (width - x - 1) (output pixel offset)
-    movq    (%rsi), %r13        # r13 = output_img->data
-    addq    %r11, %r13          # r13 = output_img->data[y * width + (width - x - 1)]
+    # Calculate mirrored_x = width - 1 - x
+    mov %r8d, %r13d               # mirrored_x = width - 1
+    dec %r13d
+    sub %r11d, %r13d              # mirrored_x -= x
 
-    # Copy pixel from input to output: output_img->data[y * width + (width - x - 1)] = input_img->data[y * width + x]
-    movl    (%r12), %r15d       # Load pixel from input image
-    movl    %r15d, (%r13)       # Store pixel in output image
+    # Calculate left pixel position: y * width + x
+    mov %r10d, %eax               # eax = y (row index)
+    imul %r8d, %eax               # eax *= width (row * width)
+    add %r11d, %eax               # eax += x (left pixel offset)
 
-    # Increment x and check if done with the row
-    incq    %r10
-    cmpq    %rax, %r10          # Compare x with width
-    jl      .Linner_loop        # If x < width, continue with the row
+    # Load left pixel: left_pixel = input_img->data[y * width + x]
+    mov (%rdi,%rax,4), %r14d      # left_pixel = input_img->data[y * width + x]
 
-    # Increment y and check if done with all rows
-    incq    %r11                # Increment y
-    cmpq    %rcx, %r11          # Compare y with height
-    jl      .Louter_loop        # If y < height, continue with the next row
+    # Calculate right pixel position: y * width + mirrored_x
+    mov %r10d, %edx               # edx = y (row index)
+    imul %r8d, %edx               # edx *= width (row * width)
+    add %r13d, %edx               # edx += mirrored_x (right pixel offset)
 
-    # Epilogue: Restore stack frame and return
-    popq    %rbp
-    ret
+    # Load right pixel: right_pixel = input_img->data[y * width + mirrored_x]
+    mov (%rdi,%rdx,4), %r15d      # right_pixel = input_img->data[y * width + mirrored_x]
+
+    # Swap the pixels in the output image
+    # Store right_pixel in output_img->data[y * width + x]
+    mov %r15d, (%rsi,%rax,4)      # output_img->data[y * width + x] = right_pixel
+
+    # Store left_pixel in output_img->data[y * width + mirrored_x]
+    mov %r14d, (%rsi,%rdx,4)      # output_img->data[y * width + mirrored_x] = left_pixel
+
+    # Increment x and continue the loop
+    inc %r11d                     # x++
+    jmp x_loop
+
+end_x_loop:
+    # Increment y and continue the loop
+    inc %r10d                     # y++
+    jmp y_loop
+
+end_y_loop:
+    # Epilogue
+    mov %rbp, %rsp                # Restore the stack pointer
+    pop %rbp                      # Restore base pointer
+    ret                           # Return from the function
+
+return:
+    mov %rbp, %rsp                # Restore the stack pointer
+    pop %rbp                      # Restore base pointer
+    ret                           # Return from the function
 
 
 /*
