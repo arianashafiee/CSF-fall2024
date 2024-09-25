@@ -267,41 +267,39 @@ void destroy_img( struct Image *img ) {
 // Test functions
 ////////////////////////////////////////////////////////////////////////
 
+void test_mirror_h_basic( TestObjs *objs ) {
+  Picture smiley_mirror_h_pic = {
+    TEST_COLORS,
+    16, 10,
+    "    cbggrrrm    "
+    "   b        c   "
+    "  c   b  r   r  "
+    " b            b "
+    " r            b "
+    " r   c    b   g "
+    "  b   brgg   c  "
+    "   c        m   "
+    "    cmbrrggg    "
+    "                "
+  };
+  struct Image *smiley_mirror_h_expected = picture_to_img(&smiley_mirror_h_pic);
 
-void test_mirror_h_basic(TestObjs *objs) {
-    Picture smiley_mirror_h_pic = {
-        TEST_COLORS,
-        16, 10,
-        "    cbggrrrm    "
-        "   b        c   "
-        "  c   b  r   r  "
-        " b            b "
-        " r            b "
-        " r   c    b   g "
-        "  b   brgg   c  "
-        "   c        m   "
-        "    cmbrrggg    "
-        "                "
-    };
-    struct Image *smiley_mirror_h_expected = picture_to_img(&smiley_mirror_h_pic);
+  // Apply horizontal mirror transformation
+  imgproc_mirror_h(objs->smiley, objs->smiley_out);
 
-    // Perform the horizontal mirror transformation
-    imgproc_mirror_h(objs->smiley, objs->smiley_out);
+  // Print the expected and actual output for debugging
+  printf("Expected image after horizontal mirroring:\n");
+  print_image(smiley_mirror_h_expected);
 
-    // Print the expected image
-    printf("Expected Image:\n");
-    print_image(smiley_mirror_h_expected);
+  printf("\nActual image after horizontal mirroring:\n");
+  print_image(objs->smiley_out);
 
-    // Print the actual output image
-    printf("Actual Output Image:\n");
-    print_image(objs->smiley_out);
+  // Check if the result matches the expected image
+  ASSERT(images_equal(smiley_mirror_h_expected, objs->smiley_out));
 
-    // Check if the images are equal
-    ASSERT(images_equal(smiley_mirror_h_expected, objs->smiley_out));
-
-    // Clean up
-    destroy_img(smiley_mirror_h_expected);
+  destroy_img(smiley_mirror_h_expected);
 }
+
 
 void test_mirror_v_basic( TestObjs *objs ) {
   Picture smiley_mirror_v_pic = {
@@ -480,7 +478,7 @@ void test_determine_tile_x_offset(TestObjs *objs) {
   ASSERT(determine_tile_x_offset(objs->smiley->width, 2, 0) == 0); // First tile (offset 0)
 
  
-   //Test 2: Non-divisible width, distribute excess to leftmost tiles
+   Test 2: Non-divisible width, distribute excess to leftmost tiles
   ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 0) == 0); // First tile (offset 0)
   ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 1) == 6); // Second tile (offset 6)
  ASSERT(determine_tile_x_offset(objs->smiley->width, 3, 2) == 11); // Third tile (offset 11)
