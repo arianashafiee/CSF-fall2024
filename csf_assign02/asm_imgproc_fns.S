@@ -174,18 +174,19 @@ determine_tile_x_offset:
     movq %rdx, %r9                # Store remainder (width % n) in %r9
 
     # Calculate base offset: tile_col * base_tile_w
-    imulq %r8, %rdx               # tile_col * base_tile_w (rdx holds tile_col)
+    movq %rdx, %rax               # Move tile_col into %rax
+    imulq %r8, %rdx               # Multiply tile_col by base_tile_w (tile_col * base_tile_w)
 
     # Compare tile_col with remainder
     cmpq %r9, %rdx                # Compare tile_col with remainder
-    jge .Lno_remainder_adjust     # If tile_col >= remainder, no extra addition
+    jge .Ladd_remainder_adjust     # If tile_col >= remainder, no extra addition
 
     # If tile_col < remainder, add tile_col
     addq %rdx, %rax               # Add tile_col to the base offset
 
-.Lno_remainder_adjust:
+.Ladd_remainder_adjust:
     # Return the calculated offset
-    movq %rax, %rax               # Move result into %rax
+    movq %rax, %rax               # Move the final result into %rax (return value)
 
     # Epilogue: Restore stack and return
     popq %rbp
@@ -196,6 +197,7 @@ determine_tile_x_offset:
     movq $0, %rax                 # Return 0 in %rax
     popq %rbp
     ret
+
 .globl determine_tile_h
 determine_tile_h:
     /* Prologue: Save base pointer and set up stack frame */
