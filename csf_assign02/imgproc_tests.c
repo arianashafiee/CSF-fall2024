@@ -493,6 +493,7 @@ void test_determine_tile_x_offset(TestObjs *objs) {
 
   // Test 8: Case with a large image width (1000 pixels) and n=4 for tiling
     int large_width = 1000;
+    int result;
 
     result = determine_tile_x_offset(large_width, 4, 0);
     printf("Test 8: determine_tile_x_offset(1000, 4, 0) = %d\n", result);
