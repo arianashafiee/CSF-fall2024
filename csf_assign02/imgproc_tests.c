@@ -267,30 +267,77 @@ void destroy_img( struct Image *img ) {
 // Test functions
 ////////////////////////////////////////////////////////////////////////
 
-void test_mirror_h_basic( TestObjs *objs ) {
-  Picture smiley_mirror_h_pic = {
-    TEST_COLORS,
-    16, 10,
-    "    cbggrrrm    "
-    "   b        c   "
-    "  c   b  r   r  "
-    " b            b "
-    " r            b "
-    " r   c    b   g "
-    "  b   brgg   c  "
-    "   c        m   "
-    "    cmbrrggg    "
-    "                "
-  };
-  struct Image *smiley_mirror_h_expected = picture_to_img( &smiley_mirror_h_pic );
+void test_mirror_h_basic(TestObjs *objs) {
+    Picture smiley_mirror_h_pic = {
+        TEST_COLORS,
+        16, 10,
+        "    cbggrrrm    "
+        "   b        c   "
+        "  c   b  r   r  "
+        " b            b "
+        " r            b "
+        " r   c    b   g "
+        "  b   brgg   c  "
+        "   c        m   "
+        "    cmbrrggg    "
+        "                "
+    };
+    struct Image *smiley_mirror_h_expected = picture_to_img(&smiley_mirror_h_pic);
 
-  imgproc_mirror_h( objs->smiley, objs->smiley_out );
+    // Print original image
+    printf("Original Image:\n");
+    char *original_img_str = img_to_string(objs->smiley);
+    printf("%s\n", original_img_str);
+    free(original_img_str);
 
-  ASSERT( images_equal( smiley_mirror_h_expected, objs->smiley_out ) );
+    // Apply horizontal mirror transformation
+    imgproc_mirror_h(objs->smiley, objs->smiley_out);
 
-  destroy_img( smiley_mirror_h_expected );
+    // Print mirrored image
+    printf("Mirrored Image:\n");
+    char *mirrored_img_str = img_to_string(objs->smiley_out);
+    printf("%s\n", mirrored_img_str);
+    free(mirrored_img_str);
+
+    // Print expected mirrored image
+    printf("Expected Mirrored Image:\n");
+    char *expected_img_str = img_to_string(smiley_mirror_h_expected);
+    printf("%s\n", expected_img_str);
+    free(expected_img_str);
+
+    // Assert that the mirrored image matches the expected image
+    ASSERT(images_equal(smiley_mirror_h_expected, objs->smiley_out));
+
+    destroy_img(smiley_mirror_h_expected);
 }
+char* img_to_string(struct Image *img) {
+    int width = img->width;
+    int height = img->height;
+    char *str = malloc((width * height + height + 1) * sizeof(char)); // +height for newlines, +1 for null terminator
+    int index = 0;
 
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint32_t pixel = img->data[y * width + x];
+            char pixel_char = ' ';  // default to space if unknown
+
+            switch (pixel) {
+                case COLOR_C: pixel_char = 'c'; break;
+                case COLOR_B: pixel_char = 'b'; break;
+                case COLOR_G: pixel_char = 'g'; break;
+                case COLOR_R: pixel_char = 'r'; break;
+                case COLOR_M: pixel_char = 'm'; break;
+                // Add more cases if you have other colors
+            }
+
+            str[index++] = pixel_char;
+        }
+        str[index++] = '\n';  // Add a newline after each row
+    }
+    str[index] = '\0';  // Null terminate the string
+
+    return str;
+}
 void test_mirror_v_basic( TestObjs *objs ) {
   Picture smiley_mirror_v_pic = {
     TEST_COLORS,
