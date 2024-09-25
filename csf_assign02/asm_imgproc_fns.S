@@ -616,16 +616,16 @@ to_grayscale:
 
     .globl imgproc_mirror_h
 imgproc_mirror_h:
-    # Prologue: Save base pointer and establish a stack frame
+    # Prologue: Save base pointer and establish stack frame
     pushq %rbp
     movq %rsp, %rbp
     subq $16, %rsp                # Reserve 16 bytes for local variables
 
     # Save callee-saved registers
-    pushq %r12
-    pushq %r13
-    pushq %r14
-    pushq %r15
+    pushq %r12                    # Save r12 (input image pointer)
+    pushq %r13                    # Save r13 (output image pointer)
+    pushq %r14                    # Save r14 (width / 2)
+    pushq %r15                    # Save r15 (temporary for loop counters)
 
     # Load input image's width and height from the struct Image
     movl (%rdi), %r8d             # Load width from input_img->width (32-bit)
@@ -637,11 +637,13 @@ imgproc_mirror_h:
     testl %r9d, %r9d              # Check if height is 0 or negative
     jle return                    # If height <= 0, return
 
-    # Load input image data pointer into %r12 (callee-saved)
+    # Load input and output image data pointers into r12 and r13 (callee-saved)
     movq 8(%rdi), %r12            # Load input_img->data (pointer to pixel array)
-
-    # Load output image data pointer into %r13 (callee-saved)
     movq 8(%rsi), %r13            # Load output_img->data (pointer to pixel array)
+
+    # Calculate half width (width / 2) for swapping pixels
+    movl %r8d, %r14d              # Move width to r14d
+    shrl $1, %r14d                # Divide width by 2 (shift right by 1)
 
     # Initialize y loop counter (row iteration)
     xorl %r10d, %r10d             # y = 0 (initialize row index)
@@ -652,18 +654,14 @@ y_loop:
 
     # Initialize x loop counter (column iteration)
     xorl %r11d, %r11d             # x = 0 (initialize column index)
-    
-    # Calculate half width (width / 2)
-    movl %r8d, %r14d              # Move width to %r14d (32-bit)
-    shrl $1, %r14d                # Divide width by 2 (shift right by 1)
 
 x_loop:
     cmpl %r11d, %r14d             # Compare x with width / 2
     jge end_x_loop                # If x >= width / 2, end x loop
 
     # Calculate mirrored_x = width - 1 - x
-    movl %r8d, %r15d              # mirrored_x = width - 1
-    decl %r15d                    # mirrored_x--
+    movl %r8d, %r15d              # mirrored_x = width
+    decl %r15d                    # mirrored_x = width - 1
     subl %r11d, %r15d             # mirrored_x -= x
 
     # Calculate left pixel position: y * width + x
