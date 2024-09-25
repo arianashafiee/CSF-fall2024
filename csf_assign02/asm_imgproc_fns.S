@@ -532,7 +532,7 @@ get_a:
     ret                           # Return, with result in %eax
 
 
-    .globl make_pixel
+.globl make_pixel
 make_pixel:
     # Prologue: Setup the stack frame
     pushq   %rbp                   # Save base pointer
@@ -555,8 +555,10 @@ make_pixel:
 
     # %eax now holds the complete pixel
     # Epilogue: Clean up and return
+    movq    %rbp, %rsp             # Restore stack pointer
     popq    %rbp                   # Restore base pointer
     ret                            # Return, with the pixel in %eax
+
 
 .globl to_grayscale
 to_grayscale:
