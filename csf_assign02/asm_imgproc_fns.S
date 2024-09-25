@@ -194,7 +194,10 @@ determine_tile_x_offset:
 
 .Lreturn_zero_x_offset:
     # Return 0 for invalid cases
-    movq $
+    movq $0, %rax                 # Return 0 in %rax
+    popq %rbp                     # Restore base pointer
+    ret                           # Return from function
+
 
 
 .globl determine_tile_h
