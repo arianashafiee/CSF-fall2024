@@ -614,7 +614,7 @@ to_grayscale:
     popq    %rbp                # Restore base pointer
     ret                         # Return with the grayscale pixel in 
 
-    .globl imgproc_mirror_h
+        .globl imgproc_mirror_h
 imgproc_mirror_h:
     # Prologue: Save base pointer and establish stack frame
     pushq %rbp
@@ -628,8 +628,8 @@ imgproc_mirror_h:
     pushq %r15                    # Save r15 (temporary for loop counters)
 
     # Load input image's width and height from the struct Image
-    movl (%rdi), %r8d             # Load width from input_img->width (32-bit)
-    movl 4(%rdi), %r9d            # Load height from input_img->height (32-bit)
+    movl (%rdi), %r8d             # Load width from input_img->width (32-bit) -> offset 0
+    movl 4(%rdi), %r9d            # Load height from input_img->height (32-bit) -> offset 4
 
     # Check for edge case: width <= 1 or height <= 0
     cmpl $1, %r8d                 # Compare width with 1
@@ -638,8 +638,8 @@ imgproc_mirror_h:
     jle return                    # If height <= 0, return
 
     # Load input and output image data pointers into r12 and r13 (callee-saved)
-    movq 8(%rdi), %r12            # Load input_img->data (pointer to pixel array)
-    movq 8(%rsi), %r13            # Load output_img->data (pointer to pixel array)
+    movq 8(%rdi), %r12            # Load input_img->data (pointer to pixel array) -> offset 8
+    movq 8(%rsi), %r13            # Load output_img->data (pointer to pixel array) -> offset 8
 
     # Calculate half width (width / 2) for swapping pixels
     movl %r8d, %r14d              # Move width to r14d
