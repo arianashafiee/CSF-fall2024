@@ -137,62 +137,68 @@ determine_tile_w:
     ret
 
 
+
 .globl determine_tile_x_offset
 determine_tile_x_offset:
-    # Prologue: Save the base pointer and set up the stack frame
+    /* Prologue: Save base pointer and set up stack frame */
     pushq %rbp
     movq %rsp, %rbp
 
-    # Parameters:
-    # %edi - width (first argument)
-    # %esi - n (second argument)
-    # %edx - tile_col (third argument)
+    /* Parameters:
+     * %edi - width (passed as first argument)
+     * %esi - n (tiling factor, second argument)
+     * %edx - tile_col (third argument)
+     */
 
     # Check if n <= 0
     cmpq $0, %rsi                 # Compare n with 0
-    jle .Lreturn_zero_x_offset     # If n <= 0, return 0
+    jle .Lreturn_zero_x_offset    # Jump if n <= 0
 
     # Check if width <= 0
     cmpq $0, %rdi                 # Compare width with 0
-    jle .Lreturn_zero_x_offset     # If width <= 0, return 0
+    jle .Lreturn_zero_x_offset    # Jump if width <= 0
 
     # Check if tile_col < 0
     cmpq $0, %rdx                 # Compare tile_col with 0
-    jl .Lreturn_zero_x_offset      # If tile_col < 0, return 0
+    jl .Lreturn_zero_x_offset     # Jump if tile_col < 0
 
     # Check if tile_col >= n
     cmpq %rsi, %rdx               # Compare tile_col with n
-    jge .Lreturn_zero_x_offset     # If tile_col >= n, return 0
+    jge .Lreturn_zero_x_offset    # Jump if tile_col >= n
 
     # Calculate base_tile_w = width / n
     movq %rdi, %rax               # Move width into %rax
-    cqto                          # Sign extend for division
-    idivq %rsi                    # Divide width by n, quotient in %rax, remainder in %rdx
+    cqto                          # Sign extend %rax for division
+    idivq %rsi                    # Divide width by n (width / n), quotient in %rax, remainder in %rdx
     movq %rax, %r8                # Store base_tile_w (quotient) in %r8
     movq %rdx, %r9                # Store remainder (width % n) in %r9
 
-    # Calculate tile_col * base_tile_w
-    imulq %r8, %rdx               # Multiply tile_col by base_tile_w (rdx holds tile_col)
+    # Calculate base offset: tile_col * base_tile_w
+    movq %rdx, %rax               # Move tile_col into %rax
+    imulq %r8, %rdx               # Multiply tile_col by base_tile_w (tile_col * base_tile_w)
 
     # Compare tile_col with remainder
     cmpq %r9, %rdx                # Compare tile_col with remainder
     jge .Lno_remainder_adjust     # If tile_col >= remainder, no extra addition
 
-    # Add tile_col to the offset if tile_col < remainder
+    # If tile_col < remainder, add tile_col
     addq %rdx, %rax               # Add tile_col to the base offset
 
 .Lno_remainder_adjust:
     # Return the calculated offset
-    movq %rax, %rax               # Move result into %rax for return
+    movq %rax, %rax               # Move result into %rax
 
-    # Epilogue: Restore the stack and return
+    # Epilogue: Restore stack and return
     popq %rbp
     ret
+
 .Lreturn_zero_x_offset:
     # Return 0 for invalid cases
     movq $0, %rax                 # Return 0 in %rax
-    popq %rbp                     # Restore the base pointer
-    ret
+    popq %rbp                     # Restore base pointer
+    ret                           # Return from function
+
+
 
 .globl determine_tile_h
 determine_tile_h:
