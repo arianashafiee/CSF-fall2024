@@ -233,9 +233,9 @@ determine_tile_h:
     cqto                            # Sign extend %rax for division
     idivq %rsi                      # Divide height by n (height / n), quotient in %rax, remainder in %rdx
     movq %rax, %r8                  # Store base_tile_h (quotient) in %r8
-    movq %rdx, %r9                  # Store remainder in %r9
+    movq %rdx, %r9                  # Store remainder (height % n) in %r9
 
-    # Check if tile_row < remainder to decide if an extra pixel is added
+    # Compare tile_row with remainder
     cmpq %r9, %rdx                  # Compare tile_row with remainder
     jge .Lreturn_base_tile_h         # Jump if tile_row >= remainder (no extra pixel)
 
@@ -255,7 +255,6 @@ determine_tile_h:
     movq $0, %rax                   # Return 0 in %rax
     popq %rbp
     ret
-
 
 
 
