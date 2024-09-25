@@ -531,33 +531,31 @@ get_a:
     popq    %rbp                  # Restore base pointer
     ret                           # Return, with result in %eax
 
-
 .globl make_pixel
 make_pixel:
-    # Prologue: Setup the stack frame
-    pushq   %rbp                   # Save base pointer
-    movq    %rsp, %rbp             # Set the new base pointer
+    # Parameters are passed as:
+    # %rdi - red
+    # %rsi - green
+    # %rdx - blue
 
-    # Move the arguments into appropriate registers
-    movl    %edi, %eax             # Move the red component (r) into %eax
-    shll    $24, %eax              # Shift left red component by 24 bits (r << 24)
+    # Create a 32-bit packed pixel in the format 0x00RRGGBB
+    # We assume the red, green, and blue values are 8-bit each (0-255).
+    
+    # Step 1: Shift red to the highest 8 bits (shift left by 16)
+    shl $16, %rdi     # red = red << 16
 
-    movl    %esi, %ecx             # Move the green component (g) into %ecx
-    shll    $16, %ecx              # Shift left green component by 16 bits (g << 16)
-    orl     %ecx, %eax             # OR it with %eax (combine with red component)
+    # Step 2: Shift green to the middle 8 bits (shift left by 8)
+    shl $8, %rsi      # green = green << 8
 
-    movl    %edx, %ecx             # Move the blue component (b) into %ecx
-    shll    $8, %ecx               # Shift left blue component by 8 bits (b << 8)
-    orl     %ecx, %eax             # OR it with %eax (combine with red and green)
+    # Step 3: Combine the shifted red, green, and blue values into a single value
+    or %rsi, %rdi     # red |= green (combine red and green)
+    or %rdx, %rdi     # red |= blue (combine with blue)
 
-    movl    %r8d, %ecx             # Move the alpha component (a) into %ecx
-    orl     %ecx, %eax             # OR it with %eax (combine with red, green, and blue)
+    # Step 4: Return the packed pixel (stored in %rdi, which is the return register)
+    mov %rdi, %rax    # Move result to %rax (return value register)
 
-    # %eax now holds the complete pixel
-    # Epilogue: Clean up and return
-    movq    %rbp, %rsp             # Restore stack pointer
-    popq    %rbp                   # Restore base pointer
-    ret                            # Return, with the pixel in %eax
+    # Step 5: Return from function
+    ret
 
 
 .globl to_grayscale
