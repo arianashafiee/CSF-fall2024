@@ -558,6 +558,7 @@ make_pixel:
     ret
 
 
+
 .globl to_grayscale
 to_grayscale:
     # Prologue: Set up the stack frame
