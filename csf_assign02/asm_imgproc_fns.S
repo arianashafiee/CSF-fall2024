@@ -179,14 +179,14 @@ determine_tile_x_offset:
 
     # Compare tile_col with remainder
     cmpq %r9, %rdx                # Compare tile_col with remainder
-    jge .Ladd_remainder_adjust     # If tile_col >= remainder, no extra addition
+    jge .Lno_remainder_adjust     # If tile_col >= remainder, no extra addition
 
     # If tile_col < remainder, add tile_col
     addq %rdx, %rax               # Add tile_col to the base offset
 
-.Ladd_remainder_adjust:
+.Lno_remainder_adjust:
     # Return the calculated offset
-    movq %rax, %rax               # Move the final result into %rax (return value)
+    movq %rax, %rax               # Move result into %rax
 
     # Epilogue: Restore stack and return
     popq %rbp
@@ -194,9 +194,8 @@ determine_tile_x_offset:
 
 .Lreturn_zero_x_offset:
     # Return 0 for invalid cases
-    movq $0, %rax                 # Return 0 in %rax
-    popq %rbp
-    ret
+    movq $
+
 
 .globl determine_tile_h
 determine_tile_h:
