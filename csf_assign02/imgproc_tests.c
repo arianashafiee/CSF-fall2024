@@ -20,6 +20,7 @@ typedef struct {
   const char *data;
 } Picture;
 
+void print_image(struct Image *img);
 
 // Some "basic" colors to use in test Pictures
 #define TEST_COLORS \
