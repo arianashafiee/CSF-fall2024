@@ -163,19 +163,19 @@ determine_tile_x_offset:
 
     # Calculate base width for each tile: width / n
     mov %rdi, %rax        # Move width to rax
-    xor %rdx, %rdx        # Clear rdx
-    div %rsi              # Divide rax by n, quotient in rax (base width), remainder in rdx
+    cqo                   # Sign extend rax into rdx:rax (prepare for division)
+    idiv %rsi             # Divide width by n, quotient in rax, remainder in rdx
 
     # rax now holds base width (width / n)
     # rdx holds the remainder (width % n)
 
     # Multiply tile_col by base width to get initial offset
-    mov %rax, %r8         # Save base width in r8
-    mov %rdx, %r9         # Save remainder in r9
-    imul %r8, %rdx        # rdx = tile_col * base_width, result in rdx
+    mov %rdx, %r8         # Save the remainder (rdx) to r8
+    mov %rax, %r9         # Save the base width to r9
+    imul %rdx, %rdx       # tile_col * base_width, result in rdx (offset)
 
     # Check if tile_col is less than the remainder. If so, add 1 to the offset
-    cmp %r9, %rdx         # Compare tile_col with remainder
+    cmp %r8, %rdx         # Compare tile_col with remainder
     jl add_one            # If tile_col < remainder, jump to add_one
 
 return_offset:
@@ -188,63 +188,9 @@ return_zero:
 
 add_one:
     add $1, %rdx          # Add 1 to the offset
-    jmp return_offset     # Jump to return offset
+    jmp return_offset      # Jump to return offset
 
-.globl determine_tile_h
-determine_tile_h:
-    /* Prologue: Save base pointer and set up stack frame */
-    pushq %rbp                      # Save base pointer
-    movq %rsp, %rbp                 # Set base pointer to current stack pointer
 
-    /* Parameters:
-     * %edi - height (passed as first argument)
-     * %esi - n (tiling factor, second argument)
-     * %edx - tile_row (third argument)
-     */
-
-    # Check if n <= 0 (invalid case)
-    cmpq $0, %rsi                   # Compare n with 0
-    jle .Lreturn_zero               # Jump if n <= 0
-
-    # Check if height <= 0 (invalid case)
-    cmpq $0, %rdi                   # Compare height with 0
-    jle .Lreturn_zero               # Jump if height <= 0
-
-    # Check if tile_row < 0 (invalid case)
-    cmpq $0, %rdx                   # Compare tile_row with 0
-    jl .Lreturn_zero                # Jump if tile_row < 0
-
-    # Check if tile_row >= n (invalid case)
-    cmpq %rsi, %rdx                 # Compare tile_row with n
-    jge .Lreturn_zero               # Jump if tile_row >= n
-
-    # Calculate base_tile_h = height / n
-    movq %rdi, %rax                 # Move height into %rax
-    cqto                            # Sign extend %rax for division
-    idivq %rsi                      # Divide height by n (height / n), quotient in %rax, remainder in %rdx
-    movq %rax, %r8                  # Store base_tile_h (quotient) in %r8
-    movq %rdx, %r9                  # Store remainder (height % n) in %r9
-
-    # Compare tile_row with remainder
-    cmpq %r9, %rdx                  # Compare tile_row with remainder
-    jge .Lreturn_base_tile_h         # Jump if tile_row >= remainder (no extra pixel)
-
-    # If tile_row < remainder, add 1 to base_tile_h
-    incq %r8                        # Increment base_tile_h by 1
-
-.Lreturn_base_tile_h:
-    # Return the final tile height (base_tile_h + 1 if necessary)
-    movq %r8, %rax                  # Move result into %rax
-
-    # Epilogue: Clean up stack and return
-    popq %rbp
-    ret
-
-.Lreturn_zero:
-    # Return 0 for invalid cases
-    movq $0, %rax                   # Return 0 in %rax
-    popq %rbp
-    ret
 
 .globl determine_tile_y_offset
 determine_tile_y_offset:
