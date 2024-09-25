@@ -203,8 +203,8 @@ determine_tile_x_offset:
 .globl determine_tile_h
 determine_tile_h:
     /* Prologue: Save base pointer and set up stack frame */
-    pushq %rbp
-    movq %rsp, %rbp
+    pushq   %rbp
+    movq    %rsp, %rbp
 
     /* Parameters:
      * %edi - height (passed as first argument)
@@ -230,10 +230,10 @@ determine_tile_h:
 
     # Calculate base_tile_h = height / n
     movq %rdi, %rax               # Move height into %rax
-    xorq %rdx, %rdx               # Clear %rdx before division
-    divq %rsi                     # Divide height by n, quotient in %rax, remainder in %rdx
-    movq %rax, %r8                # Store base_tile_h in %r8
-    movq %rdx, %r9                # Store remainder in %r9
+    cqto                          # Sign-extend %rax into %rdx for division
+    idivq %rsi                    # Divide height by n, quotient in %rax, remainder in %rdx
+    movq %rax, %r8                # Store base_tile_h (quotient) in %r8
+    movq %rdx, %r9                # Store remainder (height % n) in %r9
 
     # Compare tile_row with remainder
     cmpq %r9, %rdx                # Compare tile_row with remainder
@@ -255,6 +255,7 @@ determine_tile_h:
     movq $0, %rax
     popq %rbp
     ret
+
 
 .globl determine_tile_y_offset
 determine_tile_y_offset:
