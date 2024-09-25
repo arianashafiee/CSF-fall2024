@@ -163,19 +163,19 @@ determine_tile_x_offset:
 
     # Calculate base width for each tile: width / n
     mov %rdi, %rax        # Move width to rax
-    cqo                   # Sign extend rax into rdx:rax (prepare for division)
-    idiv %rsi             # Divide width by n, quotient in rax, remainder in rdx
+    xor %rdx, %rdx        # Clear rdx
+    div %rsi              # Divide rax by n, quotient in rax (base width), remainder in rdx
 
     # rax now holds base width (width / n)
     # rdx holds the remainder (width % n)
 
     # Multiply tile_col by base width to get initial offset
-    mov %rdx, %r8         # Save the remainder (rdx) to r8
-    mov %rax, %r9         # Save the base width to r9
-    imul %rdx, %rdx       # tile_col * base_width, result in rdx (offset)
+    mov %rax, %r8         # Save base width in r8
+    mov %rdx, %r9         # Save remainder in r9
+    imul %r8, %rdx        # rdx = tile_col * base_width, result in rdx
 
     # Check if tile_col is less than the remainder. If so, add 1 to the offset
-    cmp %r8, %rdx         # Compare tile_col with remainder
+    cmp %r9, %rdx         # Compare tile_col with remainder
     jl add_one            # If tile_col < remainder, jump to add_one
 
 return_offset:
@@ -188,8 +188,7 @@ return_zero:
 
 add_one:
     add $1, %rdx          # Add 1 to the offset
-    jmp return_offset      # Jump to return offset
-
+    jmp return_offset     # Jump to return offset
 
 
 .globl determine_tile_y_offset
