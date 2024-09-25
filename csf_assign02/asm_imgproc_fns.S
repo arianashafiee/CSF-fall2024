@@ -186,9 +186,13 @@ determine_tile_x_offset:
     movq %rax, %rax               # Move result into %rax for return
 
     # Epilogue: Restore the stack and return
-    popq %bb
+    popq %rbp
     ret
-
+.Lreturn_zero_x_offset:
+    # Return 0 for invalid cases
+    movq $0, %rax                 # Return 0 in %rax
+    popq %rbp                     # Restore the base pointer
+    ret
 
 .globl determine_tile_h
 determine_tile_h:
