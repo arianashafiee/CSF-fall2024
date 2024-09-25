@@ -492,12 +492,23 @@ void test_determine_tile_x_offset(TestObjs *objs) {
   //ASSERT(determine_tile_x_offset(objs->smiley->width, 20, 2) == 2); // Third tile, offset 2
 
   // Test 8: Case with a large image width (1000 pixels) and n=4 for tiling
-  int large_width = 1000;
-  ASSERT(determine_tile_x_offset(large_width, 4, 0) == 0);    // First tile starts at 0
-  ASSERT(determine_tile_x_offset(large_width, 4, 1) == 250);  // Second tile starts at 250
-  ASSERT(determine_tile_x_offset(large_width, 4, 2) == 500);  // Third tile starts at 500
-  ASSERT(determine_tile_x_offset(large_width, 4, 3) == 750);  // Fourth tile starts at 750
-}
+    int large_width = 1000;
+
+    result = determine_tile_x_offset(large_width, 4, 0);
+    printf("Test 8: determine_tile_x_offset(1000, 4, 0) = %d\n", result);
+    ASSERT(result == 0);    // First tile starts at 0
+
+    result = determine_tile_x_offset(large_width, 4, 1);
+    printf("Test 8: determine_tile_x_offset(1000, 4, 1) = %d\n", result);
+    ASSERT(result == 250);  // Second tile starts at 250
+
+    result = determine_tile_x_offset(large_width, 4, 2);
+    printf("Test 8: determine_tile_x_offset(1000, 4, 2) = %d\n", result);
+    ASSERT(result == 500);  // Third tile starts at 500
+
+    result = determine_tile_x_offset(large_width, 4, 3);
+    printf("Test 8: determine_tile_x_offset(1000, 4, 3) = %d\n", result);
+    ASSERT(result == 750);  // Fourth tile starts at 750}
 
 
 void test_determine_tile_h(TestObjs *objs) {
