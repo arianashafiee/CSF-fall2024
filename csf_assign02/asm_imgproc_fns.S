@@ -137,6 +137,7 @@ determine_tile_w:
     ret
 
 
+
 .globl determine_tile_x_offset
 determine_tile_x_offset:
     /* Prologue: Save base pointer and set up stack frame */
