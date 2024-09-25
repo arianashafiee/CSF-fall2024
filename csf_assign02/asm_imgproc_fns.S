@@ -533,29 +533,28 @@ get_a:
 
 .globl make_pixel
 make_pixel:
-    # Parameters are passed as:
-    # %rdi - red
-    # %rsi - green
-    # %rdx - blue
+    # Input: %rdi (red), %rsi (green), %rdx (blue), %rcx (alpha)
+    # Output: %rax (the packed pixel value: 0xRRGGBBAA)
 
-    # Create a 32-bit packed pixel in the format 0x00RRGGBB
-    # We assume the red, green, and blue values are 8-bit each (0-255).
-    
-    # Step 1: Shift red to the highest 8 bits (shift left by 16)
-    shl $16, %rdi     # red = red << 16
+    # Step 1: Pack the red component (shift left by 24 bits to align with most significant byte)
+    shl $24, %rdi          # red << 24
+    # Step 2: Pack the green component (shift left by 16 bits)
+    shl $16, %rsi          # green << 16
+    # Step 3: Pack the blue component (shift left by 8 bits)
+    shl $8, %rdx           # blue << 8
+    # Step 4: Alpha remains as it is (already in the correct position)
 
-    # Step 2: Shift green to the middle 8 bits (shift left by 8)
-    shl $8, %rsi      # green = green << 8
+    # Step 5: Combine all components using bitwise OR operations
+    or %rsi, %rdi          # Combine red and green
+    or %rdx, %rdi          # Combine with blue
+    or %rcx, %rdi          # Combine with alpha
 
-    # Step 3: Combine the shifted red, green, and blue values into a single value
-    or %rsi, %rdi     # red |= green (combine red and green)
-    or %rdx, %rdi     # red |= blue (combine with blue)
+    # Step 6: Move the packed pixel into %rax for the return value
+    mov %rdi, %rax
 
-    # Step 4: Return the packed pixel (stored in %rdi, which is the return register)
-    mov %rdi, %rax    # Move result to %rax (return value register)
-
-    # Step 5: Return from function
+    # Step 7: Return
     ret
+
 
 
 
