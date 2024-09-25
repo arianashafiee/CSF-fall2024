@@ -640,10 +640,10 @@ imgproc_mirror_h:
     testl %r9d, %r9d              # Check if height is 0 or negative
     jle return                    # If height <= 0, return
 
-    # Load input image data pointer into %r13
+    # Load input image data pointer into %r13 (64-bit pointer)
     movq 8(%rdi), %r13            # Load input_img->data (pointer to pixel array)
 
-    # Load output image data pointer into %r14
+    # Load output image data pointer into %r14 (64-bit pointer)
     movq 8(%rsi), %r14            # Load output_img->data (pointer to pixel array)
 
     # Initialize y loop counter (row iteration)
