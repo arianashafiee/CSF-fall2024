@@ -614,16 +614,6 @@ to_grayscale:
     popq    %rbp                # Restore base pointer
     ret                         # Return with the grayscale pixel in 
 
-/*
- * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
- *
- * Transform image by mirroring its pixels horizontally.
- * This transformation always succeeds.
- *
- * Parameters:
- *   %rdi - pointer to original struct Image
- *   %rsi - pointer to output struct Image
- */
     .globl imgproc_mirror_h
 imgproc_mirror_h:
     # Prologue
