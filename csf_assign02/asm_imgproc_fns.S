@@ -245,6 +245,8 @@ add_one:
     add $1, %rdx          # Add 1 to the offset
     jmp return_offset      # Jump to return offset
 
+
+
 .globl determine_tile_y_offset
 determine_tile_y_offset:
     /* Prologue: Save base pointer and set up stack frame */
