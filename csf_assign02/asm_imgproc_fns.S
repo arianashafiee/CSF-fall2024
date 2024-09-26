@@ -715,53 +715,54 @@ return:
     popq %rbp                     # Restore base pointer
     ret                           # Return from the function
 
-    .global imgproc_mirror_v
+.global imgproc_mirror_v
 
 imgproc_mirror_v:
 
-    mov eax, [rdi + 8]         
-    mov ebx, [rdi + 12]        
+    movl 8(%rdi), %eax         
+    movl 12(%rdi), %ebx        
 
-    shr ebx, 1                
+    shrl $1, %ebx              
 
-    xor ecx, ecx                
+    xorl %ecx, %ecx             
 
 .loop_y:
-    cmp ecx, ebx               
+    cmpl %ebx, %ecx             
     jge .end_loop_y             
 
-    mov edx, [rdi + 12]         
-    sub edx, 1                 
-    sub edx, ecx                
+    movl 12(%rdi), %edx         
+    subl $1, %edx               
+    subl %ecx, %edx             
 
-    xor edi, edi                
+    xorl %edi, %edi             
 
 .loop_x:
-    cmp edi, [rdi + 8]          
+    cmpl 8(%rdi), %edi          
     jge .end_loop_x             
 
-    mov eax, ecx                
-    imul eax, [rdi + 8]         
-    add eax, edi                
-    mov eax, [rdi + 16 + rax*4] 
+    movl %ecx, %eax             
+    imull 8(%rdi), %eax         
+    addl %edi, %eax             
+    movl 16(%rdi, %rax, 4), %eax
 
-    mov ebx, edx                
-    imul ebx, [rdi + 8]         
-    add ebx, edi                
-    mov ebx, [rdi + 16 + ebx*4] 
+    movl %edx, %ebx             
+    imull 8(%rdi), %ebx         
+    addl %edi, %ebx             
+    movl 16(%rdi, %rbx, 4), %ebx
 
-    mov [rsi + 16 + rax*4], ebx 
-    mov [rsi + 16 + rdx*4], eax  
+    movl %ebx, 16(%rsi, %rax, 4)
+    movl %eax, 16(%rsi, %rdx, 4)
 
-    inc edi                     
-    jmp .loop_x                
+    incl %edi                    
+    jmp .loop_x                 
 
 .end_loop_x:
-    inc ecx                     
-    jmp .loop_y                
+    incl %ecx                    
+    jmp .loop_y                 
 
 .end_loop_y:
     ret
+
 
 /*
  * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
