@@ -283,25 +283,14 @@ void test_mirror_h_basic( TestObjs *objs ) {
     "    cmbrrggg    "
     "                "
   };
-  struct Image *smiley_mirror_h_expected = picture_to_img(&smiley_mirror_h_pic);
+  struct Image *smiley_mirror_h_expected = picture_to_img( &smiley_mirror_h_pic );
 
-  // Apply horizontal mirror transformation
-  imgproc_mirror_h(objs->smiley, objs->smiley_out);
+  imgproc_mirror_h( objs->smiley, objs->smiley_out );
 
-  // Print the expected and actual output for debugging
-  printf("Expected image after horizontal mirroring:\n");
-  print_image(smiley_mirror_h_expected);
+  ASSERT( images_equal( smiley_mirror_h_expected, objs->smiley_out ) );
 
-
-  printf("\nActual image after horizontal mirroring:\n");
-  print_image(objs->smiley_out);
-
-  // Check if the result matches the expected image
-  ASSERT(images_equal(smiley_mirror_h_expected, objs->smiley_out));
-
-  destroy_img(smiley_mirror_h_expected);
+  destroy_img( smiley_mirror_h_expected );
 }
-
 
 void test_mirror_v_basic( TestObjs *objs ) {
   Picture smiley_mirror_v_pic = {
@@ -320,21 +309,13 @@ void test_mirror_v_basic( TestObjs *objs ) {
   };
   struct Image *smiley_mirror_v_expected = picture_to_img( &smiley_mirror_v_pic );
 
-  // Apply horizontal mirror transformation
-  imgproc_mirror_v(objs->smiley, objs->smiley_out);
+  imgproc_mirror_v( objs->smiley, objs->smiley_out );
 
-  // Print the expected and actual output for debugging
-  printf("Expected image after horizontal mirroring:\n");
-  print_image(smiley_mirror_v_expected);
+  ASSERT( images_equal( smiley_mirror_v_expected, objs->smiley_out ) );
 
-  printf("\nActual image after horizontal mirroring:\n");
-  print_image(objs->smiley_out);
-
-  // Check if the result matches the expected image
-  ASSERT(images_equal(smiley_mirror_v_expected, objs->smiley_out));
-
-  destroy_img(smiley_mirror_v_expected);
+  destroy_img( smiley_mirror_v_expected );
 }
+
 void print_image(struct Image *img) {
     for (int y = 0; y < img->height; y++) {
         for (int x = 0; x < img->width; x++) {
