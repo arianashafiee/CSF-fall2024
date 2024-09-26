@@ -613,108 +613,107 @@ to_grayscale:
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
     ret                         # Return with the grayscale pixel in 
-
-        .globl imgproc_mirror_h
+.global imgproc_mirror_h:
 imgproc_mirror_h:
-    # Prologue: Save base pointer and establish stack frame
-    pushq %rbp
-    movq %rsp, %rbp
-    subq $16, %rsp                # Reserve 16 bytes for local variables
-
-    # Save callee-saved registers
-    pushq %r12                    # Save r12 (input image pointer)
-    pushq %r13                    # Save r13 (output image pointer)
-    pushq %r14                    # Save r14 (width / 2)
-    pushq %r15                    # Save r15 (temporary for loop counters)
-
-    # Load input image's width and height from the struct Image
-    movl (%rdi), %r8d             # Load width from input_img->width (32-bit) -> offset 0
-    movl 4(%rdi), %r9d            # Load height from input_img->height (32-bit) -> offset 4
-
-    # Check for edge case: width <= 1 or height <= 0
-    cmpl $1, %r8d                 # Compare width with 1
-    jle return                    # If width <= 1, return
-    testl %r9d, %r9d              # Check if height is 0 or negative
-    jle return                    # If height <= 0, return
-
-    # Load input and output image data pointers into r12 and r13 (callee-saved)
-    movq 8(%rdi), %r12            # Load input_img->data (pointer to pixel array) -> offset 8
-    movq 8(%rsi), %r13            # Load output_img->data (pointer to pixel array) -> offset 8
-
-    # Calculate half width (width / 2) for swapping pixels
-    movl %r8d, %r14d              # Move width to r14d
-    shrl $1, %r14d                # Divide width by 2 (shift right by 1)
-
-    # Initialize y loop counter (row iteration)
-    xorl %r10d, %r10d             # y = 0 (initialize row index)
-
-y_loop:
-    cmpl %r10d, %r9d              # Compare y with height
-    jge end_y_loop                # If y >= height, end loop
-
-    # Initialize x loop counter (column iteration)
-    xorl %r11d, %r11d             # x = 0 (initialize column index)
-
-x_loop:
-    cmpl %r11d, %r14d             # Compare x with width / 2
-    jge end_x_loop                # If x >= width / 2, end x loop
-
-    # Calculate mirrored_x = width - 1 - x
-    movl %r8d, %r15d              # mirrored_x = width
-    decl %r15d                    # mirrored_x = width - 1
-    subl %r11d, %r15d             # mirrored_x -= x
-
-    # Calculate left pixel position: y * width + x
-    movl %r10d, %eax              # eax = y (row index)
-    imull %r8d, %eax              # eax *= width (row * width)
-    addl %r11d, %eax              # eax += x (left pixel offset)
-
-    # Load left pixel: left_pixel = input_img->data[y * width + x]
-    movl (%r12,%rax,4), %r14d     # left_pixel = input_img->data[y * width + x]
-
-    # Calculate right pixel position: y * width + mirrored_x
-    movl %r10d, %edx              # edx = y (row index)
-    imull %r8d, %edx              # edx *= width (row * width)
-    addl %r15d, %edx              # edx += mirrored_x (right pixel offset)
-
-    # Load right pixel: right_pixel = input_img->data[y * width + mirrored_x]
-    movl (%r12,%rdx,4), %r15d     # right_pixel = input_img->data[y * width + mirrored_x]
-
-    # Swap the pixels in the output image
-    # Store right_pixel in output_img->data[y * width + x]
-    movl %r15d, (%r13,%rax,4)     # output_img->data[y * width + x] = right_pixel
-
-    # Store left_pixel in output_img->data[y * width + mirrored_x]
-    movl %r14d, (%r13,%rdx,4)     # output_img->data[y * width + mirrored_x] = left_pixel
-
-    # Increment x and continue the loop
-    incl %r11d                    # x++
-    jmp x_loop
-
-end_x_loop:
-    # Increment y and continue the loop
-    incl %r10d                    # y++
-    jmp y_loop
-
-end_y_loop:
-    # Epilogue: Restore callee-saved registers
-    popq %r15
-    popq %r14
-    popq %r13
-    popq %r12
-
-    # Restore the stack frame
-    addq $16, %rsp                # Clean up local variable space
-    movq %rbp, %rsp               # Restore the stack pointer
-    popq %rbp                     # Restore base pointer
-    ret                           # Return from the function
-
-return:
-    # Early return if width <= 1 or height <= 0
-    addq $16, %rsp                # Clean up local variable space
-    popq %rbp                     # Restore base pointer
-    ret                           # Return from the function
-
+.LFB20:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movq	%rdi, -40(%rbp)
+	movq	%rsi, -48(%rbp)
+	movq	-40(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -12(%rbp)
+	movq	-40(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	%eax, -16(%rbp)
+	cmpl	$1, -12(%rbp)
+	jle	.L64
+	cmpl	$0, -16(%rbp)
+	jle	.L64
+	movl	$0, -4(%rbp)
+	jmp	.L60
+.L63:
+	movl	$0, -8(%rbp)
+	jmp	.L61
+.L62:
+	movl	-12(%rbp), %eax
+	subl	$1, %eax
+	subl	-8(%rbp), %eax
+	movl	%eax, -20(%rbp)
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -24(%rbp)
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-20(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -28(%rbp)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-28(%rbp), %eax
+	movl	%eax, (%rdx)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-20(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-24(%rbp), %eax
+	movl	%eax, (%rdx)
+	addl	$1, -8(%rbp)
+.L61:
+	movl	-12(%rbp), %eax
+	movl	%eax, %edx
+	shrl	$31, %edx
+	addl	%edx, %eax
+	sarl	%eax
+	cmpl	%eax, -8(%rbp)
+	jl	.L62
+	addl	$1, -4(%rbp)
+.L60:
+	movl	-4(%rbp), %eax
+	cmpl	-16(%rbp), %eax
+	jl	.L63
+	jmp	.L56
+.L64:
+	nop
+.L56:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
     .global imgproc_mirror_v
 imgproc_mirror_v:
 .LFB21:
@@ -847,71 +846,78 @@ imgproc_tile:
  */
 .globl imgproc_grayscale
 imgproc_grayscale:
-    # Prologue: set up the stack frame
-    pushq   %rbp
-    movq    %rsp, %rbp
-
-    # Register use:
-    # %rdi - pointer to input_img
-    # %rsi - pointer to output_img
-    # %rax - width of the image (input_img->width)
-    # %rcx - height of the image (input_img->height)
-    # %rdx - x (current column index)
-    # %r8  - y (current row index)
-    # %r9  - pixel (current pixel)
-    # %r10 - grayscale pixel
-
-    # Load the width and height of the input image into registers
-    movq    8(%rdi), %rax        # Load width (input_img->width)
-    movq    16(%rdi), %rcx       # Load height (input_img->height)
-
-    # Edge case: If width <= 0 or height <= 0, return immediately
-    cmpq    $0, %rax
-    jle     .Lexit_grayscale
-    cmpq    $0, %rcx
-    jle     .Lexit_grayscale
-
-    # Outer loop: Iterate over the rows (y)
-    movq    $0, %r8              # Set y = 0
-.Louter_loop_grayscale:
-    cmpq    %rcx, %r8            # Compare y with height
-    jge     .Lexit_grayscale     # If y >= height, exit
-
-    # Inner loop: Iterate over the columns (x)
-    movq    $0, %rdx             # Set x = 0
-.Linner_loop_grayscale:
-    cmpq    %rax, %rdx           # Compare x with width
-    jge     .Lnext_row_grayscale # If x >= width, go to the next row
-
-    # Load the pixel from input_img->data[y * width + x]
-    movq    %rdx, %r9            # r9 = x
-    imulq   %rax, %r8            # r8 = y * width
-    addq    %r9, %r8             # r8 = y * width + x (pixel offset)
-    movq    (%rdi), %r9          # r9 = input_img->data
-    movl    (%r9, %r8, 4), %r9d  # Load the pixel (32-bit RGBA)
-
-    # Call the to_grayscale function to convert pixel to grayscale
-    # Note: This would be an external function call to to_grayscale.
-    call    to_grayscale          # Result goes to %rax (grayscale pixel)
-
-    # Store the grayscale pixel in output_img->data[y * width + x]
-    movq    (%rsi), %r10         # r10 = output_img->data
-    movq    %rax, (%r10, %r8, 4) # Store the grayscale pixel
-
-    # Increment x and go to the next column
-    incq    %rdx
-    jmp     .Linner_loop_grayscale
-
-.Lnext_row_grayscale:
-    # Increment y and go to the next row
-    incq    %r8
-    jmp     .Louter_loop_grayscale
-
-.Lexit_grayscale:
-    # Epilogue: Restore the stack and return
-    popq    %rbp
-    ret
-
+.LFB23:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$48, %rsp
+	movq	%rdi, -40(%rbp)
+	movq	%rsi, -48(%rbp)
+	movq	-40(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -12(%rbp)
+	movq	-40(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	%eax, -16(%rbp)
+	cmpl	$0, -12(%rbp)
+	jle	.L87
+	cmpl	$0, -16(%rbp)
+	jle	.L87
+	movl	$0, -4(%rbp)
+	jmp	.L83
+.L86:
+	movl	$0, -8(%rbp)
+	jmp	.L84
+.L85:
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -20(%rbp)
+	movl	-20(%rbp), %eax
+	movl	%eax, %edi
+	call	to_grayscale
+	movl	%eax, -24(%rbp)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-24(%rbp), %eax
+	movl	%eax, (%rdx)
+	addl	$1, -8(%rbp)
+.L84:
+	movl	-8(%rbp), %eax
+	cmpl	-12(%rbp), %eax
+	jl	.L85
+	addl	$1, -4(%rbp)
+.L83:
+	movl	-4(%rbp), %eax
+	cmpl	-16(%rbp), %eax
+	jl	.L86
+	jmp	.L79
+.L87:
+	nop
+.L79:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
