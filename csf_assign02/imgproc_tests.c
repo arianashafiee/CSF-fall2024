@@ -320,11 +320,21 @@ void test_mirror_v_basic( TestObjs *objs ) {
   };
   struct Image *smiley_mirror_v_expected = picture_to_img( &smiley_mirror_v_pic );
 
-  imgproc_mirror_v( objs->smiley, objs->smiley_out );
+  // Apply horizontal mirror transformation
+  imgproc_mirror_v(objs->smiley, objs->smiley_out);
 
-  ASSERT( images_equal( smiley_mirror_v_expected, objs->smiley_out ) );
+  // Print the expected and actual output for debugging
+  printf("Expected image after horizontal mirroring:\n");
+  print_image(smiley_mirror_v_expected);
 
-  destroy_img( smiley_mirror_v_expected );
+
+  printf("\nActual image after horizontal mirroring:\n");
+  print_image(objs->smiley_out);
+
+  // Check if the result matches the expected image
+  ASSERT(images_equal(smiley_mirror_v_expected, objs->smiley_out));
+
+  destroy_img(smiley_mirror_v_expected);
 }
 void print_image(struct Image *img) {
     for (int y = 0; y < img->height; y++) {
