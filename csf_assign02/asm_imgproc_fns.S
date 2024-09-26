@@ -352,95 +352,100 @@ mirror_h_exit:
  */
     .global imgproc_mirror_v
 imgproc_mirror_v:
-    pushq   %rbp                 # Save the base pointer
-    movq    %rsp, %rbp            # Set up the stack frame
-    subq    $32, %rsp             # Reserve stack space for local variables
-
-    movq    %rdi, -40(%rbp)       # Store input image pointer in local variable
-    movq    %rsi, -48(%rbp)       # Store output image pointer in local variable
-
-    # Load input image width and height
-    movq    -40(%rbp), %rax       # Load input image pointer
-    movl    (%rax), %eax          # Load width from input image
-    movl    %eax, -12(%rbp)       # Store width in local variable
-    movq    -40(%rbp), %rax       # Load input image pointer again
-    movl    4(%rax), %eax         # Load height from input image
-    movl    %eax, -16(%rbp)       # Store height in local variable
-
-    # Initialize row index (y) to 0
-    movl    $0, -4(%rbp)          # Set initial row index y to 0
-
-    # Begin row loop
-vertical_mirror_row_loop_check:
-    movl    -16(%rbp), %eax       # Load height
-    subl    $1, %eax              # mirrored_y = height - 1
-    subl    -4(%rbp), %eax        # mirrored_y = height - 1 - y
-    movl    %eax, -20(%rbp)       # Store mirrored_y in local variable
-
-    movl    $0, -8(%rbp)          # Set column index x to 0
-
-    # Begin column loop
-vertical_mirror_column_loop_check:
-    # Load top pixel from input image at (y, x)
-    movq    -40(%rbp), %rax       # Load input image pointer
-    movq    8(%rax), %rdx         # Load input image data pointer
-    movl    -4(%rbp), %eax        # Load current row (y)
-    imull   -12(%rbp), %eax       # y * width
-    addl    -8(%rbp), %eax        # y * width + x
-    cltq                        # Convert to 64-bit
-    salq    $2, %rax              # Multiply by 4 (each pixel is 4 bytes)
-    movl    (%rdx, %rax), %eax    # Load top pixel
-    movl    %eax, -24(%rbp)       # Store top pixel in local variable
-
-    # Load bottom pixel from input image at (mirrored_y, x)
-    movq    -40(%rbp), %rax       # Load input image pointer
-    movq    8(%rax), %rdx         # Load input image data pointer
-    movl    -20(%rbp), %eax       # Load mirrored_y
-    imull   -12(%rbp), %eax       # mirrored_y * width
-    addl    -8(%rbp), %eax        # mirrored_y * width + x
-    cltq                        # Convert to 64-bit
-    salq    $2, %rax              # Multiply by 4 (each pixel is 4 bytes)
-    movl    (%rdx, %rax), %eax    # Load bottom pixel
-    movl    %eax, -28(%rbp)       # Store bottom pixel in local variable
-
-    # Store bottom pixel in output image at (y, x)
-    movq    -48(%rbp), %rax       # Load output image pointer
-    movq    8(%rax), %rdx         # Load output image data pointer
-    movl    -4(%rbp), %eax        # Load current row (y)
-    imull   -12(%rbp), %eax       # y * width
-    addl    -8(%rbp), %eax        # y * width + x
-    cltq                        # Convert to 64-bit
-    salq    $2, %rax              # Multiply by 4 (each pixel is 4 bytes)
-    movl    -28(%rbp), %eax       # Load bottom pixel
-    movl    %eax, (%rdx, %rax)    # Store bottom pixel
-
-    # Store top pixel in output image at (mirrored_y, x)
-    movq    -48(%rbp), %rax       # Load output image pointer
-    movq    8(%rax), %rdx         # Load output image data pointer
-    movl    -20(%rbp), %eax       # Load mirrored_y
-    imull   -12(%rbp), %eax       # mirrored_y * width
-    addl    -8(%rbp), %eax        # mirrored_y * width + x
-    cltq                        # Convert to 64-bit
-    salq    $2, %rax              # Multiply by 4 (each pixel is 4 bytes)
-    movl    -24(%rbp), %eax       # Load top pixel
-    movl    %eax, (%rdx, %rax)    # Store top pixel
-
-    addl    $1, -8(%rbp)          # Increment column index x
-    movl    -8(%rbp), %eax        # Check if x < width
-    cmpl    -12(%rbp), %eax
-    jl      vertical_mirror_column_loop_check  # Repeat column loop
-
-    addl    $1, -4(%rbp)          # Increment row index y
-    movl    -4(%rbp), %eax        # Check if y < height / 2
-    movl    -16(%rbp), %edx
-    shrl    $1, %edx              # height / 2
-    cmpl    %edx, %eax
-    jl      vertical_mirror_row_loop_check     # Repeat row loop
-
-    # Epilogue
-    addq    $32, %rsp             # Deallocate local variables
-    popq    %rbp                  # Restore the base pointer
-    ret                           # Return
+   imgproc_mirror_v:
+.LFB21:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movq	%rdi, -40(%rbp)
+	movq	%rsi, -48(%rbp)
+	movq	-40(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -12(%rbp)
+	movq	-40(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	%eax, -16(%rbp)
+	movl	$0, -4(%rbp)
+	jmp	.Louter_loop
+.Linner_loop_start:
+	movl	-16(%rbp), %eax
+	subl	$1, %eax
+	subl	-4(%rbp), %eax
+	movl	%eax, -20(%rbp)
+	movl	$0, -8(%rbp)
+	jmp	.Lprocess_pixels
+.Lpixel_processing:
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -24(%rbp)
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-20(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -28(%rbp)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-28(%rbp), %eax
+	movl	%eax, (%rdx)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-20(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-24(%rbp), %eax
+	movl	%eax, (%rdx)
+	addl	$1, -8(%rbp)
+.Lprocess_pixels:
+	movl	-8(%rbp), %eax
+	cmpl	-12(%rbp), %eax
+	jl	.Lpixel_processing
+	addl	$1, -4(%rbp)
+.Louter_loop:
+	movl	-16(%rbp), %eax
+	movl	%eax, %edx
+	shrl	$31, %edx
+	addl	%edx, %eax
+	sarl	%eax
+	cmpl	%eax, -4(%rbp)
+	jl	.Linner_loop_start
+	nop
+	nop
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
 
 /*

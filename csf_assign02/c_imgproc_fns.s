@@ -860,6 +860,7 @@ imgproc_mirror_v:
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
+	
 .LFE21:
 	.size	imgproc_mirror_v, .-imgproc_mirror_v
 	.globl	imgproc_tile
