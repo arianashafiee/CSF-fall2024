@@ -715,55 +715,50 @@ return:
     popq %rbp                     # Restore base pointer
     ret                           # Return from the function
 
-
-.global imgproc_mirror_v
+    .global imgproc_mirror_v
 
 imgproc_mirror_v:
 
     mov eax, [rdi + 8]         
-    mov ebx, [rdi + 12]         ; Load height into ebx
+    mov ebx, [rdi + 12]        
 
-    shr ebx, 1                  ; ebx = height / 2
+    shr ebx, 1                
 
-    xor ecx, ecx                ; Initialize y = 0
+    xor ecx, ecx                
 
 .loop_y:
-    cmp ecx, ebx                ; Compare y with height / 2
-    jge .end_loop_y             ; If y >= height / 2, exit loop
+    cmp ecx, ebx               
+    jge .end_loop_y             
 
-    ; Calculate mirrored_y = height - 1 - y
-    mov edx, [rdi + 12]         ; Load height into edx
-    sub edx, 1                  ; edx = height - 1
-    sub edx, ecx                ; edx = mirrored_y = height - 1 - y
+    mov edx, [rdi + 12]         
+    sub edx, 1                 
+    sub edx, ecx                
 
-    xor edi, edi                ; Initialize x = 0
+    xor edi, edi                
 
 .loop_x:
-    cmp edi, [rdi + 8]          ; Compare x with width
-    jge .end_loop_x             ; If x >= width, exit loop
+    cmp edi, [rdi + 8]          
+    jge .end_loop_x             
 
-    ; Get top_pixel = input_img->data[y * width + x]
-    mov eax, ecx                ; eax = y
-    imul eax, [rdi + 8]         ; eax = y * width
-    add eax, edi                ; eax = y * width + x
-    mov eax, [rdi + 16 + rax*4] ; Load top_pixel
+    mov eax, ecx                
+    imul eax, [rdi + 8]         
+    add eax, edi                
+    mov eax, [rdi + 16 + rax*4] 
 
-    ; Get bottom_pixel = input_img->data[mirrored_y * width + x]
-    mov ebx, edx                ; ebx = mirrored_y
-    imul ebx, [rdi + 8]         ; ebx = mirrored_y * width
-    add ebx, edi                ; ebx = mirrored_y * width + x
-    mov ebx, [rdi + 16 + ebx*4] ; Load bottom_pixel
+    mov ebx, edx                
+    imul ebx, [rdi + 8]         
+    add ebx, edi                
+    mov ebx, [rdi + 16 + ebx*4] 
 
-    ; Swap the pixels
-    mov [rsi + 16 + rax*4], ebx ; output_img->data[y * width + x] = bottom_pixel
-    mov [rsi + 16 + rdx*4], eax  ; output_img->data[mirrored_y * width + x] = top_pixel
+    mov [rsi + 16 + rax*4], ebx 
+    mov [rsi + 16 + rdx*4], eax  
 
-    inc edi                     ; x++
-    jmp .loop_x                 ; Repeat for next x
+    inc edi                     
+    jmp .loop_x                
 
 .end_loop_x:
-    inc ecx                     ; y++
-    jmp .loop_y                 ; Repeat for next y
+    inc ecx                     
+    jmp .loop_y                
 
 .end_loop_y:
     ret
