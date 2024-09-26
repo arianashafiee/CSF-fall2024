@@ -310,9 +310,6 @@ void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
     int32_t width = input_img->width;
     int32_t height = input_img->height;
 
-    // Edge case: Empty image or single-row image
-    if (height <= 1 || width <= 0) return;
-
     // Iterate over each column
     for (int32_t y = 0; y < height / 2; y++) {
         // Calculate the position of the mirrored row

@@ -715,104 +715,112 @@ return:
     popq %rbp                     # Restore base pointer
     ret                           # Return from the function
 
-.global imgproc_mirror_v
-.section .text
+section .data
 
-/* 
- * imgproc_mirror_v:
- * Vertically mirrors an input image by swapping rows.
- * Parameters:
- *   %rdi - pointer to the input Image (input_img)
- *   %rsi - pointer to the output Image (output_img)
- * 
- * Register usage:
- *   %rdi - input_img (struct Image *)
- *   %rsi - output_img (struct Image *)
- *   %r12d - image width (int32_t)
- *   %r13d - image height (int32_t)
- *   %r14d - current row index (y)
- *   %r15d - mirrored row index (mirrored_y)
- * 
- * Memory use:
- *   -4(%rbp)  - x (current column index)
- *   -8(%rbp)  - top_pixel
- *   -12(%rbp) - bottom_pixel
- * 
- * Stack layout:
- *   Uses ABI-compliant stack frame with 16-byte alignment.
- */
+section .text
+global imgproc_mirror_v
+
+; Function to mirror an image vertically
+; input_img - pointer to input Image struct
+; output_img - pointer to output Image struct
+; The image data is an array of uint32_t pixels
+
+; Struct layout:
+; input_img->width  = [input_img + 0x0]
+; input_img->height = [input_img + 0x4]
+; input_img->data   = [input_img + 0x8]
+; Same layout for output_img.
 
 imgproc_mirror_v:
-    /* Prologue: Save caller-saved registers and set up stack frame */
-    pushq %rbp                  /* save base pointer */
-    movq %rsp, %rbp              /* set stack frame */
-    subq $16, %rsp               /* allocate space for local variables */
-    pushq %r12                   /* save callee-saved register */
-    pushq %r13                   /* save callee-saved register */
-    pushq %r14                   /* save callee-saved register */
-    pushq %r15                   /* save callee-saved register */
+    ; Prologue
+    push    rbp                ; Save base pointer
+    mov     rbp, rsp           ; Set base pointer to stack pointer
+    sub     rsp, 32            ; Allocate local variables (y, mirrored_y, x)
 
-    /* Load width and height from input_img struct */
-    movl 8(%rdi), %r12d          /* input_img->width -> %r12d (width) */
-    movl 12(%rdi), %r13d         /* input_img->height -> %r13d (height) */
+    ; Function arguments
+    mov     rdi, [rbp + 16]    ; input_img (1st parameter)
+    mov     rsi, [rbp + 24]    ; output_img (2nd parameter)
 
-    /* Edge case: If height <= 1 or width <= 0, return immediately */
-    cmpl $1, %r13d               /* compare height with 1 */
-    jle .Ldone                   /* if height <= 1, return */
-    cmpl $0, %r12d               /* compare width with 0 */
-    jle .Ldone                   /* if width <= 0, return */
+    ; Load the width and height of the input image
+    mov     eax, [rdi]         ; width = input_img->width
+    mov     [rbp - 4], eax     ; Store width in local variable
+    mov     eax, [rdi + 4]     ; height = input_img->height
+    mov     [rbp - 8], eax     ; Store height in local variable
 
-    /* Iterate over each row (y < height / 2) */
-    xorl %r14d, %r14d            /* y = 0 */
-.Lrow_loop:
-    movl %r13d, %r15d            /* mirrored_y = height - 1 - y */
-    subl %r14d, %r15d
-    decl %r15d
+    ; Check if height is less than or equal to 1
+    mov     eax, [rbp - 8]     ; Load height
+    cmp     eax, 1             ; Compare height with 1
+    jle     .end               ; If height <= 1, end the function
 
-    /* Compare if y < height / 2, exit if not */
-    movl %r13d, %eax
-    shrl $1, %eax                /* divide height by 2 */
-    cmpl %eax, %r14d
-    jge .Ldone                   /* if y >= height / 2, exit loop */
+    ; Start outer loop: Iterate over each row (y < height / 2)
+    xor     ecx, ecx           ; y = 0 (counter register)
+.outer_loop:
+    mov     eax, [rbp - 8]     ; Load height
+    shr     eax, 1             ; height / 2
+    cmp     ecx, eax           ; Compare y with height / 2
+    jge     .end               ; If y >= height / 2, end loop
 
-    /* Iterate over each column (x < width) */
-    xorl %eax, %eax              /* x = 0 */
-.Lcol_loop:
-    cmpl %r12d, %eax             /* compare x with width */
-    jge .Lnext_row               /* if x >= width, move to the next row */
+    ; Calculate mirrored_y = height - 1 - y
+    mov     eax, [rbp - 8]     ; Load height
+    dec     eax                ; height - 1
+    sub     eax, ecx           ; mirrored_y = height - 1 - y
+    mov     [rbp - 12], eax    ; Store mirrored_y in local variable
 
-    /* Calculate top_pixel and bottom_pixel positions */
-    movl %r14d, %edx             /* row index y -> %edx */
-    imull %r12d, %edx            /* y * width -> %edx */
-    addl %eax, %edx              /* y * width + x -> top pixel index */
-    movl (%rdi, %rdx, 4), %r8d   /* input_img->data[y * width + x] -> top_pixel */
+    ; Start inner loop: Iterate over each column (x < width)
+    xor     edx, edx           ; x = 0 (column counter)
+.inner_loop:
+    mov     eax, [rbp - 4]     ; Load width
+    cmp     edx, eax           ; Compare x with width
+    jge     .next_row          ; If x >= width, go to next row
 
-    movl %r15d, %edx             /* mirrored row index -> %edx */
-    imull %r12d, %edx            /* mirrored_y * width -> %edx */
-    addl %eax, %edx              /* mirrored_y * width + x -> bottom pixel index */
-    movl (%rdi, %rdx, 4), %r9d   /* input_img->data[mirrored_y * width + x] -> bottom_pixel */
+    ; Calculate the position of the pixel for both rows (top and bottom)
+    ; top_pixel = input_img->data[y * width + x]
+    ; bottom_pixel = input_img->data[mirrored_y * width + x]
 
-    /* Swap the pixels */
-    movl %r9d, (%rsi, %rdx, 4)   /* output_img->data[y * width + x] = bottom_pixel */
-    movl %r8d, (%rsi, %rdx, 4)   /* output_img->data[mirrored_y * width + top_pixel */
+    ; Calculate y * width + x
+    mov     eax, ecx           ; eax = y
+    imul    eax, [rbp - 4]     ; eax = y * width
+    add     eax, edx           ; eax = y * width + x
+    mov     rdi, [rdi + 8]     ; Load input_img->data (pointer to data)
+    mov     eax, [rdi + rax * 4] ; top_pixel = input_img->data[y * width + x]
+    mov     [rbp - 16], eax    ; Store top_pixel in local variable
 
-    incl %eax                    /* x++ */
-    jmp .Lcol_loop               /* continue column loop */
+    ; Calculate mirrored_y * width + x
+    mov     eax, [rbp - 12]    ; eax = mirrored_y
+    imul    eax, [rbp - 4]     ; eax = mirrored_y * width
+    add     eax, edx           ; eax = mirrored_y * width + x
+    mov     eax, [rdi + rax * 4] ; bottom_pixel = input_img->data[mirrored_y * width + x]
+    mov     [rbp - 20], eax    ; Store bottom_pixel in local variable
 
-.Lnext_row:
-    incl %r14d                   /* y++ */
-    jmp .Lrow_loop               /* continue row loop */
+    ; Store bottom_pixel in output_img->data[y * width + x]
+    mov     rsi, [rsi + 8]     ; Load output_img->data
+    mov     eax, ecx           ; eax = y
+    imul    eax, [rbp - 4]     ; eax = y * width
+    add     eax, edx           ; eax = y * width + x
+    mov     ebx, [rbp - 20]    ; Load bottom_pixel
+    mov     [rsi + rax * 4], ebx ; output_img->data[y * width + x] = bottom_pixel
 
-.Ldone:
-    /* Epilogue: Restore callee-saved registers and clean up stack */
-    popq %r15                    /* restore callee-saved register */
-    popq %r14                    /* restore callee-saved register */
-    popq %r13                    /* restore callee-saved register */
-    popq %r12                    /* restore callee-saved register */
-    addq $16, %rsp               /* restore stack space */
-    popq %rbp                    /* restore base pointer */
-    ret                          /* return */
+    ; Store top_pixel in output_img->data[mirrored_y * width + x]
+    mov     eax, [rbp - 12]    ; eax = mirrored_y
+    imul    eax, [rbp - 4]     ; eax = mirrored_y * width
+    add     eax, edx           ; eax = mirrored_y * width + x
+    mov     ebx, [rbp - 16]    ; Load top_pixel
+    mov     [rsi + rax * 4], ebx ; output_img->data[mirrored_y * width + x] = top_pixel
 
+    ; Increment x and continue inner loop
+    inc     edx                ; x++
+    jmp     .inner_loop
+
+.next_row:
+    ; Increment y and continue outer loop
+    inc     ecx                ; y++
+    jmp     .outer_loop
+
+.end:
+    ; Epilogue
+    add     rsp, 32            ; Clean up local variables
+    pop     rbp                ; Restore base pointer
+    ret                        ; Return from function
 
 
 /*
