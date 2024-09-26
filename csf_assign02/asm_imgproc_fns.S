@@ -717,105 +717,79 @@ return:
 
 
 .global imgproc_mirror_v
-
-; Function to mirror an image vertically
-; input_img - pointer to input Image struct
-; output_img - pointer to output Image struct
-; The image data is an array of uint32_t pixels
-
-; Struct layout:
-; input_img->width  = [input_img + 0x0]
-; input_img->height = [input_img + 0x4]
-; input_img->data   = [input_img + 0x8]
-; Same layout for output_img.
-
 imgproc_mirror_v:
-    ; Prologue
-    push    rbp                ; Save base pointer
-    mov     rbp, rsp           ; Set base pointer to stack pointer
-    sub     rsp, 32            ; Allocate local variables (y, mirrored_y, x)
+    push    rbp
+    mov     rbp, rsp
+    sub     rsp, 32
 
-    ; Function arguments
-    mov     rdi, [rbp + 16]    ; input_img (1st parameter)
-    mov     rsi, [rbp + 24]    ; output_img (2nd parameter)
+    mov     rdi, [rbp + 16]
+    mov     rsi, [rbp + 24]
 
-    ; Load the width and height of the input image
-    mov     eax, [rdi]         ; width = input_img->width
-    mov     [rbp - 4], eax     ; Store width in local variable
-    mov     eax, [rdi + 4]     ; height = input_img->height
-    mov     [rbp - 8], eax     ; Store height in local variable
+    mov     eax, [rdi]
+    mov     [rbp - 4], eax
+    mov     eax, [rdi + 4]
+    mov     [rbp - 8], eax
 
-    ; Check if height is less than or equal to 1
-    mov     eax, [rbp - 8]     ; Load height
-    cmp     eax, 1             ; Compare height with 1
-    jle     .end               ; If height <= 1, end the function
+    mov     eax, [rbp - 8]
+    cmp     eax, 1
+    jle     .end
 
-    ; Start outer loop: Iterate over each row (y < height / 2)
-    xor     ecx, ecx           ; y = 0 (counter register)
+    xor     ecx, ecx
 .outer_loop:
-    mov     eax, [rbp - 8]     ; Load height
-    shr     eax, 1             ; height / 2
-    cmp     ecx, eax           ; Compare y with height / 2
-    jge     .end               ; If y >= height / 2, end loop
+    mov     eax, [rbp - 8]
+    shr     eax, 1
+    cmp     ecx, eax
+    jge     .end
 
-    ; Calculate mirrored_y = height - 1 - y
-    mov     eax, [rbp - 8]     ; Load height
-    dec     eax                ; height - 1
-    sub     eax, ecx           ; mirrored_y = height - 1 - y
-    mov     [rbp - 12], eax    ; Store mirrored_y in local variable
+    mov     eax, [rbp - 8]
+    dec     eax
+    sub     eax, ecx
+    mov     [rbp - 12], eax
 
-    ; Start inner loop: Iterate over each column (x < width)
-    xor     edx, edx           ; x = 0 (column counter)
+    xor     edx, edx
 .inner_loop:
-    mov     eax, [rbp - 4]     ; Load width
-    cmp     edx, eax           ; Compare x with width
-    jge     .next_row          ; If x >= width, go to next row
+    mov     eax, [rbp - 4]
+    cmp     edx, eax
+    jge     .next_row
 
-    ; Calculate the position of the pixel for both rows (top and bottom)
-    ; Calculate y * width + x
-    mov     eax, ecx           ; eax = y
-    imul    eax, [rbp - 4]     ; eax = y * width
-    add     eax, edx           ; eax = y * width + x
-    mov     rdi, [rdi + 8]     ; Load input_img->data (pointer to data)
-    mov     eax, [rdi + rax * 4] ; top_pixel = input_img->data[y * width + x]
-    mov     [rbp - 16], eax    ; Store top_pixel in local variable
+    mov     eax, ecx
+    imul    eax, [rbp - 4]
+    add     eax, edx
+    mov     rdi, [rdi + 8]
+    mov     eax, [rdi + rax * 4]
+    mov     [rbp - 16], eax
 
-    ; Calculate mirrored_y * width + x
-    mov     eax, [rbp - 12]    ; eax = mirrored_y
-    imul    eax, [rbp - 4]     ; eax = mirrored_y * width
-    add     eax, edx           ; eax = mirrored_y * width + x
-    mov     eax, [rdi + rax * 4] ; bottom_pixel = input_img->data[mirrored_y * width + x]
-    mov     [rbp - 20], eax    ; Store bottom_pixel in local variable
+    mov     eax, [rbp - 12]
+    imul    eax, [rbp - 4]
+    add     eax, edx
+    mov     eax, [rdi + rax * 4]
+    mov     [rbp - 20], eax
 
-    ; Store bottom_pixel in output_img->data[y * width + x]
-    mov     rsi, [rsi + 8]     ; Load output_img->data
-    mov     eax, ecx           ; eax = y
-    imul    eax, [rbp - 4]     ; eax = y * width
-    add     eax, edx           ; eax = y * width + x
-    mov     ebx, [rbp - 20]    ; Load bottom_pixel
-    mov     [rsi + rax * 4], ebx ; output_img->data[y * width + x] = bottom_pixel
+    mov     rsi, [rsi + 8]
+    mov     eax, ecx
+    imul    eax, [rbp - 4]
+    add     eax, edx
+    mov     ebx, [rbp - 20]
+    mov     [rsi + rax * 4], ebx
 
-    ; Store top_pixel in output_img->data[mirrored_y * width + x]
-    mov     eax, [rbp - 12]    ; eax = mirrored_y
-    imul    eax, [rbp - 4]     ; eax = mirrored_y * width
-    add     eax, edx           ; eax = mirrored_y * width + x
-    mov     ebx, [rbp - 16]    ; Load top_pixel
-    mov     [rsi + rax * 4], ebx ; output_img->data[mirrored_y * width + x] = top_pixel
+    mov     eax, [rbp - 12]
+    imul    eax, [rbp - 4]
+    add     eax, edx
+    mov     ebx, [rbp - 16]
+    mov     [rsi + rax * 4], ebx
 
-    ; Increment x and continue inner loop
-    inc     edx                ; x++
+    inc     edx
     jmp     .inner_loop
 
 .next_row:
-    ; Increment y and continue outer loop
-    inc     ecx                ; y++
+    inc     ecx
     jmp     .outer_loop
 
 .end:
-    ; Epilogue
-    add     rsp, 32            ; Clean up local variables
-    pop     rbp                ; Restore base pointer
-    ret                        ; Return from function
+    add     rsp, 32
+    pop     rbp
+    ret
+
 
 /*
  * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
