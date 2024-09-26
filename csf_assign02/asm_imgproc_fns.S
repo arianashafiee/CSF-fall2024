@@ -726,57 +726,57 @@ imgproc_mirror_v:
     mov     rsi, [rbp + 24]
 
     mov     eax, [rdi]
-    mov     [rbp - 4], eax
+    mov     DWORD PTR [rbp - 4], eax
     mov     eax, [rdi + 4]
-    mov     [rbp - 8], eax
+    mov     DWORD PTR [rbp - 8], eax
 
-    mov     eax, [rbp - 8]
+    mov     eax, DWORD PTR [rbp - 8]
     cmp     eax, 1
     jle     .end
 
     xor     ecx, ecx
 .outer_loop:
-    mov     eax, [rbp - 8]
+    mov     eax, DWORD PTR [rbp - 8]
     shr     eax, 1
     cmp     ecx, eax
     jge     .end
 
-    mov     eax, [rbp - 8]
+    mov     eax, DWORD PTR [rbp - 8]
     dec     eax
     sub     eax, ecx
-    mov     [rbp - 12], eax
+    mov     DWORD PTR [rbp - 12], eax
 
     xor     edx, edx
 .inner_loop:
-    mov     eax, [rbp - 4]
+    mov     eax, DWORD PTR [rbp - 4]
     cmp     edx, eax
     jge     .next_row
 
     mov     eax, ecx
-    imul    eax, [rbp - 4]
+    imul    eax, DWORD PTR [rbp - 4]
     add     eax, edx
-    mov     rdi, [rdi + 8]
-    mov     eax, [rdi + rax * 4]
-    mov     [rbp - 16], eax
+    mov     rdi, QWORD PTR [rdi + 8]
+    mov     eax, DWORD PTR [rdi + rax * 4]
+    mov     DWORD PTR [rbp - 16], eax
 
-    mov     eax, [rbp - 12]
-    imul    eax, [rbp - 4]
+    mov     eax, DWORD PTR [rbp - 12]
+    imul    eax, DWORD PTR [rbp - 4]
     add     eax, edx
-    mov     eax, [rdi + rax * 4]
-    mov     [rbp - 20], eax
+    mov     eax, DWORD PTR [rdi + rax * 4]
+    mov     DWORD PTR [rbp - 20], eax
 
-    mov     rsi, [rsi + 8]
+    mov     rsi, QWORD PTR [rsi + 8]
     mov     eax, ecx
-    imul    eax, [rbp - 4]
+    imul    eax, DWORD PTR [rbp - 4]
     add     eax, edx
-    mov     ebx, [rbp - 20]
-    mov     [rsi + rax * 4], ebx
+    mov     ebx, DWORD PTR [rbp - 20]
+    mov     DWORD PTR [rsi + rax * 4], ebx
 
-    mov     eax, [rbp - 12]
-    imul    eax, [rbp - 4]
+    mov     eax, DWORD PTR [rbp - 12]
+    imul    eax, DWORD PTR [rbp - 4]
     add     eax, edx
-    mov     ebx, [rbp - 16]
-    mov     [rsi + rax * 4], ebx
+    mov     ebx, DWORD PTR [rbp - 16]
+    mov     DWORD PTR [rsi + rax * 4], ebx
 
     inc     edx
     jmp     .inner_loop
