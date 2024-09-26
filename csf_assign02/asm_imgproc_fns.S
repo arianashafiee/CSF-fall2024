@@ -715,54 +715,101 @@ return:
     popq %rbp                     # Restore base pointer
     ret                           # Return from the function
 
-.global imgproc_mirror_v
-
+    .global imgproc_mirror_v
 imgproc_mirror_v:
-
-    movl 8(%rdi), %eax         
-    movl 12(%rdi), %ebx        
-
-    shrl $1, %ebx              
-
-    xorl %ecx, %ecx             
-
-.loop_y:
-    cmpl %ebx, %ecx             
-    jge .end_loop_y             
-
-    movl 12(%rdi), %edx         
-    subl $1, %edx               
-    subl %ecx, %edx             
-
-    xorl %edi, %edi             
-
-.loop_x:
-    cmpl 8(%rdi), %edi          
-    jge .end_loop_x             
-
-    movl %ecx, %eax             
-    imull 8(%rdi), %eax         
-    addl %edi, %eax             
-    movl 16(%rdi, %rax, 4), %eax
-
-    movl %edx, %ebx             
-    imull 8(%rdi), %ebx         
-    addl %edi, %ebx             
-    movl 16(%rdi, %rbx, 4), %ebx
-
-    movl %ebx, 16(%rsi, %rax, 4)
-    movl %eax, 16(%rsi, %rdx, 4)
-
-    incl %edi                    
-    jmp .loop_x                 
-
-.end_loop_x:
-    incl %ecx                    
-    jmp .loop_y                 
-
-.end_loop_y:
-    ret
-
+.LFB21:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movq	%rdi, -40(%rbp)
+	movq	%rsi, -48(%rbp)
+	movq	-40(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -12(%rbp)
+	movq	-40(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	%eax, -16(%rbp)
+	movl	$0, -4(%rbp)
+	jmp	.L66
+.L69:
+	movl	-16(%rbp), %eax
+	subl	$1, %eax
+	subl	-4(%rbp), %eax
+	movl	%eax, -20(%rbp)
+	movl	$0, -8(%rbp)
+	jmp	.L67
+.L68:
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -24(%rbp)
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-20(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -28(%rbp)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-28(%rbp), %eax
+	movl	%eax, (%rdx)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-20(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-24(%rbp), %eax
+	movl	%eax, (%rdx)
+	addl	$1, -8(%rbp)
+.L67:
+	movl	-8(%rbp), %eax
+	cmpl	-12(%rbp), %eax
+	jl	.L68
+	addl	$1, -4(%rbp)
+.L66:
+	movl	-16(%rbp), %eax
+	movl	%eax, %edx
+	shrl	$31, %edx
+	addl	%edx, %eax
+	sarl	%eax
+	cmpl	%eax, -4(%rbp)
+	jl	.L69
+	nop
+	nop
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
 /*
  * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
