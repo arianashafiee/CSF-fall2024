@@ -717,77 +717,59 @@ return:
 
 
 .global imgproc_mirror_v
+
 imgproc_mirror_v:
-    # Prologue: set up the stack frame and save callee-saved registers
-    pushq   %rbp
-    movq    %rsp, %rbp
-    subq    $32, %rsp                # Allocate space on the stack for local variables
+    ; Input: rdi = input_img, rsi = output_img
 
-    # Load the width and height of the input image
-    movq    16(%rdi), %rsi            # Load the address of input_img->width
-    movl    (%rsi), %eax              # Load the width into %eax
-    movl    %eax, -4(%rbp)            # Store width in a local variable (-4 offset)
-    
-    movq    20(%rdi), %rsi            # Load the address of input_img->height
-    movl    (%rsi), %eax              # Load the height into %eax
-    movl    %eax, -8(%rbp)            # Store height in a local variable (-8 offset)
+    ; Load width and height from input_img
+    mov eax, [rdi + 8]          ; Load width into eax
+    mov ebx, [rdi + 12]         ; Load height into ebx
 
-    # Outer loop over rows (y) up to height / 2
-    xorl    %ecx, %ecx                # Initialize the row index (y) to 0
-outer_loop:
-    movl    -8(%rbp), %eax            # Load the height
-    shrl    $1, %eax                  # Divide height by 2 (height / 2)
-    cmpl    %eax, %ecx                # Compare row index (y) with height / 2
-    jge     end_function              # If y >= height / 2, end the function
+    ; Calculate height / 2
+    shr ebx, 1                  ; ebx = height / 2
 
-    # Calculate mirrored row: mirrored_y = height - 1 - y
-    movl    -8(%rbp), %eax            # Load the height
-    decl    %eax                      # mirrored_y = height - 1
-    subl    %ecx, %eax                # mirrored_y = height - 1 - y
-    movl    %eax, -12(%rbp)           # Store mirrored_y in local variable (-12 offset)
+    xor ecx, ecx                ; Initialize y = 0
 
-    # Inner loop over columns (x)
-    xorl    %edx, %edx                # Initialize column index (x) to 0
-inner_loop:
-    movl    -4(%rbp), %eax            # Load the width
-    cmpl    %eax, %edx                # Compare column index (x) with width
-    jge     next_row                  # If x >= width, go to the next row
+.loop_y:
+    cmp ecx, ebx                ; Compare y with height / 2
+    jge .end_loop_y             ; If y >= height / 2, exit loop
 
-    # Calculate the address of the top pixel (y * width + x)
-    movl    %ecx, %eax                # Load row index y
-    imull   -4(%rbp), %eax            # Multiply y by width
-    addl    %edx, %eax                # Add column index x: y * width + x
-    leaq    (%rdi,%rax,4), %rsi       # Calculate address of top pixel in input image
-    movl    (%rsi), %eax              # Load top pixel into %eax
+    ; Calculate mirrored_y = height - 1 - y
+    mov edx, [rdi + 12]         ; Load height into edx
+    sub edx, 1                  ; edx = height - 1
+    sub edx, ecx                ; edx = mirrored_y = height - 1 - y
 
-    # Calculate the address of the bottom pixel (mirrored_y * width + x)
-    movl    -12(%rbp), %ebx           # Load mirrored_y
-    imull   -4(%rbp), %ebx            # Multiply mirrored_y by width
-    addl    %edx, %ebx                # Add column index x: mirrored_y * width + x
-    leaq    (%rdi,%rbx,4), %rsi       # Calculate address of bottom pixel in input image
-    movl    (%rsi), %ebx              # Load bottom pixel into %ebx
+    xor edi, edi                ; Initialize x = 0
 
-    # Swap the top and bottom pixels in the output image
-    movq    24(%rdi), %rdi            # Load output_img->data pointer
-    leaq    (%rdi,%rax,4), %rsi       # Calculate address for top pixel in output image
-    movl    %ebx, (%rsi)              # Store bottom pixel in output image (top location)
+.loop_x:
+    cmp edi, [rdi + 8]          ; Compare x with width
+    jge .end_loop_x             ; If x >= width, exit loop
 
-    leaq    (%rdi,%rbx,4), %rsi       # Calculate address for bottom pixel in output image
-    movl    %eax, (%rsi)              # Store top pixel in output image (bottom location)
+    ; Get top_pixel = input_img->data[y * width + x]
+    mov eax, ecx                ; eax = y
+    imul eax, [rdi + 8]         ; eax = y * width
+    add eax, edi                ; eax = y * width + x
+    mov eax, [rdi + 16 + rax*4] ; Load top_pixel
 
-    incl    %edx                      # Increment column index (x)
-    jmp     inner_loop                # Continue to next column
+    ; Get bottom_pixel = input_img->data[mirrored_y * width + x]
+    mov ebx, edx                ; ebx = mirrored_y
+    imul ebx, [rdi + 8]         ; ebx = mirrored_y * width
+    add ebx, edi                ; ebx = mirrored_y * width + x
+    mov ebx, [rdi + 16 + ebx*4] ; Load bottom_pixel
 
-next_row:
-    incl    %ecx                      # Increment row index (y)
-    jmp     outer_loop                # Continue to next row
+    ; Swap the pixels
+    mov [rsi + 16 + rax*4], ebx ; output_img->data[y * width + x] = bottom_pixel
+    mov [rsi + 16 + rdx*4], eax  ; output_img->data[mirrored_y * width + x] = top_pixel
 
-end_function:
-    addq    $32, %rsp                 # Restore stack space
-    popq    %rbp                      # Restore base pointer
-    ret                               # Return from function
+    inc edi                     ; x++
+    jmp .loop_x                 ; Repeat for next x
 
+.end_loop_x:
+    inc ecx                     ; y++
+    jmp .loop_y                 ; Repeat for next y
 
+.end_loop_y:
+    ret
 
 
 /*
