@@ -498,7 +498,7 @@ imgproc_tile:
 imgproc_grayscale:
 imgproc_grayscale:
 .LFB_grayscale_start:
-	.cfi_grayscale_startproc
+	.cfi_startproc
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
