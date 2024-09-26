@@ -496,84 +496,79 @@ imgproc_tile:
 
 .globl imgproc_grayscale
 imgproc_grayscale:
-    pushq   %rbp                   # Save the base pointer
-    movq    %rsp, %rbp              # Set up the stack frame
-    subq    $48, %rsp               # Allocate stack space for local variables
-
-    movq    %rdi, -40(%rbp)         # Store input image pointer in local variable
-    movq    %rsi, -48(%rbp)         # Store output image pointer in local variable
-
-    # Load input image width and height
-    movq    -40(%rbp), %rax         # Load input image pointer
-    movl    (%rax), %eax            # Load width from input image
-    movl    %eax, -12(%rbp)         # Store width in local variable
-    movq    -40(%rbp), %rax         # Load input image pointer again
-    movl    4(%rax), %eax           # Load height from input image
-    movl    %eax, -16(%rbp)         # Store height in local variable
-
-    # Check if width or height is zero or negative
-    cmpl    $0, -12(%rbp)           # Compare width with 0
-    jle     grayscale_exit           # If width <= 0, exit
-    cmpl    $0, -16(%rbp)           # Compare height with 0
-    jle     grayscale_exit           # If height <= 0, exit
-
-    # Initialize row index (y) to 0
-    movl    $0, -4(%rbp)            # Set initial row index y to 0
-
-    # Begin row loop
-grayscale_row_loop_check:
-    movl    $0, -8(%rbp)            # Set column index x to 0
-
-    # Begin column loop
-grayscale_column_loop_check:
-    # Load current pixel from input image at (y, x)
-    movq    -40(%rbp), %rax         # Load input image pointer
-    movq    8(%rax), %rdx           # Load input image data pointer
-    movl    -4(%rbp), %eax          # Load current row (y)
-    imull   -12(%rbp), %eax         # y * width
-    movl    %eax, %ecx              # Store result in ecx (row offset)
-    movl    -8(%rbp), %eax          # Load current column (x)
-    addl    %ecx, %eax              # Calculate y * width + x
-    cltq                            # Convert to 64-bit
-    salq    $2, %rax                # Multiply by 4 (each pixel is 4 bytes)
-    addq    %rdx, %rax              # Calculate final address
-    movl    (%rax), %eax            # Load current pixel value
-    movl    %eax, -20(%rbp)         # Store pixel value in local variable
-
-    # Convert pixel to grayscale using a helper function
-    movl    -20(%rbp), %edi         # Load current pixel into edi for to_grayscale
-    call    to_grayscale            # Call to_grayscale to convert to grayscale
-    movl    %eax, -24(%rbp)         # Store grayscale pixel value
-
-    # Store grayscale pixel in output image at (y, x)
-    movq    -48(%rbp), %rax         # Load output image pointer
-    movq    8(%rax), %rdx           # Load output image data pointer
-    movl    -4(%rbp), %eax          # Load current row (y)
-    imull   -12(%rbp), %eax         # y * width
-    movl    %eax, %ecx              # Store result in ecx (row offset)
-    movl    -8(%rbp), %eax          # Load current column (x)
-    addl    %ecx, %eax              # Calculate y * width + x
-    cltq                            # Convert to 64-bit
-    salq    $2, %rax                # Multiply by 4 (each pixel is 4 bytes)
-    addq    %rdx, %rax              # Calculate final address in output image
-    movl    -24(%rbp), %eax         # Load grayscale pixel value
-    movl    %eax, (%rdx)            # Store grayscale pixel in output image
-
-    addl    $1, -8(%rbp)            # Increment column index x
-    movl    -8(%rbp), %eax          # Check if x < width
-    cmpl    -12(%rbp), %eax
-    jl      grayscale_column_loop_check   # Repeat column loop if x < width
-
-    addl    $1, -4(%rbp)            # Increment row index y
-    movl    -4(%rbp), %eax          # Check if y < height
-    cmpl    -16(%rbp), %eax
-    jl      grayscale_row_loop_check     # Repeat row loop if y < height
-
-    # Exit routine
-grayscale_exit:
-    leave                           # Restore the base pointer
-    ret                             # Return
-
+imgproc_grayscale:
+.LFB_grayscale_start:
+	.cfi_grayscale_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$48, %rsp
+	movq	%rdi, -40(%rbp)
+	movq	%rsi, -48(%rbp)
+	movq	-40(%rbp), %rax
+	movl	(%rax), %eax
+	movl	%eax, -12(%rbp)
+	movq	-40(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	%eax, -16(%rbp)
+	cmpl	$0, -12(%rbp)
+	jle	.L_exit
+	cmpl	$0, -16(%rbp)
+	jle	.L_exit
+	movl	$0, -4(%rbp)
+	jmp	.L_outer_loop
+.L_inner_loop:
+	movl	$0, -8(%rbp)
+	jmp	.L_process_pixel
+.L_pixel_processing:
+	movq	-40(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -20(%rbp)
+	movl	-20(%rbp), %eax
+	movl	%eax, %edi
+	call	to_grayscale
+	movl	%eax, -24(%rbp)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-4(%rbp), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-24(%rbp), %eax
+	movl	%eax, (%rdx)
+	addl	$1, -8(%rbp)
+.L_process_pixel:
+	movl	-8(%rbp), %eax
+	cmpl	-12(%rbp), %eax
+	jl	.L_pixel_processing
+	addl	$1, -4(%rbp)
+.L_outer_loop:
+	movl	-4(%rbp), %eax
+	cmpl	-16(%rbp), %eax
+	jl	.L_inner_loop
+	jmp	.L_return
+.L_exit:
+	nop
+.L_return:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
