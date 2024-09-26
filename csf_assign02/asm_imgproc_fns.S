@@ -613,7 +613,7 @@ to_grayscale:
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
     ret                         # Return with the grayscale pixel in 
-.global imgproc_mirror_h:
+    .global imgproc_mirror_h
 imgproc_mirror_h:
 .LFB20:
 	.cfi_startproc
