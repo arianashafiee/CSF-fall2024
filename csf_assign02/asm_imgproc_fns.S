@@ -718,79 +718,74 @@ return:
 
 .global imgproc_mirror_v
 imgproc_mirror_v:
-    push    rbp
-    mov     rbp, rsp
-    sub     rsp, 32
+    pushq   %rbp
+    movq    %rsp, %rbp
+    subq    $32, %rsp
 
-    mov     rax, rdi
-    mov     rdi, rax
-    mov     rax, rsi
-    mov     rsi, rax
+    movq    16(%rdi), %rax
+    movl    %eax, -4(%rbp)
+    movq    20(%rdi), %rax
+    movl    %eax, -8(%rbp)
 
-    mov     eax, DWORD PTR [rdi]
-    mov     DWORD PTR [rbp - 4], eax
-    mov     eax, DWORD PTR [rdi + 4]
-    mov     DWORD PTR [rbp - 8], eax
+    cmpl    $1, -8(%rbp)
+    jle     end_function
 
-    mov     eax, DWORD PTR [rbp - 8]
-    cmp     eax, 1
-    jle     .end
+    xorl    %ecx, %ecx
+outer_loop:
+    movl    -8(%rbp), %eax
+    shrl    $1, %eax
+    cmpl    %eax, %ecx
+    jge     end_function
 
-    xor     ecx, ecx
-.outer_loop:
-    mov     eax, DWORD PTR [rbp - 8]
-    shr     eax, 1
-    cmp     ecx, eax
-    jge     .end
+    movl    -8(%rbp), %eax
+    decl    %eax
+    subl    %ecx, %eax
+    movl    %eax, -12(%rbp)
 
-    mov     eax, DWORD PTR [rbp - 8]
-    dec     eax
-    sub     eax, ecx
-    mov     DWORD PTR [rbp - 12], eax
+    xorl    %edx, %edx
+inner_loop:
+    movl    -4(%rbp), %eax
+    cmpl    %eax, %edx
+    jge     next_row
 
-    xor     edx, edx
-.inner_loop:
-    mov     eax, DWORD PTR [rbp - 4]
-    cmp     edx, eax
-    jge     .next_row
+    movl    %ecx, %eax
+    imull   -4(%rbp), %eax
+    addl    %edx, %eax
+    movq    24(%rdi), %rsi
+    movl    (%rsi,%rax,4), %eax
+    movl    %eax, -16(%rbp)
 
-    mov     eax, ecx
-    imul    eax, DWORD PTR [rbp - 4]
-    add     eax, edx
-    mov     rax, QWORD PTR [rdi + 8]
-    mov     eax, DWORD PTR [rax + rax * 4]
-    mov     DWORD PTR [rbp - 16], eax
+    movl    -12(%rbp), %eax
+    imull   -4(%rbp), %eax
+    addl    %edx, %eax
+    movl    (%rsi,%rax,4), %eax
+    movl    %eax, -20(%rbp)
 
-    mov     eax, DWORD PTR [rbp - 12]
-    imul    eax, DWORD PTR [rbp - 4]
-    add     eax, edx
-    mov     eax, DWORD PTR [rax + rax * 4]
-    mov     DWORD PTR [rbp - 20], eax
+    movl    %ecx, %eax
+    imull   -4(%rbp), %eax
+    addl    %edx, %eax
+    movq    24(%rsi), %rdi
+    movl    -20(%rbp), %ebx
+    movl    %ebx, (%rdi,%rax,4)
 
-    mov     rsi, QWORD PTR [rsi + 8]
-    mov     eax, ecx
-    imul    eax, DWORD PTR [rbp - 4]
-    add     eax, edx
-    mov     ebx, DWORD PTR [rbp - 20]
-    mov     DWORD PTR [rsi + rax * 4], ebx
+    movl    -12(%rbp), %eax
+    imull   -4(%rbp), %eax
+    addl    %edx, %eax
+    movl    -16(%rbp), %ebx
+    movl    %ebx, (%rdi,%rax,4)
 
-    mov     eax, DWORD PTR [rbp - 12]
-    imul    eax, DWORD PTR [rbp - 4]
-    add     eax, edx
-    mov     ebx, DWORD PTR [rbp - 16]
-    mov     DWORD PTR [rsi + rax * 4], ebx
+    incl    %edx
+    jmp     inner_loop
 
-    inc     edx
-    jmp     .inner_loop
+next_row:
+    incl    %ecx
+    jmp     outer_loop
 
-.next_row:
-    inc     ecx
-    jmp     .outer_loop
-
-.end:
-    add     rsp, 32
-    pop     rbp
+end_function:
+    addq    $32, %rsp
+    popq    %rbp
     ret
+
 
 
 /*
