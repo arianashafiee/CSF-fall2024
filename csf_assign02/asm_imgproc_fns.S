@@ -722,12 +722,12 @@ imgproc_mirror_v:
     mov     rbp, rsp
     sub     rsp, 32
 
-    mov     rdi, [rdi]
-    mov     rsi, [rsi]
+    mov     rdi, QWORD PTR [rdi]
+    mov     rsi, QWORD PTR [rsi]
 
-    mov     eax, [rdi]
+    mov     eax, DWORD PTR [rdi]
     mov     DWORD PTR [rbp - 4], eax
-    mov     eax, [rdi + 4]
+    mov     eax, DWORD PTR [rdi + 4]
     mov     DWORD PTR [rbp - 8], eax
 
     mov     eax, DWORD PTR [rbp - 8]
@@ -789,7 +789,6 @@ imgproc_mirror_v:
     add     rsp, 32
     pop     rbp
     ret
-
 
 /*
  * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
