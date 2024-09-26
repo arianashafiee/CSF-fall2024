@@ -719,13 +719,10 @@ return:
 .global imgproc_mirror_v
 
 imgproc_mirror_v:
-    ; Input: rdi = input_img, rsi = output_img
 
-    ; Load width and height from input_img
-    mov eax, [rdi + 8]          ; Load width into eax
+    mov eax, [rdi + 8]         
     mov ebx, [rdi + 12]         ; Load height into ebx
 
-    ; Calculate height / 2
     shr ebx, 1                  ; ebx = height / 2
 
     xor ecx, ecx                ; Initialize y = 0
@@ -770,7 +767,6 @@ imgproc_mirror_v:
 
 .end_loop_y:
     ret
-
 
 /*
  * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
