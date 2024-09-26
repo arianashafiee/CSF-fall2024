@@ -772,9 +772,6 @@ imgproc_mirror_v:
     jge     .next_row          ; If x >= width, go to next row
 
     ; Calculate the position of the pixel for both rows (top and bottom)
-    ; top_pixel = input_img->data[y * width + x]
-    ; bottom_pixel = input_img->data[mirrored_y * width + x]
-
     ; Calculate y * width + x
     mov     eax, ecx           ; eax = y
     imul    eax, [rbp - 4]     ; eax = y * width
@@ -819,7 +816,6 @@ imgproc_mirror_v:
     add     rsp, 32            ; Clean up local variables
     pop     rbp                ; Restore base pointer
     ret                        ; Return from function
-
 
 /*
  * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
