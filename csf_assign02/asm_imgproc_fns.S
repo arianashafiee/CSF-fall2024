@@ -722,8 +722,8 @@ imgproc_mirror_v:
     mov     rbp, rsp
     sub     rsp, 32
 
-    mov     rdi, [rbp + 16]
-    mov     rsi, [rbp + 24]
+    mov     rdi, [rdi]
+    mov     rsi, [rsi]
 
     mov     eax, [rdi]
     mov     DWORD PTR [rbp - 4], eax
@@ -789,7 +789,6 @@ imgproc_mirror_v:
     add     rsp, 32
     pop     rbp
     ret
-
 
 
 /*
