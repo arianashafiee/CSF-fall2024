@@ -723,8 +723,10 @@ imgproc_mirror_v:
     subq    $32, %rsp
 
     movq    16(%rdi), %rax
+    movl    (%rax), %eax
     movl    %eax, -4(%rbp)
     movq    20(%rdi), %rax
+    movl    (%rax), %eax
     movl    %eax, -8(%rbp)
 
     cmpl    $1, -8(%rbp)
@@ -785,6 +787,7 @@ end_function:
     addq    $32, %rsp
     popq    %rbp
     ret
+
 
 
 
