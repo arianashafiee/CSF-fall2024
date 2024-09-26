@@ -28,419 +28,368 @@
  * Helper functions for image processing
  */
 
-.globl all_tiles_nonempty
+    .global all_tiles_nonempty
 all_tiles_nonempty:
-    /* Prologue to set up the stack frame */
-    pushq %rbp                    # Save base pointer
-    movq %rsp, %rbp               # Set base pointer to current stack pointer
+.LFB6:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -4(%rbp)
+	movl	%esi, -8(%rbp)
+	movl	%edx, -12(%rbp)
+	cmpl	$0, -12(%rbp)
+	jle	.L2
+	cmpl	$0, -4(%rbp)
+	jle	.L2
+	cmpl	$0, -8(%rbp)
+	jg	.L3
+.L2:
+	movl	$0, %eax
+	jmp	.L4
+.L3:
+	movl	-4(%rbp), %eax
+	cltd
+	idivl	-12(%rbp)
+	testl	%eax, %eax
+	jle	.L5
+	movl	-8(%rbp), %eax
+	cltd
+	idivl	-12(%rbp)
+	testl	%eax, %eax
+	jle	.L5
+	movl	$1, %eax
+	jmp	.L4
+.L5:
+	movl	$0, %eax
+.L4:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
-    /* Parameters: 
-     * %edi = width
-     * %esi = height
-     * %edx = n
-     */
-
-    # Check if n <= 0
-    cmpq $0, %rdx                 # Compare n with 0
-    jle .Lreturn_zero_all_tiles   # Jump if n <= 0
-
-    # Check if width <= 0
-    cmpq $0, %rdi                 # Compare width with 0
-    jle .Lreturn_zero_all_tiles   # Jump if width <= 0
-
-    # Check if height <= 0
-    cmpq $0, %rsi                 # Compare height with 0
-    jle .Lreturn_zero_all_tiles   # Jump if height <= 0
-
-    # Perform width / n
-    movq %rdx, %rcx               # Save n into %rcx (since idiv overwrites %rdx)
-    movq %rdi, %rax               # Move width to %rax (for division)
-    xorq %rdx, %rdx               # Clear %rdx for division (cqto equivalent)
-    divq %rcx                     # Divide width by n
-    cmpq $0, %rax                 # Check if width / n > 0
-    jle .Lreturn_zero_all_tiles   # Jump if width / n <= 0
-
-    # Perform height / n
-    movq %rsi, %rax               # Move height to %rax (for division)
-    xorq %rdx, %rdx               # Clear %rdx for division (cqto equivalent)
-    divq %rcx                     # Divide height by n
-    cmpq $0, %rax                 # Check if height / n > 0
-    jle .Lreturn_zero_all_tiles   # Jump if height / n <= 0
-
-    # If both conditions are met, return 1
-    movq $1, %rax                 # Return 1 (true)
-    jmp .Ldone_all_tiles          # Jump to the function epilogue
-
-.Lreturn_zero_all_tiles:
-    # Return 0 if any condition fails
-    movq $0, %rax                 # Return 0 (false)
-
-.Ldone_all_tiles:
-    # Epilogue to restore stack and return
-    popq %rbp                     # Restore base pointer
-    ret                           # Return from the function
-
-.globl determine_tile_w
+	.globl	determine_tile_w
 determine_tile_w:
-    /* Prologue: Save base pointer and set up stack frame */
-    pushq %rbp
-    movq %rsp, %rbp
-
-    /* Parameters:
-     * %edi - width (passed as first argument)
-     * %esi - n (tiling factor, second argument)
-     * %edx - tile_col (third argument)
-     */
-
-    # Check if n <= 0
-    cmpq $0, %rsi                 # Compare n with 0
-    jle .Lreturn_zero_tile_w      # Jump if n <= 0
-
-    # Check if width <= 0
-    cmpq $0, %rdi                 # Compare width with 0
-    jle .Lreturn_zero_tile_w      # Jump if width <= 0
-
-    # Check if tile_col < 0
-    cmpq $0, %rdx                 # Compare tile_col with 0
-    jl .Lreturn_zero_tile_w       # Jump if tile_col < 0
-
-    # Check if tile_col >= n
-    cmpq %rsi, %rdx               # Compare tile_col with n
-    jge .Lreturn_zero_tile_w      # Jump if tile_col >= n
-
-    # Calculate base_tile_w = width / n
-    movq %rdi, %rax               # Move width into %rax
-    xorq %rdx, %rdx               # Clear %rdx (to avoid leftovers from previous operations)
-    divq %rsi                     # Divide width by n (width / n), quotient in %rax, remainder in %rdx
-    movq %rax, %r8                # Store base_tile_w (quotient) in %r8
-    movq %rdx, %r9                # Store remainder (width % n) in %r9
-
-    # Compare tile_col with remainder
-    cmpq %r9, %rdx                # Compare tile_col with remainder
-    jge .Lno_remainder_add_tile_w # Jump if tile_col >= remainder
-
-    # If tile_col < remainder, add 1 to base_tile_w
-    incq %r8                      # base_tile_w++
-
-.Lno_remainder_add_tile_w:
-    # Return base_tile_w
-    movq %r8, %rax                # Move result into %rax for return
-
-    # Epilogue: Restore stack and return
-    popq %rbp
-    ret
-
-.Lreturn_zero_tile_w:
-    # Return 0 for invalid cases
-    movq $0, %rax                 # Return 0 in %rax
-    popq %rbp
-    ret
-
-.globl determine_tile_h
-determine_tile_h:
-    /* Prologue: Save base pointer and set up stack frame */
-    pushq %rbp                      # Save base pointer
-    movq %rsp, %rbp                 # Set base pointer to current stack pointer
-
-    /* Parameters:
-     * %edi - height (passed as first argument)
-     * %esi - n (tiling factor, second argument)
-     * %edx - tile_row (third argument)
-     */
-
-    # Check if n <= 0 (invalid case)
-    cmpq $0, %rsi                   # Compare n with 0
-    jle .Lreturn_zero               # Jump if n <= 0
-
-    # Check if height <= 0 (invalid case)
-    cmpq $0, %rdi                   # Compare height with 0
-    jle .Lreturn_zero               # Jump if height <= 0
-
-    # Check if tile_row < 0 (invalid case)
-    cmpq $0, %rdx                   # Compare tile_row with 0
-    jl .Lreturn_zero                # Jump if tile_row < 0
-
-    # Check if tile_row >= n (invalid case)
-    cmpq %rsi, %rdx                 # Compare tile_row with n
-    jge .Lreturn_zero               # Jump if tile_row >= n
-
-    # Calculate base_tile_h = height / n
-    movq %rdi, %rax                 # Move height into %rax
-    cqto                            # Sign extend %rax for division
-    idivq %rsi                      # Divide height by n (height / n), quotient in %rax, remainder in %rdx
-    movq %rax, %r8                  # Store base_tile_h (quotient) in %r8
-    movq %rdx, %r9                  # Store remainder (height % n) in %r9
-
-    # Compare tile_row with remainder
-    cmpq %r9, %rdx                  # Compare tile_row with remainder
-    jge .Lreturn_base_tile_h         # Jump if tile_row >= remainder (no extra pixel)
-
-    # If tile_row < remainder, add 1 to base_tile_h
-    incq %r8                        # Increment base_tile_h by 1
-
-.Lreturn_base_tile_h:
-    # Return the final tile height (base_tile_h + 1 if necessary)
-    movq %r8, %rax                  # Move result into %rax
-
-    # Epilogue: Clean up stack and return
-    popq %rbp
-    ret
-
-.Lreturn_zero:
-    # Return 0 for invalid cases
-    movq $0, %rax                   # Return 0 in %rax
-    popq %rbp
-    ret
-
-.globl determine_tile_x_offset
+.LFB7:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L8
+	cmpl	$0, -20(%rbp)
+	jle	.L8
+	cmpl	$0, -28(%rbp)
+	js	.L8
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L9
+.L8:
+	movl	$0, %eax
+	jmp	.L10
+.L9:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	cmpl	-8(%rbp), %eax
+	setl	%al
+	movzbl	%al, %edx
+	movl	-4(%rbp), %eax
+	addl	%edx, %eax
+.L10:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE7:
+	.size	determine_tile_w, .-determine_tile_w
+	.globl	determine_tile_x_offset
+	.type	determine_tile_x_offset, @function
 determine_tile_x_offset:
-    # Input: 
-    #   width in %rdi (image width)
-    #   n in %rsi (tiling factor, number of tiles)
-    #   tile_col in %rdx (column index of tile)
-    #
-    # Output: 
-    #   %rax - the x-offset for the tile
-    
-    # Check if n == 0, return 0 if true (to handle division by zero)
-    test %rsi, %rsi       # Test if n is zero
-    jz return_zero        # Jump to return_zero if n == 0
+.LFB8:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L12
+	cmpl	$0, -20(%rbp)
+	jle	.L12
+	cmpl	$0, -28(%rbp)
+	js	.L12
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L13
+.L12:
+	movl	$0, %eax
+	jmp	.L14
+.L13:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	imull	-4(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %edx
+	movl	-28(%rbp), %eax
+	cmpl	%eax, %edx
+	cmovle	%edx, %eax
+	addl	%ecx, %eax
+.L14:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
-    # Check if tile_col is out of bounds (tile_col < 0 or tile_col >= n)
-    cmp $0, %rdx          # Compare tile_col with 0
-    jl return_zero        # Jump to return_zero if tile_col < 0
-    cmp %rsi, %rdx        # Compare tile_col with n
-    jge return_zero       # Jump to return_zero if tile_col >= n
+	.globl	determine_tile_h
+determine_tile_h:
+.LFB9:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L16
+	cmpl	$0, -20(%rbp)
+	jle	.L16
+	cmpl	$0, -28(%rbp)
+	js	.L16
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L17
+.L16:
+	movl	$0, %eax
+	jmp	.L18
+.L17:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	cmpl	-8(%rbp), %eax
+	setl	%al
+	movzbl	%al, %edx
+	movl	-4(%rbp), %eax
+	addl	%edx, %eax
+.L18:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
-    # Check if width == 0, return 0 if true
-    test %rdi, %rdi       # Test if width is zero
-    jz return_zero        # Jump to return_zero if width == 0
-
-    # Calculate base width for each tile: width / n
-    mov %rdi, %rax        # Move width to rax
-    cqo                   # Sign extend rax into rdx:rax (prepare for division)
-    idiv %rsi             # Divide width by n, quotient in rax, remainder in rdx
-
-    # rax now holds base width (width / n)
-    # rdx holds the remainder (width % n)
-
-    # Multiply tile_col by base width to get initial offset
-    mov %rdx, %r8         # Save the remainder (rdx) to r8
-    mov %rax, %r9         # Save the base width to r9
-    imul %rdx, %rdx       # tile_col * base_width, result in rdx (offset)
-
-    # Check if tile_col is less than the remainder. If so, add 1 to the offset
-    cmp %r8, %rdx         # Compare tile_col with remainder
-    jl add_one            # If tile_col < remainder, jump to add_one
-
-return_offset:
-    # Return the calculated offset in %rax
-    ret
-
-return_zero:
-    xor %rax, %rax        # Return 0
-    ret
-
-add_one:
-    add $1, %rdx          # Add 1 to the offset
-    jmp return_offset      # Jump to return offset
-
-.globl determine_tile_y_offset
+	.globl	determine_tile_y_offset
 determine_tile_y_offset:
-    /* Prologue: Save base pointer and set up stack frame */
-    pushq %rbp
-    movq %rsp, %rbp
-
-    /* Parameters:
-     * %edi - height (passed as first argument)
-     * %esi - n (tiling factor, second argument)
-     * %edx - tile_row (third argument)
-     */
-
-    # Check if n <= 0
-    cmpq $0, %rsi                 # Compare n with 0
-    jle .Lreturn_zero_tile_y_offset # Jump if n <= 0
-
-    # Check if height <= 0
-    cmpq $0, %rdi                 # Compare height with 0
-    jle .Lreturn_zero_tile_y_offset # Jump if height <= 0
-
-    # Check if tile_row < 0
-    cmpq $0, %rdx                 # Compare tile_row with 0
-    jl .Lreturn_zero_tile_y_offset # Jump if tile_row < 0
-
-    # Check if tile_row >= n
-    cmpq %rsi, %rdx               # Compare tile_row with n
-    jge .Lreturn_zero_tile_y_offset # Jump if tile_row >= n
-
-    # Calculate base_tile_h = height / n
-    movq %rdi, %rax               # Move height into %rax
-    xorq %rdx, %rdx               # Clear %rdx before division
-    divq %rsi                     # Divide height by n, quotient in %rax (base_tile_h), remainder in %rdx
-    movq %rax, %r8                # Store base_tile_h in %r8
-    movq %rdx, %r9                # Store remainder in %r9
-
-    # Multiply tile_row by base_tile_h
-    movq %r8, %rax                # Move base_tile_h to %rax
-    imulq %rdx, %rax, %rdx        # Multiply tile_row by base_tile_h, result in %rdx
-
-    # Compare tile_row with remainder
-    cmpq %r9, %rdx                # Compare tile_row with remainder
-    jge .Ladd_remainder_tile_y_offset # Jump if tile_row >= remainder
-
-    # If tile_row < remainder, add tile_row to base_tile_h * tile_row
-    addq %rdx, %rax               # Add tile_row to the result
-    jmp .Lreturn_result_tile_y_offset # Jump to return the result
-
-.Ladd_remainder_tile_y_offset:
-    # If tile_row >= remainder, add remainder to base_tile_h * tile_row
-    addq %r9, %rax                # Add remainder to the result
-
-.Lreturn_result_tile_y_offset:
-    # Return the result
-    movq %rax, %rax               # Move the final result into %rax (return value)
-
-    # Epilogue: Restore stack and return
-    popq %rbp                     # Restore the base pointer
-    ret                           # Return
-
-.Lreturn_zero_tile_y_offset:
-    # Return 0 for invalid cases
-    movq $0, %rax                 # Set return value to 0
-    popq %rbp                     # Restore the base pointer
-    ret                           # Return
-
-.globl copy_tile
+.LFB10:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L20
+	cmpl	$0, -20(%rbp)
+	jle	.L20
+	cmpl	$0, -28(%rbp)
+	js	.L20
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L21
+.L20:
+	movl	$0, %eax
+	jmp	.L22
+.L21:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	imull	-4(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %edx
+	movl	-28(%rbp), %eax
+	cmpl	%eax, %edx
+	cmovle	%edx, %eax
+	addl	%ecx, %eax
+.L22:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+    .global copy_tile
 copy_tile:
-    # Prologue
-    pushq %rbp                      # Save base pointer
-    movq %rsp, %rbp                 # Set stack pointer
-    subq $32, %rsp                  # Reserve 32 bytes for local variables
-
-    # Save callee-saved registers
-    pushq %r12
-    pushq %r13
-    pushq %r14
-    pushq %r15
-
-    # Arguments:
-    # %rdi - out_img (pointer to output Image)
-    # %rsi - img (pointer to input Image)
-    # %edx - tile_row (index of tile row)
-    # %ecx - tile_col (index of tile column)
-    # %r8d - n (tiling factor)
-
-    # Check for invalid input (n <= 0 || img->width <= 0 || img->height <= 0)
-    testl %r8d, %r8d                # Check if n <= 0
-    jle .Lreturn_copy_tile
-
-    movl 8(%rsi), %eax              # Load img->width
-    testl %eax, %eax                # Check if img->width <= 0
-    jle .Lreturn_copy_tile
-
-    movl 12(%rsi), %eax             # Load img->height
-    testl %eax, %eax                # Check if img->height <= 0
-    jle .Lreturn_copy_tile
-
-    # Calculate tile_w: determine_tile_w(img->width, n, tile_col)
-    movl 8(%rsi), %edi              # Load img->width into %edi (first argument for determine_tile_w)
-    movl %r8d, %esi                 # Move n into %esi (second argument)
-    movl %ecx, %edx                 # Move tile_col into %edx (third argument)
-    call determine_tile_w           # Call determine_tile_w
-    movl %eax, -4(%rbp)             # Store tile_w in local variable (-4(%rbp))
-
-    # Calculate tile_h: determine_tile_h(img->height, n, tile_row)
-    movl 12(%rsi), %edi             # Load img->height into %edi
-    movl %r8d, %esi                 # Move n into %esi
-    movl %edx, %edx                 # Move tile_row into %edx
-    call determine_tile_h           # Call determine_tile_h
-    movl %eax, -8(%rbp)             # Store tile_h in local variable (-8(%rbp))
-    
-    # Calculate tile_x_offset: determine_tile_x_offset(img->width, n, tile_col)
-    movl 8(%rsi), %edi              # Load img->width into %edi
-    movl %r8d, %esi                 # Move n into %esi
-    movl %ecx, %edx                 # Move tile_col into %edx
-    call determine_tile_x_offset    # Call determine_tile_x_offset
-    movl %eax, -12(%rbp)            # Store tile_x_offset in local variable (-12(%rbp))
-
-    # Calculate tile_y_offset: determine_tile_y_offset(img->height, n, tile_row)
-    movl 12(%rsi), %edi             # Load img->height into %edi
-    movl %r8d, %esi                 # Move n into %esi
-    movl %edx, %edx                 # Move tile_row into %edx
-    call determine_tile_y_offset    # Call determine_tile_y_offset
-    movl %eax, -16(%rbp)            # Store tile_y_offset in local variable (-16(%rbp))
-
-    # Start copying tile pixels
-    xorl %r9d, %r9d                 # Initialize y = 0
-
-.Ly_loop_copy_tile:
-    cmpl -8(%rbp), %r9d             # Compare y with tile_h
-    jge .Ldone_copy_tile            # If y >= tile_h, exit loop
-
-    xorl %r10d, %r10d               # Initialize x = 0
-
-.Lx_loop_copy_tile:
-    cmpl -4(%rbp), %r10d            # Compare x with tile_w
-    jge .Lnext_row_copy_tile        # If x >= tile_w, go to next row
-
-    # Calculate sample_y = y * n
-    imull %r8d, %r9d, %eax          # sample_y = y * n
-
-    # Calculate sample_x = x * n
-    imull %r8d, %r10d, %edx         # sample_x = x * n
-
-    # Ensure sample coordinates are within image bounds
-    addl %eax, -16(%rbp)            # Add tile_y_offset to sample_y
-    addl %edx, -12(%rbp)            # Add tile_x_offset to sample_x
-
-    cmpl 12(%rsi), %eax             # Compare sample_y with img->height
-    jge .Lskip_pixel_copy_tile      # If sample_y >= img->height, skip pixel
-
-    cmpl 8(%rsi), %edx              # Compare sample_x with img->width
-    jge .Lskip_pixel_copy_tile      # If sample_x >= img->width, skip pixel
-
-    # Load pixel from img->data[sample_y * img->width + sample_x]
-    movl 8(%rsi), %r11d             # img->width
-    imull %eax, %r11d, %eax         # sample_y * img->width
-    addl %edx, %eax                 # sample_y * img->width + sample_x
-    movl (%rsi,%rax,4), %r12d       # Load pixel from img->data
-
-    # Store pixel in out_img->data
-    movl 8(%rdi), %r11d             # out_img->width
-    imull %r9d, %r11d, %r9d         # tile_y_offset + y
-    addl %r10d, %r9d                # tile_x_offset + x
-    movl %r12d, (%rdi,%r9,4)        # Store pixel to out_img->data
-
-.Lskip_pixel_copy_tile:
-    incl %r10d                      # Increment x
-    jmp .Lx_loop_copy_tile          # Continue x loop
-
-.Lnext_row_copy_tile:
-    incl %r9d                       # Increment y
-    jmp .Ly_loop_copy_tile          # Continue y loop
-
-.Ldone_copy_tile:
-    # Epilogue
-    popq %r15
-    popq %r14
-    popq %r13
-    popq %r12
-    addq $32, %rsp                  # Restore stack space
-    popq %rbp                       # Restore base pointer
-    ret                             # Return
-
-.Lreturn_copy_tile:
-    # Handle invalid case (return without doing anything)
-    popq %r15
-    popq %r14
-    popq %r13
-    popq %r12
-    addq $32, %rsp
-    popq %rbp
-    ret
-
-
-
+.LFB11:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$80, %rsp
+	movq	%rdi, -56(%rbp)
+	movq	%rsi, -64(%rbp)
+	movl	%edx, -68(%rbp)
+	movl	%ecx, -72(%rbp)
+	movl	%r8d, -76(%rbp)
+	cmpl	$0, -76(%rbp)
+	jle	.L34
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	testl	%eax, %eax
+	jle	.L34
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	testl	%eax, %eax
+	jle	.L34
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	movl	-72(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_w
+	movl	%eax, -12(%rbp)
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	-68(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_h
+	movl	%eax, -16(%rbp)
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	movl	-72(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_x_offset
+	movl	%eax, -20(%rbp)
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	-68(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_y_offset
+	movl	%eax, -24(%rbp)
+	movl	$0, -4(%rbp)
+	jmp	.L27
+.L33:
+	movl	$0, -8(%rbp)
+	jmp	.L28
+.L32:
+	movl	-24(%rbp), %edx
+	movl	-4(%rbp), %eax
+	addl	%eax, %edx
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	cmpl	%eax, %edx
+	jge	.L35
+	movl	-20(%rbp), %edx
+	movl	-8(%rbp), %eax
+	addl	%eax, %edx
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	cmpl	%eax, %edx
+	jge	.L35
+	movl	-8(%rbp), %eax
+	imull	-76(%rbp), %eax
+	movl	%eax, -28(%rbp)
+	movl	-4(%rbp), %eax
+	imull	-76(%rbp), %eax
+	movl	%eax, -32(%rbp)
+	movq	-64(%rbp), %rax
+	movq	8(%rax), %rdx
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	imull	-32(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-28(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -36(%rbp)
+	movq	-56(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-24(%rbp), %ecx
+	movl	-4(%rbp), %eax
+	addl	%eax, %ecx
+	movq	-56(%rbp), %rax
+	movl	(%rax), %eax
+	imull	%ecx, %eax
+	movl	-20(%rbp), %esi
+	movl	-8(%rbp), %ecx
+	addl	%esi, %ecx
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-36(%rbp), %eax
+	movl	%eax, (%rdx)
+	jmp	.L31
+.L35:
+	nop
+.L31:
+	addl	$1, -8(%rbp)
+.L28:
+	movl	-8(%rbp), %eax
+	cmpl	-12(%rbp), %eax
+	jl	.L32
+	addl	$1, -4(%rbp)
+.L27:
+	movl	-4(%rbp), %eax
+	cmpl	-16(%rbp), %eax
+	jl	.L33
+	jmp	.L23
+.L34:
+	nop
+.L23:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
     .globl get_r
 get_r:
@@ -544,9 +493,6 @@ make_pixel:
     # Step 7: Return
     ret
 
-
-
-
 .globl to_grayscale
 to_grayscale:
     # Prologue: Set up the stack frame
@@ -613,6 +559,17 @@ to_grayscale:
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
     ret                         # Return with the grayscale pixel in 
+
+/*
+ * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
+ *
+ * Transform image by mirroring its pixels horizontally.
+ * This transformation always succeeds.
+ *
+ * Parameters:
+ *   %rdi - pointer to original struct Image
+ *   %rsi - pointer to output struct Image
+ */
     .global imgproc_mirror_h
 imgproc_mirror_h:
 .LFB20:
@@ -714,6 +671,17 @@ imgproc_mirror_h:
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
+
+/*
+ * void imgproc_mirror_v( struct Image *input_img, struct Image *output_img );
+ *
+ * Transform image by mirroring its pixels vertically.
+ * This transformation always succeeds.
+ *
+ * Parameters:
+ *   %rdi - pointer to original struct Image
+ *   %rsi - pointer to output struct Image
+ */
     .global imgproc_mirror_v
 imgproc_mirror_v:
 .LFB21:
