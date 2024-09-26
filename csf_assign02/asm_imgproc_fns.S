@@ -715,10 +715,8 @@ return:
     popq %rbp                     # Restore base pointer
     ret                           # Return from the function
 
-section .data
 
-section .text
-global imgproc_mirror_v
+.global imgproc_mirror_v
 
 ; Function to mirror an image vertically
 ; input_img - pointer to input Image struct
