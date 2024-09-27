@@ -366,13 +366,13 @@ imgproc_mirror_v:
 	movl	%eax, -16(%rbp)     # Store height in local variable
 
     # Check if width <= 0 or height <= 1 (no need to mirror)
-    cmpl    $0, -12(%rbp)           # Compare width with 0
-    jle     mirror_h_exit            # Exit if width <= 0
-    cmpl    $1, -16(%rbp)           # Compare height with 1
-    jle     mirror_h_exit            # Exit if height <= 1
+    cmpl    $0, -12(%rbp)       # Compare width with 0
+    jle     mirror_h_exit       # Exit if width <= 0
+    cmpl    $1, -16(%rbp)       # Compare height with 1
+    jle     mirror_h_exit       # Exit if height <= 1
 
-    # Initialize col index ()
-	movl	$0, -4(%rbp)
+    # Initialize row index (y) to 0
+	movl	$0, -4(%rbp)        # Set row index y to 0
 	jmp	.Louter_loop
 .Linner_loop_start:
 	movl	-16(%rbp), %eax
