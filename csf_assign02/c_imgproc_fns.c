@@ -311,7 +311,7 @@ void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
     int32_t height = input_img->height;
 
     // Edge case: Empty image or single-row image
-    if (height <= 1 || width <= 0) return;
+    if (width <= 0 || height <= 1) return;
 
     // Iterate over each column
     for (int32_t y = 0; y < height / 2; y++) {

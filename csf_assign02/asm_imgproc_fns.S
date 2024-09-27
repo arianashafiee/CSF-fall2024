@@ -389,6 +389,8 @@ imgproc_mirror_v:
 	addq	%rdx, %rax
 	movl	(%rax), %eax
 	movl	%eax, -24(%rbp)
+
+    
 	movq	-40(%rbp), %rax
 	movq	8(%rax), %rdx
 	movl	-20(%rbp), %eax
