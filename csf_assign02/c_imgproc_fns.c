@@ -313,9 +313,9 @@ void imgproc_mirror_v(struct Image *input_img, struct Image *output_img) {
     // Edge case: Empty image or single-row image
     if (width <= 0 || height <= 1) return;
 
-    // Iterate over each column
+    // Iterate over each row (only up to middle of image)
     for (int32_t y = 0; y < height / 2; y++) {
-        // Calculate the position of the mirrored row
+        // Calculate the position of the mirrored pixel
         int32_t mirrored_y = height - 1 - y;
 
         // Swap pixels in each column between the current row and the mirrored row

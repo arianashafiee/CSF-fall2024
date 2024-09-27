@@ -359,12 +359,17 @@ imgproc_mirror_v:
 
     # Load image width and height
 	movq	-40(%rbp), %rax     # Load input image pointer
-	movl	(%rax), %eax        # Load image height from input image
+	movl	(%rax), %eax        # Load width from input image
 	movl	%eax, -12(%rbp)     # Store height in local varaible
 	movq	-40(%rbp), %rax     # Load input image pointer again
 	movl	4(%rax), %eax       # Load height from input image
 	movl	%eax, -16(%rbp)     # Store height in local variable
 
+    # Check if width <= 0 or height <= 1 (no need to mirror)
+    cmpl    $0, -12(%rbp)           # Compare width with 0
+    jle     mirror_h_exit            # Exit if width <= 0
+    cmpl    $1, -16(%rbp)           # Compare height with 1
+    jle     mirror_h_exit            # Exit if height <= 1
 
     # Initialize col index ()
 	movl	$0, -4(%rbp)
@@ -390,7 +395,7 @@ imgproc_mirror_v:
 	movl	(%rax), %eax
 	movl	%eax, -24(%rbp)
 
-    
+
 	movq	-40(%rbp), %rax
 	movq	8(%rax), %rdx
 	movl	-20(%rbp), %eax
