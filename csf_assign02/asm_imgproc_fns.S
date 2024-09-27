@@ -236,11 +236,11 @@ imgproc_mirror_h:
     movl    $0, -4(%rbp)            # Set row index y to 0
 
     # Begin row loop
-mirror_h_row_loop:
+.Lmirror_h_row_loop:
     movl    $0, -8(%rbp)            # Set left column index x to 0
 
     # Begin column loop (left half of image)
-mirror_h_col_loop_check:
+.Lmirror_h_col_loop_check:
     # Calculate mirrored right column index (width - 1 - x)
     movl    -12(%rbp), %eax         # Load image width
     subl    $1, %eax                # width - 1
@@ -311,16 +311,16 @@ mirror_h_col_loop_check:
     addl    %edx, %eax              # Adjust width
     sarl    %eax                    # Divide width by 2
     cmpl    %eax, -8(%rbp)          # Compare x with width / 2
-    jl      mirror_h_col_loop_check  # Repeat column loop if x < width / 2
+    jl      .Lmirror_h_col_loop_check  # Repeat column loop if x < width / 2
 
     # Increment row index y
     addl    $1, -4(%rbp)            # Increment y
     movl    -4(%rbp), %eax          # Check if y < height
     cmpl    -16(%rbp), %eax
-    jl      mirror_h_row_loop        # Repeat row loop if y < height
+    jl      .Lmirror_h_row_loop        # Repeat row loop if y < height
 
     # Exit routine
-mirror_h_exit:
+.Lmirror_h_exit:
     popq    %rbp                    # Restore base pointer
     ret                             # Return
 
