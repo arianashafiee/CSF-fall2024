@@ -2,7 +2,7 @@
  * x86-64 assembly language implementations of functions
  */
 
-    .section .text
+.section .text
 
 /* Offsets of struct Image fields */
 #define IMAGE_WIDTH_OFFSET   0
@@ -61,7 +61,7 @@ get_b:
     # Prologue: Setup the stack frame
     pushq   %rbp                  # Save base pointer
     movq    %rsp, %rbp            # Set the new base pointer
-    
+
     # Move the input argument (pixel) from %edi to %eax
     movl    %edi, %eax            # Copy the pixel argument to %eax
 
@@ -81,7 +81,7 @@ get_a:
     # Prologue: Setup the stack frame
     pushq   %rbp                  # Save base pointer
     movq    %rsp, %rbp            # Set the new base pointer
-    
+
     # Move the input argument (pixel) from %edi to %eax
     movl    %edi, %eax            # Copy the pixel argument to %eax
 
@@ -92,7 +92,7 @@ get_a:
     popq    %rbp                  # Restore base pointer
     ret                           # Return, with result in %eax
 
-.globl make_pixel
+    .globl make_pixel
 make_pixel:
     # Input: %rdi (red), %rsi (green), %rdx (blue), %rcx (alpha)
     # Output: %rax (the packed pixel value: 0xRRGGBBAA)
@@ -116,7 +116,7 @@ make_pixel:
     # Step 7: Return
     ret
 
-.globl to_grayscale
+    .globl to_grayscale
 to_grayscale:
     # Prologue: Set up the stack frame
     pushq   %rbp
@@ -181,7 +181,7 @@ to_grayscale:
 
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
-    ret                         # Return with the grayscale pixel in 
+    ret                         # Return with the grayscale pixel in
 
 /*
  * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
@@ -198,7 +198,7 @@ to_grayscale:
  *   %rsi - output image pointer
  *   %rax - temporary register for pixel manipulation
  *   %rbp - base pointer for the stack frame
- * 
+ *
  * Memory use:
  *   -40(%rbp) - input image pointer
  *   -48(%rbp) - output image pointer
@@ -211,7 +211,7 @@ to_grayscale:
  *   -28(%rbp) - pixel value from right column
  */
 
-.global imgproc_mirror_h
+    .global imgproc_mirror_h
 imgproc_mirror_h:
     pushq   %rbp                   # Save base pointer
     movq    %rsp, %rbp              # Set up stack frame
@@ -352,10 +352,10 @@ mirror_h_exit:
  */
     .global imgproc_mirror_v
 imgproc_mirror_v:
-   imgproc_mirror_v:
+
 .LFB21:
 	.cfi_startproc
-	pushq	%rbp
+	pushq	%rbp                # Save base pointer
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
