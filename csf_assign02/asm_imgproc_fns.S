@@ -353,21 +353,18 @@ imgproc_mirror_h:
     .global imgproc_mirror_v
 imgproc_mirror_v:
 
-.LFB21:
-	.cfi_startproc
 	pushq	%rbp                # Save base pointer
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
 	movq	%rdi, -40(%rbp)
 	movq	%rsi, -48(%rbp)
+
 	movq	-40(%rbp), %rax
 	movl	(%rax), %eax
 	movl	%eax, -12(%rbp)
 	movq	-40(%rbp), %rax
 	movl	4(%rax), %eax
 	movl	%eax, -16(%rbp)
+
 	movl	$0, -4(%rbp)
 	jmp	.Louter_loop
 .Linner_loop_start:
@@ -443,9 +440,7 @@ imgproc_mirror_v:
 	nop
 	nop
 	popq	%rbp
-	.cfi_def_cfa 7, 8
 	ret
-	.cfi_endproc
 
 
 /*
