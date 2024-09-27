@@ -499,8 +499,7 @@ imgproc_tile:
  *   -24(%rbp) - grayscale pixel value
  */
 
-.globl imgproc_grayscale
-imgproc_grayscale:
+    .globl imgproc_grayscale
 imgproc_grayscale:
 .LFB_grayscale_start:
 	.cfi_startproc
