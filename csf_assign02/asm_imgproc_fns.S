@@ -352,19 +352,21 @@ imgproc_mirror_h:
  */
     .global imgproc_mirror_v
 imgproc_mirror_v:
-
 	pushq	%rbp                # Save base pointer
-	movq	%rsp, %rbp
-	movq	%rdi, -40(%rbp)
-	movq	%rsi, -48(%rbp)
+	movq	%rsp, %rbp          # Set up stack frame
+	movq	%rdi, -40(%rbp)     # Store input image pointer
+	movq	%rsi, -48(%rbp)     # Store output image pointer
 
-	movq	-40(%rbp), %rax
-	movl	(%rax), %eax
-	movl	%eax, -12(%rbp)
-	movq	-40(%rbp), %rax
-	movl	4(%rax), %eax
-	movl	%eax, -16(%rbp)
+    # Load image width and height
+	movq	-40(%rbp), %rax     # Load input image pointer
+	movl	(%rax), %eax        # Load image height from input image
+	movl	%eax, -12(%rbp)     # Store height in local varaible
+	movq	-40(%rbp), %rax     # Load input image pointer again
+	movl	4(%rax), %eax       # Load height from input image
+	movl	%eax, -16(%rbp)     # Store height in local variable
 
+
+    # Initialize col index ()
 	movl	$0, -4(%rbp)
 	jmp	.Louter_loop
 .Linner_loop_start:
@@ -439,8 +441,11 @@ imgproc_mirror_v:
 	jl	.Linner_loop_start
 	nop
 	nop
-	popq	%rbp
-	ret
+
+    # Exit routine
+.Lmirror_v_exit:
+	popq	%rbp                # Restore base pointer
+	ret                         # Return
 
 
 /*
