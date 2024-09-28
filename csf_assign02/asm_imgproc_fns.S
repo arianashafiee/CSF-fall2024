@@ -228,9 +228,9 @@ imgproc_mirror_h:
 
     # Check if width <= 1 or height <= 0 (no need to mirror)
     cmpl    $1, -12(%rbp)           # Compare width with 1
-    jle     mirror_h_exit            # Exit if width <= 1
+    jle     .Lmirror_h_exit            # Exit if width <= 1
     cmpl    $0, -16(%rbp)           # Compare height with 0
-    jle     mirror_h_exit            # Exit if height <= 0
+    jle     .Lmirror_h_exit            # Exit if height <= 0
 
     # Initialize row index (y) to 0
     movl    $0, -4(%rbp)            # Set row index y to 0
@@ -367,9 +367,9 @@ imgproc_mirror_v:
 
     # Check if width <= 0 or height <= 1 (no need to mirror)
     cmpl    $0, -12(%rbp)       # Compare width with 0
-    jle     mirror_h_exit       # Exit if width <= 0
+    jle     .Lmirror_v_exit       # Exit if width <= 0
     cmpl    $1, -16(%rbp)       # Compare height with 1
-    jle     mirror_h_exit       # Exit if height <= 1
+    jle     .Lmirror_v_exit       # Exit if height <= 1
 
     # Initialize row index (y) to 0
 	movl	$0, -4(%rbp)        # Set row index y to 0
