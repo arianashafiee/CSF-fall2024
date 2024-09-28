@@ -373,15 +373,15 @@ imgproc_mirror_v:
 
     # Initialize row index (y) to 0
 	movl	$0, -4(%rbp)        # Set row index y to 0
-	jmp	.Louter_loop
-.Linner_loop_start:
+	jmp	    .Lmirror_v_row_loop
+.Lmirror_v_col_loop_start:
 	movl	-16(%rbp), %eax
 	subl	$1, %eax
 	subl	-4(%rbp), %eax
 	movl	%eax, -20(%rbp)
 	movl	$0, -8(%rbp)
-	jmp	.Lprocess_pixels
-.Lpixel_processing:
+	jmp	    .Lmirror_v_process_pixels
+.Lmirror_v_pixel_processing:
 	movq	-40(%rbp), %rax
 	movq	8(%rax), %rdx
 	movl	-4(%rbp), %eax
@@ -433,21 +433,19 @@ imgproc_mirror_v:
 	movl	-24(%rbp), %eax
 	movl	%eax, (%rdx)
 	addl	$1, -8(%rbp)
-.Lprocess_pixels:
+.Lmirror_v_process_pixels:
 	movl	-8(%rbp), %eax
 	cmpl	-12(%rbp), %eax
-	jl	.Lpixel_processing
+	jl	    .Lmirror_v_pixel_processing
 	addl	$1, -4(%rbp)
-.Louter_loop:
+.Lmirror_v_row_loop:
 	movl	-16(%rbp), %eax
 	movl	%eax, %edx
 	shrl	$31, %edx
 	addl	%edx, %eax
 	sarl	%eax
 	cmpl	%eax, -4(%rbp)
-	jl	.Linner_loop_start
-	nop
-	nop
+	jl	    .Lmirror_v_col_loop_start
 
     # Exit routine
 .Lmirror_v_exit:
@@ -520,14 +518,14 @@ imgproc_grayscale:
 	movl	4(%rax), %eax
 	movl	%eax, -16(%rbp)
 	cmpl	$0, -12(%rbp)
-	jle	.L_exit
+	jle	    .L_exit
 	cmpl	$0, -16(%rbp)
-	jle	.L_exit
+	jle	    .L_exit
 	movl	$0, -4(%rbp)
-	jmp	.L_outer_loop
+	jmp	    .L_outer_loop
 .L_inner_loop:
 	movl	$0, -8(%rbp)
-	jmp	.L_process_pixel
+	jmp	    .L_process_pixel
 .L_pixel_processing:
 	movq	-40(%rbp), %rax
 	movq	8(%rax), %rdx
@@ -561,13 +559,13 @@ imgproc_grayscale:
 .L_process_pixel:
 	movl	-8(%rbp), %eax
 	cmpl	-12(%rbp), %eax
-	jl	.L_pixel_processing
+	jl	    .L_pixel_processing
 	addl	$1, -4(%rbp)
 .L_outer_loop:
 	movl	-4(%rbp), %eax
 	cmpl	-16(%rbp), %eax
-	jl	.L_inner_loop
-	jmp	.L_return
+	jl	    .L_inner_loop
+	jmp	    .L_return
 .L_exit:
 	nop
 .L_return:
