@@ -542,7 +542,30 @@ imgproc_mirror_v:
 	popq	%rbp                # Restore base pointer
 	ret                         # Return
 
-
+/*
+ * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
+ *
+ * Transform image by generating a grid of n x n smaller tiles created by
+ * sampling every n'th pixel from the original image.
+ *
+ * Parameters:
+ *   %rdi - pointer to original struct Image
+ *   %esi - tiling factor (how many rows and columns of tiles to generate)
+ *   %rdx - pointer to the output Image (in which the transformed
+ *          pixels should be stored)
+ *
+ * Returns (in %eax):
+ *   1 if successful, or 0 if either
+ *     - n is less than 1, or
+ *     - the output can't be generated because at least one tile would
+ *       be empty (i.e., have 0 width or height)
+ */
+	.globl imgproc_tile
+imgproc_tile:
+	/* TODO: implement (this stub implementation just returns 0) */
+	xorl %eax, %eax
+	ret
+    
 /*
  * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
  *
