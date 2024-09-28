@@ -518,15 +518,15 @@ imgproc_grayscale:
 	movl	4(%rax), %eax
 	movl	%eax, -16(%rbp)
 	cmpl	$0, -12(%rbp)
-	jle	    .L_exit
+	jle	    .Lgrayscale_exit
 	cmpl	$0, -16(%rbp)
-	jle	    .L_exit
+	jle	    .Lgrayscale_exit
 	movl	$0, -4(%rbp)
-	jmp	    .L_outer_loop
-.L_inner_loop:
+	jmp	    .Lgrayscale_y_loop
+.Lgrayscale_x_loop:
 	movl	$0, -8(%rbp)
-	jmp	    .L_process_pixel
-.L_pixel_processing:
+	jmp	    .Lgrayscale_process_pixel
+.Lgrayscale_pixel_processing:
 	movq	-40(%rbp), %rax
 	movq	8(%rax), %rdx
 	movl	-4(%rbp), %eax
@@ -556,19 +556,19 @@ imgproc_grayscale:
 	movl	-24(%rbp), %eax
 	movl	%eax, (%rdx)
 	addl	$1, -8(%rbp)
-.L_process_pixel:
+.Lgrayscale_process_pixel:
 	movl	-8(%rbp), %eax
 	cmpl	-12(%rbp), %eax
-	jl	    .L_pixel_processing
+	jl	    .Lgrayscale_pixel_processing
 	addl	$1, -4(%rbp)
-.L_outer_loop:
+.Lgrayscale_y_loop:
 	movl	-4(%rbp), %eax
 	cmpl	-16(%rbp), %eax
-	jl	    .L_inner_loop
-	jmp	    .L_return
-.L_exit:
+	jl	    .Lgrayscale_x_loop
+	jmp	    .Lgrayscale_return
+.Lgrayscale_exit:
 	nop
-.L_return:
+.Lgrayscale_return:
 	leave
 	ret
 
