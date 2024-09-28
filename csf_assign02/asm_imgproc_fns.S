@@ -508,13 +508,8 @@ imgproc_tile:
 
     .globl imgproc_grayscale
 imgproc_grayscale:
-.LFB_grayscale_start:
-	.cfi_startproc
 	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
 	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
 	subq	$48, %rsp
 	movq	%rdi, -40(%rbp)
 	movq	%rsi, -48(%rbp)
@@ -577,9 +572,7 @@ imgproc_grayscale:
 	nop
 .L_return:
 	leave
-	.cfi_def_cfa 7, 8
 	ret
-	.cfi_endproc
 
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
