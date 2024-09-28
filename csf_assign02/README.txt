@@ -7,6 +7,7 @@ This function enables efficient downsampling of pixels for tiled images, ensurin
 Functions like all_tiles_nonempty, determine_tile_w, and determine_tile_h carefully ensure that tiles in the output image are not empty by calculating tile sizes and offsets. They handle edge cases where tile dimensions are invalid or zero, ensuring robust tiling.
 
 Ariana Shafiee:
+MS1:
 void imgproc_mirror_h(struct Image *input_img, struct Image *output_img);
 void imgproc_mirror_v(struct Image *input_img, struct Image *output_img);
 int imgproc_tile(struct Image *input_img, int n, struct Image *output_img);
@@ -44,7 +45,22 @@ test_to_grayscale(TestObjs *objs)
 test_blend_components(TestObjs *objs)
 test_blend_colors(TestObjs *objs)
 
+MS2:
+assembly implementations of:
+void imgproc_mirror_h(struct Image *input_img, struct Image *output_img);
+void imgproc_mirror_v(struct Image *input_img, struct Image *output_img);
+void imgproc_grayscale(struct Image *input_img, struct Image *output_img);
+uint32_t get_r(uint32_t pixel);
+uint32_t get_g(uint32_t pixel);
+uint32_t get_b(uint32_t pixel);
+uint32_t get_a(uint32_t pixel);
+uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
+uint32_t to_grayscale(uint32_t pixel);
+
+
 Eric Guan: 
+
+MS1:
 test_tile_basic(TestObjs *objs)
 test_grayscale_basic(TestObjs *objs)
 test_composite_basic(TestObjs *objs)
@@ -63,4 +79,6 @@ test_to_grayscale(TestObjs *objs)
 test_blend_components(TestObjs *objs)
 test_blend_colors(TestObjs *objs)
 
+MS2:
+added meaningful loop labels
 

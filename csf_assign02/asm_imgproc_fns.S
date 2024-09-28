@@ -13,6 +13,20 @@
  * Helper functions for image processing
  */
 
+/*
+ * Register use:
+ *   %rbp - base pointer for the stack frame
+ *   %rsp - stack pointer, used for adjusting the stack
+ *   %edi - holds the input pixel argument (32-bit value)
+ *   %eax - used for storing the pixel value and result (red component)
+ *
+ * Memory:
+ *   No explicit use of stack memory beyond the base pointer and stack pointer for setting up and tearing down the stack frame.
+ * 
+ *   The function extracts the red color component from a 32-bit pixel value.
+ *   It shifts the input value right by 24 bits to move the red component to the lowest 8 bits.
+ *   It then applies a mask to isolate the red component and returns it.
+ */
 
     .globl get_r
 get_r:
@@ -34,6 +48,20 @@ get_r:
     popq    %rbp                    # Restore the old base pointer
     ret                             # Return to the caller, result in %eax
 
+/*
+ * Register use:
+ *   %rbp - base pointer for the stack frame
+ *   %rsp - stack pointer, used for adjusting the stack
+ *   %edi - holds the input pixel argument (32-bit value)
+ *   %eax - used for storing the pixel value and result (green component)
+ *
+ * Memory:
+ *   No explicit use of stack memory beyond the base pointer and stack pointer for setting up and tearing down the stack frame.
+ *
+ *   This function extracts the green color component from a 32-bit pixel value.
+ *   It shifts the input value right by 16 bits to move the green component to the lowest 8 bits.
+ *   Then, it applies a mask to isolate the green component and returns it.
+ */
 
     .globl get_g
 get_g:
@@ -55,7 +83,21 @@ get_g:
     popq    %rbp                  # Restore old base pointer
     ret                           # Return to caller, result is in %eax
 
-
+/*
+ *
+ * Register use:
+ *   %rbp - base pointer for the stack frame
+ *   %rsp - stack pointer, used for adjusting the stack
+ *   %edi - holds the input pixel argument (32-bit value)
+ *   %eax - used for storing the pixel value and result (blue component)
+ *
+ * Memory:
+ *   No explicit use of stack memory beyond the base pointer and stack pointer for setting up and tearing down the stack frame.
+ *
+ *   This function extracts the blue color component from a 32-bit pixel value.
+ *   It shifts the input value right by 8 bits to move the blue component to the lowest 8 bits.
+ *   Then, it applies a mask to isolate the blue component and returns it.
+ */
     .globl get_b
 get_b:
     # Prologue: Setup the stack frame
@@ -75,6 +117,20 @@ get_b:
     popq    %rbp                  # Restore base pointer
     ret                           # Return, with result in %eax
 
+/*
+ *
+ * Register use:
+ *   %rbp - base pointer for the stack frame
+ *   %rsp - stack pointer, used for adjusting the stack
+ *   %edi - holds the input pixel argument (32-bit value)
+ *   %eax - used for storing the pixel value and result (alpha component)
+ *
+ * Memory:
+ *   No explicit use of stack memory beyond the base pointer and stack pointer for setting up and tearing down the stack frame.
+ *
+ *   This function extracts the alpha component from a 32-bit pixel value.
+ *   It directly applies a mask to the least significant 8 bits to isolate the alpha component and returns it.
+ */
 
     .globl get_a
 get_a:
@@ -92,10 +148,23 @@ get_a:
     popq    %rbp                  # Restore base pointer
     ret                           # Return, with result in %eax
 
+/*
+ * Register use:
+ *   %rdi - red component (input)
+ *   %rsi - green component (input)
+ *   %rdx - blue component (input)
+ *   %rcx - alpha component (input)
+ *   %rax - final packed pixel (output)
+ *
+ * Memory:
+ *   No explicit use of stack memory beyond the base pointer and stack pointer for setting up and tearing down the stack frame.
+ *
+ *   This function packs the red, green, blue, and alpha components into a 32-bit pixel value.
+ *   It shifts each component to its correct position in the 32-bit pixel and combines them using bitwise OR.
+ *   The final packed pixel is returned in %rax.
+ */
     .globl make_pixel
 make_pixel:
-    # Input: %rdi (red), %rsi (green), %rdx (blue), %rcx (alpha)
-    # Output: %rax (the packed pixel value: 0xRRGGBBAA)
 
     # Step 1: Pack the red component (shift left by 24 bits to align with most significant byte)
     shl $24, %rdi          # red << 24
@@ -115,6 +184,27 @@ make_pixel:
 
     # Step 7: Return
     ret
+
+/*
+ * Register use:
+ *   %rbp - base pointer for the stack frame
+ *   %rsp - stack pointer, used for adjusting the stack
+ *   %edi - holds the input pixel argument (32-bit value)
+ *   %r12d - holds the original pixel value (callee-saved)
+ *   %r13d - holds the red component and later the grayscale value
+ *   %r14d - holds the green component
+ *   %r15d - holds the blue component
+ *   %ebx  - holds the alpha component
+ *   %eax  - used for temporary calculations (grayscale)
+ *   %ecx  - used for combining color components into the final pixel
+ *
+ * Memory:
+ *   No explicit use of stack memory beyond the base pointer and stack pointer for setting up and tearing down the stack frame.
+ *
+ *   This function converts a 32-bit pixel (ARGB format) to grayscale using a weighted average formula:
+ *   grayscale = (79 * red + 128 * green + 49 * blue) / 256.
+ *   It then combines the grayscale value with the original alpha component to produce a 32-bit grayscale pixel.
+ */
 
     .globl to_grayscale
 to_grayscale:
@@ -181,7 +271,7 @@ to_grayscale:
 
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
-    ret                         # Return with the grayscale pixel in
+    ret                         # Return with the grayscale pixel
 
 /*
  * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
@@ -454,30 +544,6 @@ imgproc_mirror_v:
 
 
 /*
- * int imgproc_tile( struct Image *input_img, int n, struct Image *output_img );
- *
- * Transform image by generating a grid of n x n smaller tiles created by
- * sampling every n'th pixel from the original image.
- *
- * Parameters:
- *   %rdi - pointer to original struct Image
- *   %esi - tiling factor (how many rows and columns of tiles to generate)
- *   %rdx - pointer to the output Image (in which the transformed
- *          pixels should be stored)
- *
- * Returns (in %eax):
- *   1 if successful, or 0 if either
- *     - n is less than 1, or
- *     - the output can't be generated because at least one tile would
- *       be empty (i.e., have 0 width or height)
- */
-	.globl imgproc_tile
-imgproc_tile:
-	/* TODO: implement (this stub implementation just returns 0) */
-	xorl %eax, %eax
-	ret
-
-/*
  * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
  *
  * Transform image by converting each pixel to grayscale.
@@ -506,71 +572,81 @@ imgproc_tile:
 
     .globl imgproc_grayscale
 imgproc_grayscale:
-	pushq	%rbp
-	movq	%rsp, %rbp
-	subq	$48, %rsp
-	movq	%rdi, -40(%rbp)
-	movq	%rsi, -48(%rbp)
-	movq	-40(%rbp), %rax
-	movl	(%rax), %eax
-	movl	%eax, -12(%rbp)
-	movq	-40(%rbp), %rax
-	movl	4(%rax), %eax
-	movl	%eax, -16(%rbp)
-	cmpl	$0, -12(%rbp)
-	jle	    .Lgrayscale_exit
-	cmpl	$0, -16(%rbp)
-	jle	    .Lgrayscale_exit
-	movl	$0, -4(%rbp)
-	jmp	    .Lgrayscale_y_loop
-.Lgrayscale_x_loop:
-	movl	$0, -8(%rbp)
-	jmp	    .Lgrayscale_process_pixel
-.Lgrayscale_pixel_processing:
-	movq	-40(%rbp), %rax
-	movq	8(%rax), %rdx
-	movl	-4(%rbp), %eax
-	imull	-12(%rbp), %eax
-	movl	%eax, %ecx
-	movl	-8(%rbp), %eax
-	addl	%ecx, %eax
-	cltq
-	salq	$2, %rax
-	addq	%rdx, %rax
-	movl	(%rax), %eax
-	movl	%eax, -20(%rbp)
-	movl	-20(%rbp), %eax
-	movl	%eax, %edi
-	call	to_grayscale
-	movl	%eax, -24(%rbp)
-	movq	-48(%rbp), %rax
-	movq	8(%rax), %rdx
-	movl	-4(%rbp), %eax
-	imull	-12(%rbp), %eax
-	movl	%eax, %ecx
-	movl	-8(%rbp), %eax
-	addl	%ecx, %eax
-	cltq
-	salq	$2, %rax
-	addq	%rax, %rdx
-	movl	-24(%rbp), %eax
-	movl	%eax, (%rdx)
-	addl	$1, -8(%rbp)
-.Lgrayscale_process_pixel:
-	movl	-8(%rbp), %eax
-	cmpl	-12(%rbp), %eax
-	jl	    .Lgrayscale_pixel_processing
-	addl	$1, -4(%rbp)
-.Lgrayscale_y_loop:
-	movl	-4(%rbp), %eax
-	cmpl	-16(%rbp), %eax
-	jl	    .Lgrayscale_x_loop
-	jmp	    .Lgrayscale_return
-.Lgrayscale_exit:
-	nop
-.Lgrayscale_return:
-	leave
-	ret
+	pushq	%rbp                # Save the base pointer
+	movq	%rsp, %rbp          # Set up the new stack frame
+	subq	$48, %rsp           # Allocate 48 bytes of stack space
+	movq	%rdi, -40(%rbp)     # Store input image pointer in stack
+	movq	%rsi, -48(%rbp)     # Store output image pointer in stack
+	movq	-40(%rbp), %rax     # Load input image pointer into %rax
+	movl	(%rax), %eax        # Load image width from input image structure
+	movl	%eax, -12(%rbp)     # Store image width in stack variable
+	movq	-40(%rbp), %rax     # Load input image pointer again into %rax
+	movl	4(%rax), %eax       # Load image height from input image structure
+	movl	%eax, -16(%rbp)     # Store image height in stack variable
+	cmpl	$0, -12(%rbp)       # Compare image width with 0
+	jle	    .Lgrayscale_exit    # Exit if width <= 0
+	cmpl	$0, -16(%rbp)       # Compare image height with 0
+	jle	    .Lgrayscale_exit    # Exit if height <= 0
+	movl	$0, -4(%rbp)        # Initialize row index (y) to 0
+	jmp	    .Lgrayscale_y_loop  # Jump to the start of the row loop
+
+.Lgrayscale_x_loop:               # Start of the column loop
+	movl	$0, -8(%rbp)        # Initialize column index (x) to 0
+	jmp	    .Lgrayscale_process_pixel # Jump to pixel processing
+
+.Lgrayscale_pixel_processing:     # Begin pixel processing
+	movq	-40(%rbp), %rax     # Load input image pointer into %rax
+	movq	8(%rax), %rdx       # Load pixel array pointer from input image
+	movl	-4(%rbp), %eax      # Load current row index (y)
+	imull	-12(%rbp), %eax     # Multiply by image width to get row offset
+	movl	%eax, %ecx          # Store row offset in %ecx
+	movl	-8(%rbp), %eax      # Load current column index (x)
+	addl	%ecx, %eax          # Add column index to row offset
+	cltq                     # Convert to 64-bit value
+	salq	$2, %rax            # Multiply by 4 (pixel size)
+	addq	%rdx, %rax          # Add to pixel array base address
+	movl	(%rax), %eax        # Load pixel value from input image
+	movl	%eax, -20(%rbp)     # Store current pixel value in stack
+
+	movl	-20(%rbp), %eax     # Load current pixel value
+	movl	%eax, %edi          # Move pixel value to %edi for the to_grayscale call
+	call	to_grayscale        # Call to_grayscale function
+	movl	%eax, -24(%rbp)     # Store grayscale value in stack
+
+	movq	-48(%rbp), %rax     # Load output image pointer into %rax
+	movq	8(%rax), %rdx       # Load pixel array pointer from output image
+	movl	-4(%rbp), %eax      # Load current row index (y)
+	imull	-12(%rbp), %eax     # Multiply by image width to get row offset
+	movl	%eax, %ecx          # Store row offset in %ecx
+	movl	-8(%rbp), %eax      # Load current column index (x)
+	addl	%ecx, %eax          # Add column index to row offset
+	cltq                     # Convert to 64-bit value
+	salq	$2, %rax            # Multiply by 4 (pixel size)
+	addq	%rax, %rdx          # Add to pixel array base address
+	movl	-24(%rbp), %eax     # Load grayscale pixel value
+	movl	%eax, (%rdx)        # Store grayscale pixel in output image
+
+	addl	$1, -8(%rbp)        # Increment column index (x)
+.Lgrayscale_process_pixel:        # Continue processing pixels in the row
+	movl	-8(%rbp), %eax      # Load current column index (x)
+	cmpl	-12(%rbp), %eax     # Compare x with image width
+	jl	    .Lgrayscale_pixel_processing # Jump to pixel processing if x < width
+
+	addl	$1, -4(%rbp)        # Increment row index (y)
+.Lgrayscale_y_loop:               # Continue processing rows
+	movl	-4(%rbp), %eax      # Load current row index (y)
+	cmpl	-16(%rbp), %eax     # Compare y with image height
+	jl	    .Lgrayscale_x_loop  # Jump to column loop if y < height
+
+	jmp	    .Lgrayscale_return  # Jump to return section
+
+.Lgrayscale_exit:                 # Exit if invalid image dimensions
+	nop                          # No operation
+
+.Lgrayscale_return:               # Return from the function
+	leave                        # Restore stack and base pointer
+	ret                          # Return to caller
+
 
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
