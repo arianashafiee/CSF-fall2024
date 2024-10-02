@@ -279,14 +279,6 @@ blend_components:
     movq    %rsi, %r13          # Move bg to %r13
     movq    %rdx, %r14          # Move alpha to %r14
     movq    $255, %r15          # Store 255 constant to %r15
-    // movq    %rdi, %rax
-
-    // imulq   %r14, %r12
-    // subq    $255, %r14
-    // imulq   %r14, %r13
-    // addq    %r13, %r12
-    // movq    %r12, %rax
-    // divq    %r15
 
     imulq   %r14, %r12          # Multiply alpha by fg
     subq    $255, %r14          # Subtract alpha from 255
