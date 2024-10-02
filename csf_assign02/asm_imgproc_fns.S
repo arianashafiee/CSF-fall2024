@@ -313,6 +313,8 @@ blend_components:
     popq    %rbp
     ret
 
+    .globl blend_colors
+
 /*
  * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
  *
@@ -730,7 +732,12 @@ imgproc_grayscale:
 	.globl imgproc_composite
 imgproc_composite:
 	/* TODO: implement (this stub implementation just returns 0) */
-	xorl %eax, %eax
+    pushq	%rbp
+    movq    %rsp, %rbp
+
+
+
+    popq    %rbp
 	ret
 
 /*

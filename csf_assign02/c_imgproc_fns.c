@@ -241,14 +241,14 @@ uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha) {
 //   The blended 32-bit pixel in RGBA format, with alpha set to 255 (fully opaque).
 uint32_t blend_colors(uint32_t fg, uint32_t bg) {
     // Extract the red, green, blue, and alpha components from both pixels
-    uint32_t fg_r = (fg >> 24); // & 0xFF;
-    uint32_t fg_g = (fg >> 16) & 0xFF;
-    uint32_t fg_b = (fg >> 8) & 0xFF;
-    uint32_t fg_a = fg & 0xFF;
+    uint32_t fg_r = get_r(fg);
+    uint32_t fg_g = get_g(fg);
+    uint32_t fg_b = get_b(fg);
+    uint32_t fg_a = get_a(fg);
 
-    uint32_t bg_r = (bg >> 24) & 0xFF;
-    uint32_t bg_g = (bg >> 16) & 0xFF;
-    uint32_t bg_b = (bg >> 8) & 0xFF;
+    uint32_t bg_r = get_r(bg);
+    uint32_t bg_g = get_g(bg);
+    uint32_t bg_b = get_b(bg);
 
     // Blend each color component using the foreground alpha value
     uint32_t blended_r = blend_components(fg_r, bg_r, fg_a);
