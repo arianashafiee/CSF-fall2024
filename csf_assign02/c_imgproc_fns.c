@@ -250,9 +250,6 @@ uint32_t blend_colors(uint32_t fg, uint32_t bg) {
     uint32_t bg_g = (bg >> 16) & 0xFF;
     uint32_t bg_b = (bg >> 8) & 0xFF;
 
-    if (fg_a == 0) return bg;  // Fully transparent, return background
-    if (fg_a == 255) return fg;  // Fully opaque, return foreground
-
     // Blend each color component using the foreground alpha value
     uint32_t blended_r = blend_components(fg_r, bg_r, fg_a);
     uint32_t blended_g = blend_components(fg_g, bg_g, fg_a);
