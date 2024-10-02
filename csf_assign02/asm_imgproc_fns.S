@@ -314,6 +314,82 @@ blend_components:
     ret
 
     .globl blend_colors
+blend_colors:
+    # Arguments:
+    # fg: %edi
+    # bg: #esi
+
+    # Prologue
+    pushq   %rbp
+    movq    %rsp, %rbp
+    subq    $4, %rsp
+
+    # Store argument values in stack
+    movl    %edi, -4(%rbp)
+    movl    %esi, -8(%rbp)
+
+    # Get component values from fg
+    movl    -4(%rbp), %edi
+    call    get_r
+    movl    %eax, %r12d
+
+    movl    -4(%rbp), %edi
+    call    get_g
+    movl    %eax, %r13d
+
+    movl    -4(%rbp), %edi
+    call    get_b
+    movl    %eax, %r14d
+
+    movl    -4(%rbp), %edi
+    call    get_a
+    movl    %eax, %r15d
+
+    # Get component values from bg
+    movl    -4(%rbp), %edi
+    call    get_r
+    movl    %eax, -12(%rbp)
+
+    movl    -4(%rbp), %edi
+    call    get_g
+    movl    %eax, -16(%rbp)
+
+    movl    -4(%rbp), %edi
+    call    get_b
+    movl    %eax, -20(%rbp)
+
+    # Blend red component
+    movl    %r12d, %edi
+    movl    -12(%rbp), %esi
+    movl    %r15d, %edx
+    call    blend_components
+    movl    %eax, -24(%rbp)
+
+    # Blend green component
+    movl    %r13d, %edi
+    movl    -14(%rbp), %esi
+    movl    %r15d, %edx
+    call    blend_components
+    movl    %eax, -28(%rbp)
+
+    # Blend blue component
+    movl    %r14d, %edi
+    movl    -16(%rbp), %esi
+    movl    %r15d, %edx
+    call    blend_components
+    movl    %eax, -32(%rbp)
+
+    # Make pixel from blended components
+    movl    -24(%rbp), %edi
+    movl    -28(%rbp), %esi
+    movl    -32(%rbp), %edx
+    movl    $255, %ecx
+    call    make_pixel
+
+    # Exit
+    addq    $4, %rsp
+    popq    %rbp
+    ret
 
 /*
  * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
