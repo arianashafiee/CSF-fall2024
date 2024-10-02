@@ -279,9 +279,9 @@ blend_components:
     movq    %rsi, %r13
     movq    %rdx, %r14
 
-    imulq    %r14, %r12
+    imulq   %r14, %r12
     subq    $255, %r14
-    imulq    %r14, %r13
+    imulq   %r14, %r13
     addq    %r13, %r12
     movq    %r12, %rax
     divq    $255
