@@ -116,7 +116,7 @@ void test_get_a(TestObjs *objs);
 void test_make_pixel(TestObjs *objs);
 void test_to_grayscale(TestObjs *objs);
 void test_blend_components(TestObjs *objs);
-//void test_blend_colors(TestObjs *objs);
+void test_blend_colors(TestObjs *objs);
 
 int main( int argc, char **argv ) {
   // allow the specific test to execute to be specified as the
@@ -148,7 +148,7 @@ int main( int argc, char **argv ) {
   TEST(test_make_pixel);
   TEST(test_to_grayscale);
   TEST(test_blend_components);
-  //TEST(test_blend_colors);
+  TEST(test_blend_colors);
 
   TEST_FINI();
 }
@@ -921,7 +921,7 @@ void test_blend_components(TestObjs *objs) {
   ASSERT(blended_g == 255);
   ASSERT(blended_b == 255);
 }
-/*
+
 void test_blend_colors(TestObjs *objs) {
   // Test 1: Basic case
   uint32_t fg = make_pixel(100, 150, 200, 128); // r = 100, g = 150, b = 200, a = 128 (semi-transparent)
@@ -977,4 +977,3 @@ void test_blend_colors(TestObjs *objs) {
   ASSERT(get_b(blended_pixel) == 255);
   ASSERT(get_a(blended_pixel) == 255); // Alpha should always be 255
 }
-*/
