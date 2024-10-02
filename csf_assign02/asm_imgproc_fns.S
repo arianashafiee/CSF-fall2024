@@ -22,7 +22,7 @@
  *
  * Memory:
  *   No explicit use of stack memory beyond the base pointer and stack pointer for setting up and tearing down the stack frame.
- * 
+ *
  *   The function extracts the red color component from a 32-bit pixel value.
  *   It shifts the input value right by 24 bits to move the red component to the lowest 8 bits.
  *   It then applies a mask to isolate the red component and returns it.
@@ -272,6 +272,10 @@ to_grayscale:
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
     ret                         # Return with the grayscale pixel
+
+    .globl blend_components
+blend_components:
+    jz
 
 /*
  * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
@@ -565,7 +569,7 @@ imgproc_tile:
 	/* TODO: implement (this stub implementation just returns 0) */
 	xorl %eax, %eax
 	ret
-    
+
 /*
  * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
  *

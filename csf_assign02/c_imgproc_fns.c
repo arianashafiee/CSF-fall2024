@@ -227,8 +227,6 @@ uint32_t to_grayscale(uint32_t pixel) {
 // Returns:
 //   The blended color component value.
 uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha) {
-    if (alpha == 0) return bg;  // Fully transparent
-    if (alpha == 255) return fg;  // Fully opaque
     return (alpha * fg + (255 - alpha) * bg) / 255;
 }
 
