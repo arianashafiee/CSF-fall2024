@@ -275,19 +275,42 @@ to_grayscale:
 
     .globl blend_components
 blend_components:
-    movq    %rdi, %r12          # Move fg to %r12
-    movq    %rsi, %r13          # Move bg to %r13
-    movq    %rdx, %r14          # Move alpha to %r14
-    movq    $255, %r15          # Store 255 constant to %r15
+    # Arguments:
+    # fg in %edi
+    # bg in %esi
+    # alpha in %edx
 
-    imulq   %r14, %r12          # Multiply alpha by fg
-    subq    $255, %r14          # Subtract alpha from 255
-    imulq   %r14, %r13          # Multiply prev. result by bg
-    addq    %r12, %r13          # Add 1st product w/ 2nd product
-    movq    %r13, %rax          # Move sum to %rax
-    cqto                        # Convert quad in %rax to octo in %rdx:%rax
-    divq    %r15                # Divide sum in %rdx:%rax by 255
+    pushq   %rbp
+    movq    %rsp, %rbp
 
+    movl    %edi, %eax
+    imull   %edx, %eax
+
+    movl    $255, %ecx
+    subl    %edx, %ecx
+
+    imull   %esi, %ecx
+    addl    %ecx, %eax
+
+    movl    $255, %ecx
+    cltq
+    cqto
+    idivl   %ecx
+
+    // movq    %rdi, %r12          # Move fg to %r12
+    // movq    %rsi, %r13          # Move bg to %r13
+    // movq    %rdx, %r14          # Move alpha to %r14
+    // movq    $255, %r15          # Store 255 constant to %r15
+
+    // imulq   %r14, %r12          # Multiply alpha by fg
+    // subq    %r14, %r15          # Subtract alpha from 255
+    // imulq   %r14, %r13          # Multiply prev. result by bg
+    // addq    %r12, %r13          # Add 1st product w/ 2nd product
+    // movq    %r13, %rax          # Move sum to %rax
+    // cqto                        # Convert quad in %rax to octo in %rdx:%rax
+    // divq    %r15                # Divide sum in %rdx:%rax by 255
+
+    popq    %rbp
     ret
 
 /*
