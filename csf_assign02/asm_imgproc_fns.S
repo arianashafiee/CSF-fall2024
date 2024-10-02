@@ -275,16 +275,26 @@ to_grayscale:
 
     .globl blend_components
 blend_components:
-    movq    %rdi, %r12
+    // movq    %rdi, %r12
     movq    %rsi, %r13
     movq    %rdx, %r14
+    movq    $255, %r15
+    movq    %rdi, %rax
 
-    imulq   %r14, %r12
+    // imulq   %r14, %r12
+    // subq    $255, %r14
+    // imulq   %r14, %r13
+    // addq    %r13, %r12
+    // movq    %r12, %rax
+    // divq    %r15
+
+    imulq   %r14
     subq    $255, %r14
-    imulq   %r14, %r13
-    addq    %r13, %r12
-    movq    %r12, %rax
-    divq    $255
+    imulq   %rdx, %rsi
+    addq    %rdi, %rsi
+    movq    %rsi, %rax
+    // cqto
+    // divq    %r15
 
     ret
 
