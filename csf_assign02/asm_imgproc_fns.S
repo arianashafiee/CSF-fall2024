@@ -275,11 +275,11 @@ to_grayscale:
 
     .globl blend_components
 blend_components:
-    // movq    %rdi, %r12
-    movq    %rsi, %r13
-    movq    %rdx, %r14
-    movq    $255, %r15
-    movq    %rdi, %rax
+    movq    %rdi, %r12          # Move fg to %r12
+    movq    %rsi, %r13          # Move bg to %r13
+    movq    %rdx, %r14          # Move alpha to %r14
+    movq    $255, %r15          # Store 255 constant to %r15
+    // movq    %rdi, %rax
 
     // imulq   %r14, %r12
     // subq    $255, %r14
@@ -288,13 +288,13 @@ blend_components:
     // movq    %r12, %rax
     // divq    %r15
 
-    imulq   %r14
-    subq    $255, %r14
-    imulq   %rdx, %rsi
-    addq    %rdi, %rsi
-    movq    %rsi, %rax
-    // cqto
-    // divq    %r15
+    imulq   %r14, %r12          # Multiply alpha by fg
+    subq    $255, %r14          # Subtract alpha from 255
+    imulq   %r14, %r13          # Multiply prev. result by bg
+    addq    %r12, %r13          # Add 1st product w/ 2nd product
+    movq    %r13, %rax          # Move sum to %rax
+    cqto                        # Convert quad in %rax to octo in %rdx:%rax
+    divq    %r15                # Divide sum in %rdx:%rax by 255
 
     ret
 
