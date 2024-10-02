@@ -275,7 +275,18 @@ to_grayscale:
 
     .globl blend_components
 blend_components:
-    jz
+    movq    %rdi, %r12
+    movq    %rsi, %r13
+    movq    %rdx, %r14
+
+    imulq    %r14, %r12
+    subq    $255, %r14
+    imulq    %r14, %r13
+    addq    %r13, %r12
+    movq    %r12, %rax
+    divq    $255
+
+    ret
 
 /*
  * void imgproc_mirror_h( struct Image *input_img, struct Image *output_img );
