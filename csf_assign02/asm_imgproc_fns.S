@@ -362,7 +362,7 @@ blend_colors:
     # Prologue
     pushq   %rbp
     movq    %rsp, %rbp
-    subq    $32, %rsp
+    subq    $24, %rsp
 
     # Store argument values in stack
     movl    %edi, -4(%rbp)
@@ -427,7 +427,7 @@ blend_colors:
     call    make_pixel
 
     # Exit
-    addq    $32, %rsp
+    addq    $24, %rsp
     popq    %rbp
     ret
 
