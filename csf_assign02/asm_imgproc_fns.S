@@ -828,6 +828,66 @@ imgproc_grayscale:
 	leave                        # Restore stack and base pointer
 	ret                          # Return to caller
 
+// imgproc_grayscale:
+//     # Function prologue
+//     pushq   %rbp                  # Save base pointer
+//     movq    %rsp, %rbp            # Set base pointer to current stack pointer
+
+//     # Load input_img and output_img from arguments
+//     movq    %rdi, %r12            # r12 = input_img (1st argument)
+//     movq    %rsi, %r13            # r13 = output_img (2nd argument)
+
+//     # Load width and height from input_img
+//     movl    (%r12), %eax          # eax = input_img->width
+//     movl    4(%r12), %ebx         # ebx = input_img->height
+
+//     # Edge case: Check if width <= 0 or height <= 0
+//     cmpl    $0, %eax              # Compare width with 0
+//     jle     .Lgrayscale_exit      # If width <= 0, return
+//     cmpl    $0, %ebx              # Compare height with 0
+//     jle     .Lgrayscale_exit      # If height <= 0, return
+
+//     # Loop over each pixel (row by row)
+//     movl    $0, %r10d             # ecx = y (row counter)
+// .Lgrayscale_y_loop:
+//     cmpl    %ebx, %r10d            # Compare y with height
+//     jge     .Lgrayscale_exit      # If y >= height, done
+
+//     movl    $0, %r11d             # edx = x (column counter)
+// .Lgrayscale_x_loop:
+//     movl    (%r12), %eax          # eax = input_img->width
+//     cmpl    %eax, %r11d           # Compare x with width
+//     jge     .Lgrayscale_next_row  # If x >= width, go to next row
+
+//     # Compute the index: idx = y * width + x
+//     movl    (%r12), %eax          # eax = input_img->width
+//     imull   %r10d, %eax           # eax = y * width
+//     addl    %r11d, %eax           # eax = idx
+
+//     # Load the current pixel from input_img
+//     movq    8(%r12), %r14         # r10 = input_img->data (pointer)
+//     movl    (%r14,%rax,4), %edi   # edi = pixel (input_img->data[idx])
+
+//     # Call to_grayscale(pixel)
+//     call    to_grayscale          # Result in %eax (gray_pixel)
+
+//     # Store the grayscale pixel in output_img
+//     movq    8(%r13), %r15         # r11 = output_img->data (pointer)
+//     movl    %eax, (%r15,%rax,4)   # output_img->data[idx] = eax (gray_pixel)
+
+//     # Increment x and continue looping
+//     incl    %r11d                 # x++
+//     jmp     .Lgrayscale_x_loop
+
+// .Lgrayscale_next_row:
+//     incl    %r10d                 # y++
+//     jmp     .Lgrayscale_y_loop
+
+// .Lgrayscale_exit:
+//     # Function epilogue
+//     popq    %rbp                  # Restore base pointer
+//     ret                           # Return from function
+
 
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
