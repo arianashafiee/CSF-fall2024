@@ -212,62 +212,102 @@ to_grayscale:
     pushq   %rbp
     movq    %rsp, %rbp
 
-    # Save pixel in callee-saved register (store %edi in %r12 for later)
-    movl    %edi, %r12d
+    // # Save pixel in callee-saved register (store %edi in %r12 for later)
+    // movl    %edi, %r12d
 
-    # Extract the red component
-    movl    %edi, %eax          # Move the pixel (in %edi) to %eax
-    shrl    $24, %eax           # Shift right 24 bits to get red component
-    movl    %eax, %r13d         # Save red component in %r13d for later
+    // # Extract the red component
+    // movl    %edi, %eax          # Move the pixel (in %edi) to %eax
+    // shrl    $24, %eax           # Shift right 24 bits to get red component
+    // movl    %eax, %r13d         # Save red component in %r13d for later
 
-    # Extract the green component
-    movl    %edi, %eax          # Move the pixel (in %edi) to %eax
-    shrl    $16, %eax           # Shift right 16 bits to get green component
-    andl    $0xFF, %eax         # Mask to get the green component (8 bits)
-    movl    %eax, %r14d         # Save green component in %r14d for later
+    // # Extract the green component
+    // movl    %edi, %eax          # Move the pixel (in %edi) to %eax
+    // shrl    $16, %eax           # Shift right 16 bits to get green component
+    // andl    $0xFF, %eax         # Mask to get the green component (8 bits)
+    // movl    %eax, %r14d         # Save green component in %r14d for later
 
-    # Extract the blue component
-    movl    %edi, %eax          # Move the pixel (in %edi) to %eax
-    shrl    $8, %eax            # Shift right 8 bits to get blue component
-    andl    $0xFF, %eax         # Mask to get the blue component (8 bits)
-    movl    %eax, %r15d         # Save blue component in %r15d for later
+    // # Extract the blue component
+    // movl    %edi, %eax          # Move the pixel (in %edi) to %eax
+    // shrl    $8, %eax            # Shift right 8 bits to get blue component
+    // andl    $0xFF, %eax         # Mask to get the blue component (8 bits)
+    // movl    %eax, %r15d         # Save blue component in %r15d for later
 
-    # Preserve the alpha component
-    movl    %edi, %eax          # Move the pixel (in %edi) to %eax
-    andl    $0xFF, %eax         # Mask to get the alpha component (8 bits)
-    movl    %eax, %ebx          # Save alpha component in %ebx for later
+    // # Preserve the alpha component
+    // movl    %edi, %eax          # Move the pixel (in %edi) to %eax
+    // andl    $0xFF, %eax         # Mask to get the alpha component (8 bits)
+    // movl    %eax, %ebx          # Save alpha component in %ebx for later
 
-    # Compute the grayscale value using weighted average (79 * r + 128 * g + 49 * b) / 256
-    movl    %r13d, %eax         # Move red component to %eax
+    // # Compute the grayscale value using weighted average (79 * r + 128 * g + 49 * b) / 256
+    // movl    %r13d, %eax         # Move red component to %eax
+    // imull   $79, %eax           # Multiply by 79 (r * 79)
+
+    // movl    %r14d, %ecx         # Move green component to %ecx
+    // imull   $128, %ecx          # Multiply by 128 (g * 128)
+    // addl    %ecx, %eax          # Add green contribution to %eax
+
+    // movl    %r15d, %ecx         # Move blue component to %ecx
+    // imull   $49, %ecx           # Multiply by 49 (b * 49)
+    // addl    %ecx, %eax          # Add blue contribution to %eax
+
+    // shrl    $8, %eax            # Divide the total by 256 (shift right by 8 bits)
+
+    // # Now %eax contains the grayscale value (y)
+    // movl    %eax, %r13d         # Save grayscale value in %r13d
+
+    // # Create the grayscale pixel with the same alpha value
+    // movl    %r13d, %eax         # Move grayscale value to %eax
+    // shll    $24, %eax           # Shift grayscale value to the red component
+
+    // movl    %r13d, %ecx         # Move grayscale value to %ecx
+    // shll    $16, %ecx           # Shift grayscale value to the green component
+    // orl     %ecx, %eax          # OR it with %eax
+
+    // movl    %r13d, %ecx         # Move grayscale value to %ecx
+    // shll    $8, %ecx            # Shift grayscale value to the blue component
+    // orl     %ecx, %eax          # OR it with %eax
+
+    // movl    %ebx, %ecx          # Move alpha component to %ecx
+    // orl     %ecx, %eax          # OR it with %eax (combine grayscale with alpha)
+
+    movl    %edi, %ebx
+
+    movl    %ebx, %edi
+    call    get_r
+    movl    %eax, %r12d
+
+    movl    %ebx, %edi
+    call    get_g
+    movl    %eax, %r13d
+
+    movl    %ebx, %edi
+    call    get_b
+    movl    %eax, %r14d
+
+    movl    %ebx, %edi
+    call    get_a
+    movl    %eax, %r15d
+
+    movl    %r12d, %eax         # Move red component to %eax
     imull   $79, %eax           # Multiply by 79 (r * 79)
 
-    movl    %r14d, %ecx         # Move green component to %ecx
+    movl    %r13d, %ecx         # Move green component to %ecx
     imull   $128, %ecx          # Multiply by 128 (g * 128)
     addl    %ecx, %eax          # Add green contribution to %eax
 
-    movl    %r15d, %ecx         # Move blue component to %ecx
+    movl    %r14d, %ecx         # Move blue component to %ecx
     imull   $49, %ecx           # Multiply by 49 (b * 49)
     addl    %ecx, %eax          # Add blue contribution to %eax
 
     shrl    $8, %eax            # Divide the total by 256 (shift right by 8 bits)
 
-    # Now %eax contains the grayscale value (y)
-    movl    %eax, %r13d         # Save grayscale value in %r13d
+    movl    %eax, %ebx          # Save grayscale value in %r13d
 
-    # Create the grayscale pixel with the same alpha value
-    movl    %r13d, %eax         # Move grayscale value to %eax
-    shll    $24, %eax           # Shift grayscale value to the red component
+    movl    %ebx, %edi
+    movl    %ebx, %esi
+    movl    %ebx, %edx
+    movl    %r15d, %ecx
 
-    movl    %r13d, %ecx         # Move grayscale value to %ecx
-    shll    $16, %ecx           # Shift grayscale value to the green component
-    orl     %ecx, %eax          # OR it with %eax
-
-    movl    %r13d, %ecx         # Move grayscale value to %ecx
-    shll    $8, %ecx            # Shift grayscale value to the blue component
-    orl     %ecx, %eax          # OR it with %eax
-
-    movl    %ebx, %ecx          # Move alpha component to %ecx
-    orl     %ecx, %eax          # OR it with %eax (combine grayscale with alpha)
+    call make_pixel
 
     # Epilogue: Restore stack and return
     popq    %rbp                # Restore base pointer
@@ -322,7 +362,7 @@ blend_colors:
     # Prologue
     pushq   %rbp
     movq    %rsp, %rbp
-    subq    $4, %rsp
+    subq    $32, %rsp
 
     # Store argument values in stack
     movl    %edi, -4(%rbp)
@@ -363,31 +403,31 @@ blend_colors:
     movl    -12(%rbp), %esi
     movl    %r15d, %edx
     call    blend_components
-    movl    %eax, -24(%rbp)
+    movl    %eax, %r12d
 
     # Blend green component
     movl    %r13d, %edi
     movl    -14(%rbp), %esi
     movl    %r15d, %edx
     call    blend_components
-    movl    %eax, -28(%rbp)
+    movl    %eax, %r13d
 
     # Blend blue component
     movl    %r14d, %edi
     movl    -16(%rbp), %esi
     movl    %r15d, %edx
     call    blend_components
-    movl    %eax, -32(%rbp)
+    movl    %eax, %r14d
 
     # Make pixel from blended components
-    movl    -24(%rbp), %edi
-    movl    -28(%rbp), %esi
-    movl    -32(%rbp), %edx
+    movl    %r12d, %edi
+    movl    %r13d, %esi
+    movl    %r14d, %edx
     movl    $255, %ecx
     call    make_pixel
 
     # Exit
-    addq    $4, %rsp
+    addq    $32, %rsp
     popq    %rbp
     ret
 
