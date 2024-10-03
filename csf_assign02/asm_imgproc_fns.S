@@ -886,25 +886,25 @@ imgproc_composite:
     movl    %eax, 4(%rdx)         # output_img->height
 
     # Prepare for the outer loop (iterate over rows y)
-    xorl    %ebx, %ebx             # y = 0 (initialize y)
+    xorl    %r11d, %r11d             # y = 0 (initialize y)
     movl    4(%rdi), %r8d         # r8d = base_img->height (for the loop)
 
 .Louter_loop:
-    cmpl    %r8d, %ebx             # Compare y with base_img->height
+    cmpl    %r8d, %r11d             # Compare y with base_img->height
     jge     .Lreturn_success        # If y >= height, return success
 
     # Inner loop (iterate over columns x)
-    xorl    %ecx, %ecx             # x = 0 (initialize x)
+    xorl    %r10d, %r10d             # x = 0 (initialize x)
     movl    0(%rdi), %r9d         # r9d = base_img->width (for the inner loop)
 
 .Linner_loop:
-    cmpl    %r9d, %ecx             # Compare x with base_img->width
+    cmpl    %r9d, %r10d             # Compare x with base_img->width
     jge     .Lnext_row              # If x >= width, move to next row
 
     # Calculate idx = y * base_img->width + x
     movl    0(%rdi), %eax         # base_img->width
-    imull   %ebx, %eax             # idx = y * width
-    addl    %ecx, %eax             # idx += x
+    imull   %r11d, %eax             # idx = y * width
+    addl    %r10d, %eax             # idx += x
 
     # Load fg_pixel = overlay_img->data[idx]
     movq    8(%rsi), %r10         # r10 = overlay_img->data (pointer)
@@ -913,21 +913,21 @@ imgproc_composite:
     # Load bg_pixel = base_img->data[idx]
     movq    8(%rdi), %r10         # r10 = base_img->data (pointer)
     movl    (%r10,%rax,4), %esi    # bg_pixel = base_img->data[idx]
+    movq    8(%rdx), %rbx         # r10 = output_img->data (pointer)
 
     # Call blend_colors(fg_pixel, bg_pixel)
     call    blend_colors
 
     # Store result in output_img->data[idx]
-    movq    8(%rdx), %r10         # r10 = output_img->data (pointer)
-    movl    %eax, (%r10,%rax,4)    # output_img->data[idx] = result of blend
+    movl    %eax, (%rbx,%rax,4)    # output_img->data[idx] = result of blend
 
     # Increment x
-    incl    %ecx
+    incl    %r10d
     jmp     .Linner_loop
 
 .Lnext_row:
     # Increment y
-    incl    %ebx
+    incl    %r11d
     jmp     .Louter_loop
 
 .Lreturn_failure:
