@@ -886,7 +886,7 @@ imgproc_composite:
     movl    %eax, 4(%rdx)         # output_img->height
 
     # Prepare for the outer loop (iterate over rows y)
-    xorl    %r11d, %r11d             # y = 0 (initialize y)
+    movl    $0, %r11d             # y = 0 (initialize y)
     movl    4(%rdi), %r8d         # r8d = base_img->height (for the loop)
 
 .Louter_loop:
@@ -894,7 +894,7 @@ imgproc_composite:
     jge     .Lreturn_success        # If y >= height, return success
 
     # Inner loop (iterate over columns x)
-    xorl    %r10d, %r10d             # x = 0 (initialize x)
+    movl    $0, %r10d             # x = 0 (initialize x)
     movl    0(%rdi), %r9d         # r9d = base_img->width (for the inner loop)
 
 .Linner_loop:
