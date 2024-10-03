@@ -386,15 +386,15 @@ blend_colors:
     movl    %eax, %r15d
 
     # Get component values from bg
-    movl    -4(%rbp), %edi
+    movl    -8(%rbp), %edi
     call    get_r
     movl    %eax, -12(%rbp)
 
-    movl    -4(%rbp), %edi
+    movl    -8(%rbp), %edi
     call    get_g
     movl    %eax, -16(%rbp)
 
-    movl    -4(%rbp), %edi
+    movl    -8(%rbp), %edi
     call    get_b
     movl    %eax, -20(%rbp)
 
@@ -407,14 +407,14 @@ blend_colors:
 
     # Blend green component
     movl    %r13d, %edi
-    movl    -14(%rbp), %esi
+    movl    -16(%rbp), %esi
     movl    %r15d, %edx
     call    blend_components
     movl    %eax, %r13d
 
     # Blend blue component
     movl    %r14d, %edi
-    movl    -16(%rbp), %esi
+    movl    -20(%rbp), %esi
     movl    %r15d, %edx
     call    blend_components
     movl    %eax, %r14d
