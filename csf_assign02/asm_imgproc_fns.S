@@ -828,67 +828,6 @@ imgproc_grayscale:
 	leave                        # Restore stack and base pointer
 	ret                          # Return to caller
 
-// imgproc_grayscale:
-//     # Function prologue
-//     pushq   %rbp                  # Save base pointer
-//     movq    %rsp, %rbp            # Set base pointer to current stack pointer
-
-//     # Load input_img and output_img from arguments
-//     movq    %rdi, %r12            # r12 = input_img (1st argument)
-//     movq    %rsi, %r13            # r13 = output_img (2nd argument)
-
-//     # Load width and height from input_img
-//     movl    (%r12), %eax          # eax = input_img->width
-//     movl    4(%r12), %ebx         # ebx = input_img->height
-
-//     # Edge case: Check if width <= 0 or height <= 0
-//     cmpl    $0, %eax              # Compare width with 0
-//     jle     .Lgrayscale_exit      # If width <= 0, return
-//     cmpl    $0, %ebx              # Compare height with 0
-//     jle     .Lgrayscale_exit      # If height <= 0, return
-
-//     # Loop over each pixel (row by row)
-//     movl    $0, %r10d             # ecx = y (row counter)
-// .Lgrayscale_y_loop:
-//     cmpl    %ebx, %r10d            # Compare y with height
-//     jge     .Lgrayscale_exit      # If y >= height, done
-
-//     movl    $0, %r11d             # edx = x (column counter)
-// .Lgrayscale_x_loop:
-//     movl    (%r12), %eax          # eax = input_img->width
-//     cmpl    %eax, %r11d           # Compare x with width
-//     jge     .Lgrayscale_next_row  # If x >= width, go to next row
-
-//     # Compute the index: idx = y * width + x
-//     movl    (%r12), %eax          # eax = input_img->width
-//     imull   %r10d, %eax           # eax = y * width
-//     addl    %r11d, %eax           # eax = idx
-
-//     # Load the current pixel from input_img
-//     movq    8(%r12), %r14         # r10 = input_img->data (pointer)
-//     movl    (%r14,%rax,4), %edi   # edi = pixel (input_img->data[idx])
-
-//     # Call to_grayscale(pixel)
-//     call    to_grayscale          # Result in %eax (gray_pixel)
-
-//     # Store the grayscale pixel in output_img
-//     movq    8(%r13), %r15         # r11 = output_img->data (pointer)
-//     movl    %eax, (%r15,%rax,4)   # output_img->data[idx] = eax (gray_pixel)
-
-//     # Increment x and continue looping
-//     incl    %r11d                 # x++
-//     jmp     .Lgrayscale_x_loop
-
-// .Lgrayscale_next_row:
-//     incl    %r10d                 # y++
-//     jmp     .Lgrayscale_y_loop
-
-// .Lgrayscale_exit:
-//     # Function epilogue
-//     popq    %rbp                  # Restore base pointer
-//     ret                           # Return from function
-
-
 /*
  * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
  *
@@ -908,13 +847,103 @@ imgproc_grayscale:
 	.globl imgproc_composite
 imgproc_composite:
 	/* TODO: implement (this stub implementation just returns 0) */
+    # Arguments:
+    # rdi = base_img
+    # rsi = overlay_img
+    # rdx = output_img
+
     pushq	%rbp
     movq    %rsp, %rbp
 
+    # Load base_img->width and overlay_img->width into eax and ecx
+    movl    0(%rdi), %eax         # base_img->width
+    movl    0(%rsi), %ecx         # overlay_img->width
 
+    # Compare widths, if not equal return 0 (failure)
+    cmpl    %eax, %ecx
+    jne     .Lreturn_failure
 
+    # Load base_img->height and overlay_img->height into eax and ecx
+    movl    4(%rdi), %eax         # base_img->height
+    movl    4(%rsi), %ecx         # overlay_img->height
+
+    # Compare heights, if not equal return 0 (failure)
+    cmpl    %eax, %ecx
+    jne     .Lreturn_failure
+
+    # Check if base_img->width or base_img->height <= 0, if so return 1
+    testl   %eax, %eax
+    jle     .Lreturn_no_op
+    testl   0(%rdi), %ecx         # base_img->width
+    jle     .Lreturn_no_op
+
+    # Set output_img->width = base_img->width
+    movl    0(%rdi), %eax         # base_img->width
+    movl    %eax, 0(%rdx)         # output_img->width
+
+    # Set output_img->height = base_img->height
+    movl    4(%rdi), %eax         # base_img->height
+    movl    %eax, 4(%rdx)         # output_img->height
+
+    # Prepare for the outer loop (iterate over rows y)
+    xorl    %ebx, %ebx             # y = 0 (initialize y)
+    movl    4(%rdi), %r8d         # r8d = base_img->height (for the loop)
+
+.Louter_loop:
+    cmpl    %r8d, %ebx             # Compare y with base_img->height
+    jge     .Lreturn_success        # If y >= height, return success
+
+    # Inner loop (iterate over columns x)
+    xorl    %ecx, %ecx             # x = 0 (initialize x)
+    movl    0(%rdi), %r9d         # r9d = base_img->width (for the inner loop)
+
+.Linner_loop:
+    cmpl    %r9d, %ecx             # Compare x with base_img->width
+    jge     .Lnext_row              # If x >= width, move to next row
+
+    # Calculate idx = y * base_img->width + x
+    movl    0(%rdi), %eax         # base_img->width
+    imull   %ebx, %eax             # idx = y * width
+    addl    %ecx, %eax             # idx += x
+
+    # Load fg_pixel = overlay_img->data[idx]
+    movq    8(%rsi), %r10         # r10 = overlay_img->data (pointer)
+    movl    (%r10,%rax,4), %edi    # fg_pixel = overlay_img->data[idx]
+
+    # Load bg_pixel = base_img->data[idx]
+    movq    8(%rdi), %r10         # r10 = base_img->data (pointer)
+    movl    (%r10,%rax,4), %esi    # bg_pixel = base_img->data[idx]
+
+    # Call blend_colors(fg_pixel, bg_pixel)
+    call    blend_colors
+
+    # Store result in output_img->data[idx]
+    movq    8(%rdx), %r10         # r10 = output_img->data (pointer)
+    movl    %eax, (%r10,%rax,4)    # output_img->data[idx] = result of blend
+
+    # Increment x
+    incl    %ecx
+    jmp     .Linner_loop
+
+.Lnext_row:
+    # Increment y
+    incl    %ebx
+    jmp     .Louter_loop
+
+.Lreturn_failure:
+    movl    $0, %eax               # Return 0 (failure)
     popq    %rbp
-	ret
+    ret
+
+.Lreturn_no_op:
+    movl    $1, %eax               # Return 1 (no operation)
+    popq    %rbp
+    ret
+
+.Lreturn_success:
+    movl    $1, %eax               # Return 1 (success)
+    popq    %rbp
+    ret
 
 /*
 vim:ft=gas:
