@@ -854,7 +854,7 @@ imgproc_composite:
 
     pushq	%rbp
     movq    %rsp, %rbp
-    subq    $48, %rsp
+    subq    $32, %rsp
 
     movq    %rdi, -8(%rbp)
     movq    %rsi, -16(%rbp)
@@ -863,6 +863,22 @@ imgproc_composite:
     movq    -8(%rbp), %rcx
     movl    0(%rcx), %r13d
     movl    4(%rcx), %r12d
+
+    movq    -16(%rbp), %rcx
+    movl    0(%rcx), %r15d
+    movl    4(%rcx), %r14d
+
+    cmpl    %r13d, %r15d
+    jne     .Lcomposite_return_fail
+
+    cmpl    %r12d, %r14d
+    jne     .Lcomposite_return_fail
+
+    testl   %r13d, %r13d
+    jle     .Lcomposite_return_success
+
+    testl   %r12d, %r12d
+    jle     .Lcomposite_return_success
 
     movq    -24(%rbp), %rbx
     movl    %r8d, 0(%rbx)
@@ -901,6 +917,12 @@ imgproc_composite:
 .Lcomposite_x_loop_incr:
     incl    %r11d
     jmp     .Lcomposite_x_loop
+
+.Lcomposite_return_fail:
+    movl    $0, %eax
+    addq    $32, %rsp
+    popq    %rbp
+    ret
 
 .Lcomposite_return_success:
     movl    $1, %eax               # Return 1 (success)
