@@ -854,94 +854,49 @@ imgproc_composite:
 
     pushq	%rbp
     movq    %rsp, %rbp
+    subq    $48, %rsp
 
-    # Load base_img->width and overlay_img->width into eax and ecx
-    movl    0(%rdi), %eax         # base_img->width
-    movl    0(%rsi), %ecx         # overlay_img->width
+    movq    %rdi, -8(%rbp)
+    movq    %rsi, -16(%rbp)
+    movq    %rdx, -24(%rbp)
 
-    # Compare widths, if not equal return 0 (failure)
-    cmpl    %eax, %ecx
-    jne     .Lreturn_failure
+    movq    -8(%rbp), %rcx
+    movl    0(%rcx), %r13d
+    movl    4(%rcx), %r12d
 
-    # Load base_img->height and overlay_img->height into eax and ecx
-    movl    4(%rdi), %eax         # base_img->height
-    movl    4(%rsi), %ecx         # overlay_img->height
+    movq    -24(%rbp), %rbx
+    movl    %r8d, 0(%rbx)
+    movl    %r9d, 4(%rbx)
 
-    # Compare heights, if not equal return 0 (failure)
-    cmpl    %eax, %ecx
-    jne     .Lreturn_failure
+    xor     %r10d, %r10d
+.Lcomposite_y_loop:
+    cmpl    %r12d, %r10d
+    jge     .Lcomposite_return_success
 
-    # Check if base_img->width or base_img->height <= 0, if so return 1
-    testl   %eax, %eax
-    jle     .Lreturn_no_op
-    testl   0(%rdi), %ecx         # base_img->width
-    jle     .Lreturn_no_op
+    xor %r11d, %r11d
+.Lcomposite_x_loop:
+    cmpl    %r13d, %r11d
+    jge     .Lcomposite_x_loop_incr
 
-    # Set output_img->width = base_img->width
-    movl    0(%rdi), %eax         # base_img->width
-    movl    %eax, 0(%rdx)         # output_img->width
+    # %r8: overlay_img->data
+    # %r9: base_img->data
+    
 
-    # Set output_img->height = base_img->height
-    movl    4(%rdi), %eax         # base_img->height
-    movl    %eax, 4(%rdx)         # output_img->height
-
-    # Prepare for the outer loop (iterate over rows y)
-    movl    $0, %r11d             # y = 0 (initialize y)
-    movl    4(%rdi), %r8d         # r8d = base_img->height (for the loop)
-
-.Louter_loop:
-    cmpl    %r8d, %r11d             # Compare y with base_img->height
-    jge     .Lreturn_success        # If y >= height, return success
-
-    # Inner loop (iterate over columns x)
-    movl    $0, %r10d             # x = 0 (initialize x)
-    movl    0(%rdi), %r9d         # r9d = base_img->width (for the inner loop)
-
-.Linner_loop:
-    cmpl    %r9d, %r10d             # Compare x with base_img->width
-    jge     .Lnext_row              # If x >= width, move to next row
-
-    # Calculate idx = y * base_img->width + x
-    movl    0(%rdi), %eax         # base_img->width
-    imull   %r11d, %eax             # idx = y * width
-    addl    %r10d, %eax             # idx += x
-
-    # Load fg_pixel = overlay_img->data[idx]
-    movq    8(%rsi), %r10         # r10 = overlay_img->data (pointer)
-    movl    (%r10,%rax,4), %edi    # fg_pixel = overlay_img->data[idx]
-
-    # Load bg_pixel = base_img->data[idx]
-    movq    8(%rdi), %r10         # r10 = base_img->data (pointer)
-    movl    (%r10,%rax,4), %esi    # bg_pixel = base_img->data[idx]
-    movq    8(%rdx), %rbx         # r10 = output_img->data (pointer)
-
-    # Call blend_colors(fg_pixel, bg_pixel)
+    # r15: output_img->data (technically 8(%rbx))
     call    blend_colors
+    movq    %rax, ____
+    movq    ____,
 
-    # Store result in output_img->data[idx]
-    movl    %eax, (%rbx,%rax,4)    # output_img->data[idx] = result of blend
-
-    # Increment x
     incl    %r10d
-    jmp     .Linner_loop
+    jmp     .Lcomposite_x_loop
 
-.Lnext_row:
-    # Increment y
+.Lcomposite_x_loop_incr:
     incl    %r11d
-    jmp     .Louter_loop
+    jmp     .Lcomposite_x_loop
 
-.Lreturn_failure:
-    movl    $0, %eax               # Return 0 (failure)
-    popq    %rbp
-    ret
-
-.Lreturn_no_op:
-    movl    $1, %eax               # Return 1 (no operation)
-    popq    %rbp
-    ret
-
-.Lreturn_success:
+.Lcomposite_return_success:
     movl    $1, %eax               # Return 1 (success)
+    addq    $48, %rsp
     popq    %rbp
     ret
 
