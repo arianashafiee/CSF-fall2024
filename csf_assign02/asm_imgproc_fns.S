@@ -878,6 +878,10 @@ imgproc_composite:
     cmpl    %r13d, %r11d
     jge     .Lcomposite_x_loop_incr
 
+    movl    %r10d, %ecx
+    imull   %r13d, %ecx
+    addl    %r11d, %ecx
+
     # %r8: overlay_img->data
     # %r9: base_img->data
     
