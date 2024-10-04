@@ -883,7 +883,7 @@ imgproc_composite:
     movq    -24(%rbp), %rbx
     movl    %r8d, 0(%rbx)
     movl    %r9d, 4(%rbx)
-    movq    %rbx, -24(%rbp)
+    // movq    %rbx, -24(%rbp)
 
     movl    $0, %r14d
 .Lcomposite_y_loop:
@@ -895,12 +895,12 @@ imgproc_composite:
     cmpl    %r13d, %r15d
     jge     .Lcomposite_x_loop_incr
 
-    movl    %r14d, %ecx
-    imull   %r13d, %ecx
-    addl    %r15d, %ecx
+    // movq    -24(%rbp), %r10
+    movq    8(%rbx), -28(%rbp)
 
-    movq    -24(%rbp), %r10
-    movq    8(%r10), %rbx
+    movl    %r14d, -32(%rbp)
+    imulq   %r13d, -32(%rbp)
+    addl    %r15d, -32(%rbp)
 
     movq    -16(%rbp), %r8
     movq    8(%r8), %r9
@@ -910,9 +910,10 @@ imgproc_composite:
     movq    8(%r8), %r9
     movl    (%r9, %rcx, 4), %esi
 
-
     call    blend_colors
-    movl    %eax, (%rbx, %rcx, 4)
+    movl    -28(%rbp), %r10d
+    movl    -32(%rbp), %r11d
+    movl    %eax, (%r10, %r11, 4)
 
     incl    %r14d
     jmp     .Lcomposite_x_loop
