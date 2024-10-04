@@ -929,7 +929,7 @@ imgproc_composite:
 
 .Lcomposite_return_success:
     movl    $1, %eax               # Return 1 (success)
-    addq    $48, %rsp
+    addq    32, %rsp
     popq    %rbp
     ret
 
