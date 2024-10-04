@@ -882,14 +882,18 @@ imgproc_composite:
     imull   %r13d, %ecx
     addl    %r11d, %ecx
 
-    # %r8: overlay_img->data
-    # %r9: base_img->data
-    
+    movq    8(%rbx), %r15
 
-    # r15: output_img->data (technically 8(%rbx))
+    movq    -16(%rbp), %r8
+    movq    8(%r8), %r9
+    movl    (%r9, %rcx, 4), %edi
+
+    movq    -8(%rbp), %r8
+    movq    8(%r8), %r9
+    movl    (%r9, %rcx, 4), %esi
+
     call    blend_colors
-    movq    %rax, ____
-    movq    ____,
+    movl    %eax, (%r15, %rcx, 4)
 
     incl    %r10d
     jmp     .Lcomposite_x_loop
