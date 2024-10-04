@@ -896,19 +896,21 @@ imgproc_composite:
     jge     .Lcomposite_x_loop_incr
 
     // movq    -24(%rbp), %r10
-    movq    8(%rbx), -28(%rbp)
+    movl    8(%rbx), %r10d
+    movl    %r10d, -28(%rbp)
 
-    movl    %r14d, -32(%rbp)
-    imulq   %r13d, -32(%rbp)
-    addl    %r15d, -32(%rbp)
+    movl    %r14d, %ecx
+    imull   %r13d, %ecx
+    addl    %r15d, %ecx
+    movl    %ecx, -32(%rbp)
 
     movq    -16(%rbp), %r8
     movq    8(%r8), %r9
-    movl    (%r9, %rcx, 4), %edi
+    movq    (%r9, %rcx, 4), %rdi
 
     movq    -8(%rbp), %r8
     movq    8(%r8), %r9
-    movl    (%r9, %rcx, 4), %esi
+    movq    (%r9, %rcx, 4), %rsi
 
     call    blend_colors
     movl    -28(%rbp), %r10d
