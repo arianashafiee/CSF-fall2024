@@ -856,13 +856,13 @@ imgproc_composite:
     movq    %rsp, %rbp
     subq    $32, %rsp
 
-    movq    %rdi, -8(%rbp)
-    movq    %rsi, -16(%rbp)
-    movq    %rdx, -24(%rbp)
+    movq    %rdi, -8(%rbp) # Move base_img pointer into stack
+    movq    %rsi, -16(%rbp) # Move overlay_img pointer into stack
+    movq    %rdx, -24(%rbp) # Move output_img pointer into stack
 
-    movq    -8(%rbp), %rcx
-    movl    0(%rcx), %r13d
-    movl    4(%rcx), %r12d
+    movq    -8(%rbp), %rcx # Move base_img pointer to %rcx
+    movl    0(%rcx), %r13d # Move base_img->width to %r13d
+    movl    4(%rcx), %r12d # Move base_img-> height to %r12d
 
     movq    -16(%rbp), %rcx
     movl    0(%rcx), %r15d
@@ -929,7 +929,7 @@ imgproc_composite:
 
 .Lcomposite_return_success:
     movl    $1, %eax               # Return 1 (success)
-    addq    32, %rsp
+    addq    $32, %rsp
     popq    %rbp
     ret
 
