@@ -13,6 +13,369 @@
  * Helper functions for image processing
  */
 
+    .global all_tiles_nonempty
+all_tiles_nonempty:
+.LFB6:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -4(%rbp)
+	movl	%esi, -8(%rbp)
+	movl	%edx, -12(%rbp)
+	cmpl	$0, -12(%rbp)
+	jle	.L2
+	cmpl	$0, -4(%rbp)
+	jle	.L2
+	cmpl	$0, -8(%rbp)
+	jg	.L3
+.L2:
+	movl	$0, %eax
+	jmp	.L4
+.L3:
+	movl	-4(%rbp), %eax
+	cltd
+	idivl	-12(%rbp)
+	testl	%eax, %eax
+	jle	.L5
+	movl	-8(%rbp), %eax
+	cltd
+	idivl	-12(%rbp)
+	testl	%eax, %eax
+	jle	.L5
+	movl	$1, %eax
+	jmp	.L4
+.L5:
+	movl	$0, %eax
+.L4:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+
+	.globl	determine_tile_w
+determine_tile_w:
+.LFB7:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L8
+	cmpl	$0, -20(%rbp)
+	jle	.L8
+	cmpl	$0, -28(%rbp)
+	js	.L8
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L9
+.L8:
+	movl	$0, %eax
+	jmp	.L10
+.L9:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	cmpl	-8(%rbp), %eax
+	setl	%al
+	movzbl	%al, %edx
+	movl	-4(%rbp), %eax
+	addl	%edx, %eax
+.L10:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE7:
+
+	.globl	determine_tile_x_offset
+determine_tile_x_offset:
+.LFB8:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L12
+	cmpl	$0, -20(%rbp)
+	jle	.L12
+	cmpl	$0, -28(%rbp)
+	js	.L12
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L13
+.L12:
+	movl	$0, %eax
+	jmp	.L14
+.L13:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	imull	-4(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %edx
+	movl	-28(%rbp), %eax
+	cmpl	%eax, %edx
+	cmovle	%edx, %eax
+	addl	%ecx, %eax
+.L14:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+
+	.globl	determine_tile_h
+determine_tile_h:
+.LFB9:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L16
+	cmpl	$0, -20(%rbp)
+	jle	.L16
+	cmpl	$0, -28(%rbp)
+	js	.L16
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L17
+.L16:
+	movl	$0, %eax
+	jmp	.L18
+.L17:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	cmpl	-8(%rbp), %eax
+	setl	%al
+	movzbl	%al, %edx
+	movl	-4(%rbp), %eax
+	addl	%edx, %eax
+.L18:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+
+	.globl	determine_tile_y_offset
+determine_tile_y_offset:
+.LFB10:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	movl	%edi, -20(%rbp)
+	movl	%esi, -24(%rbp)
+	movl	%edx, -28(%rbp)
+	cmpl	$0, -24(%rbp)
+	jle	.L20
+	cmpl	$0, -20(%rbp)
+	jle	.L20
+	cmpl	$0, -28(%rbp)
+	js	.L20
+	movl	-28(%rbp), %eax
+	cmpl	-24(%rbp), %eax
+	jl	.L21
+.L20:
+	movl	$0, %eax
+	jmp	.L22
+.L21:
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%eax, -4(%rbp)
+	movl	-20(%rbp), %eax
+	cltd
+	idivl	-24(%rbp)
+	movl	%edx, -8(%rbp)
+	movl	-28(%rbp), %eax
+	imull	-4(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-8(%rbp), %edx
+	movl	-28(%rbp), %eax
+	cmpl	%eax, %edx
+	cmovle	%edx, %eax
+	addl	%ecx, %eax
+.L22:
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+    
+    .global copy_tile
+copy_tile:
+.LFB11:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$80, %rsp
+	movq	%rdi, -56(%rbp)
+	movq	%rsi, -64(%rbp)
+	movl	%edx, -68(%rbp)
+	movl	%ecx, -72(%rbp)
+	movl	%r8d, -76(%rbp)
+	cmpl	$0, -76(%rbp)
+	jle	.L34
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	testl	%eax, %eax
+	jle	.L34
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	testl	%eax, %eax
+	jle	.L34
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	movl	-72(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_w
+	movl	%eax, -12(%rbp)
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	-68(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_h
+	movl	%eax, -16(%rbp)
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	movl	-72(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_x_offset
+	movl	%eax, -20(%rbp)
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	movl	-68(%rbp), %edx
+	movl	-76(%rbp), %ecx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	determine_tile_y_offset
+	movl	%eax, -24(%rbp)
+	movl	$0, -4(%rbp)
+	jmp	.L27
+.L33:
+	movl	$0, -8(%rbp)
+	jmp	.L28
+.L32:
+	movl	-24(%rbp), %edx
+	movl	-4(%rbp), %eax
+	addl	%eax, %edx
+	movq	-64(%rbp), %rax
+	movl	4(%rax), %eax
+	cmpl	%eax, %edx
+	jge	.L35
+	movl	-20(%rbp), %edx
+	movl	-8(%rbp), %eax
+	addl	%eax, %edx
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	cmpl	%eax, %edx
+	jge	.L35
+	movl	-8(%rbp), %eax
+	imull	-76(%rbp), %eax
+	movl	%eax, -28(%rbp)
+	movl	-4(%rbp), %eax
+	imull	-76(%rbp), %eax
+	movl	%eax, -32(%rbp)
+	movq	-64(%rbp), %rax
+	movq	8(%rax), %rdx
+	movq	-64(%rbp), %rax
+	movl	(%rax), %eax
+	imull	-32(%rbp), %eax
+	movl	%eax, %ecx
+	movl	-28(%rbp), %eax
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -36(%rbp)
+	movq	-56(%rbp), %rax
+	movq	8(%rax), %rdx
+	movl	-24(%rbp), %ecx
+	movl	-4(%rbp), %eax
+	addl	%eax, %ecx
+	movq	-56(%rbp), %rax
+	movl	(%rax), %eax
+	imull	%ecx, %eax
+	movl	-20(%rbp), %esi
+	movl	-8(%rbp), %ecx
+	addl	%esi, %ecx
+	addl	%ecx, %eax
+	cltq
+	salq	$2, %rax
+	addq	%rax, %rdx
+	movl	-36(%rbp), %eax
+	movl	%eax, (%rdx)
+	jmp	.L31
+.L35:
+	nop
+.L31:
+	addl	$1, -8(%rbp)
+.L28:
+	movl	-8(%rbp), %eax
+	cmpl	-12(%rbp), %eax
+	jl	.L32
+	addl	$1, -4(%rbp)
+.L27:
+	movl	-4(%rbp), %eax
+	cmpl	-16(%rbp), %eax
+	jl	.L33
+	jmp	.L23
+.L34:
+	nop
+.L23:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+
 /*
  * Register use:
  *   %rbp - base pointer for the stack frame
