@@ -521,13 +521,13 @@ copy_tile:
 	cmpl	-16(%rbp), %eax       # Compare with tile height
 	jl	.Lcol_loop_start       # If row index < tile height, continue
 
-.Ltile_exit:
+.Ltile_exit_func:
 	leave                        # Restore base pointer and stack
 	ret                          # Return
 
 .Linvalid_tile:
 	movl	$0, %eax              # Return 0 for invalid conditions
-	jmp	.Ltile_exit            # Jump to return
+	jmp	.Ltile_exit_func            # Jump to return
 
 /*
  * Register use:
@@ -1196,20 +1196,20 @@ imgproc_tile:
 
 	# Check if tiling factor n is valid
 	cmpl	$0, -28(%rbp)           # Compare tiling factor (n) with 0
-	jle	.Linvalid_tile           # Jump to failure if n <= 0
+	jle	.Linvalid_tile_dimensions           # Jump to failure if n <= 0
 
 	# Check if input image has valid dimensions (width > 0, height > 0)
 	movq	-24(%rbp), %rax         # Load input image pointer
 	movl	(%rax), %eax            # Load width of input image
 	testl	%eax, %eax              # Check if width > 0
-	jle	.Linvalid_tile           # Jump to failure if width <= 0
+	jle	.Linvalid_tile_dimensions           # Jump to failure if width <= 0
 
 	movq	-24(%rbp), %rax         # Load input image pointer
 	movl	4(%rax), %eax           # Load height of input image
 	testl	%eax, %eax              # Check if height > 0
 	jg	.Lvalid_tile_dimensions  # Jump if height > 0
 
-.Linvalid_tile:
+.Linvalid_tile_dimensions:
 	movl	$0, %eax                # Set return value to 0 (failure)
 	jmp	.Lreturn                 # Jump to return
 
@@ -1231,7 +1231,7 @@ imgproc_tile:
 
 .Lprocess_tiles:
 	movl	$0, -4(%rbp)            # Initialize row index (y) to 0
-	jmp	.Lrow_loop_start         # Jump to row loop
+	jmp	.Lrow_loop_starting         # Jump to row loop
 
 .Lcolumn_loop_start:
 	movl	$0, -8(%rbp)            # Initialize column index (x) to 0
@@ -1257,11 +1257,11 @@ imgproc_tile:
 
 	addl	$1, -4(%rbp)            # Increment row index (y)
 
-.Lrow_loop_start:
+.Lrow_loop_starting:
 	# Row loop: iterate over rows
 	movl	-4(%rbp), %eax          # Load row index (y)
 	cmpl	-28(%rbp), %eax         # Compare row index with tiling factor (n)
-	jl	.Lcolumn_loop_start      # If y < n, process the next row
+	jl	.Lcolumn_loop_starting      # If y < n, process the next row
 
 	movl	$1, %eax                # Set return value to 1 (success)
 
@@ -1468,9 +1468,9 @@ imgproc_composite:
 
 .Lrow_done:
     movl    $0, -16(%rbp)        # Initialize column index (x) to 0
-    jmp     .Lcol_loop        # Jump to pixel processing loop
+    jmp     .Lcols_loop        # Jump to pixel processing loop
 
-.Lprocess_pixel:
+.Lprocessing_pixel:
     # Calculate the 1D index of the current pixel in the image arrays
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
@@ -1515,12 +1515,12 @@ imgproc_composite:
     movl    %eax, (%rbx)         # Store blended pixel in output image
 
     addl    $1, -16(%rbp)        # Increment column index (x)
-.Lcol_loop:
+.Lcols_loop:
     # Column loop (iterate over all pixels in the row)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
     cmpl    %eax, -16(%rbp)      # Compare column index (x) with width
-    jl      .Lprocess_pixel      # If x < width, process next pixel
+    jl      .Lprocessing_pixel      # If x < width, process next pixel
 
     addl    $1, -12(%rbp)        # Increment row index (y)
 .Lrows_loop:
