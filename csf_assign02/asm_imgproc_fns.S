@@ -1444,7 +1444,7 @@ imgproc_composite:
 
 .Linvalid_dimensions:
     movl    $1, %eax             # Set return value to 1 (failure due to invalid dimensions)
-    jmp     .Lreturn             # Jump to return
+    jmp     .Lret             # Jump to return
 
 .Lprocess_images:
     # Copy dimensions to output image (width and height)
