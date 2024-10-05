@@ -409,7 +409,7 @@ copy_tile:
 
 .Ltile_copy_invalid:
 	movl	$0, %eax              # Set return value to 0 (failure)
-	jmp	.Ltile_return:
+	jmp	.Ltile_return
 
 	# Calculate the width, height, x-offset, and y-offset of the tile
 	movq	-64(%rbp), %rax       # Load input image pointer
