@@ -50,13 +50,13 @@ all_tiles_nonempty:
 	cmpl	$0, -4(%rbp)          # Check if width <= 0
 	jle	.Ltile_empty_exit      # Jump to failure if invalid
 	cmpl	$0, -8(%rbp)          # Check if height > 0
-	jg	.Ltiles_valid          # Continue if valid
+	jg	.Ltiles_are_valid          # Continue if valid
 
 .Ltile_empty_exit:
 	movl	$0, %eax              # Set return value to 0 (failure)
 	jmp	.Ltile_exit
 
-.Ltiles_valid:
+.Ltiles_are_valid:
 	movl	-4(%rbp), %eax        # Load image width
 	cltd                        # Sign extend for division
 	idivl	-12(%rbp)             # Divide width by tiling factor
@@ -1255,7 +1255,6 @@ imgproc_tile:
 .Lreturn:
 	leave                          # Restore base pointer and stack
 	ret                            # Return from function
-	.cfi_endproc
 
 
 /*
@@ -1420,7 +1419,7 @@ imgproc_composite:
 
 .Lsize_mismatch:
     movl    $0, %eax             # Set return value to 0 (failure)
-    jmp     .Lreturn             # Jump to return
+    jmp     .Lret             # Jump to return
 
 .Lsize_match:
     # Ensure valid dimensions (both width and height > 0)
@@ -1451,11 +1450,11 @@ imgproc_composite:
     movl    %edx, 4(%rax)        # Copy height to output image
 
     movl    $0, -12(%rbp)        # Initialize row index (y) to 0
-    jmp     .Lrow_loop           # Jump to row loop
+    jmp     .Lrows_loop           # Jump to row loop
 
 .Lrow_done:
     movl    $0, -16(%rbp)        # Initialize column index (x) to 0
-    jmp     .Lcolumn_loop        # Jump to pixel processing loop
+    jmp     .Lcol_loop        # Jump to pixel processing loop
 
 .Lprocess_pixel:
     # Calculate the 1D index of the current pixel in the image arrays
@@ -1502,7 +1501,7 @@ imgproc_composite:
     movl    %eax, (%rbx)         # Store blended pixel in output image
 
     addl    $1, -16(%rbp)        # Increment column index (x)
-.Lcolumn_loop:
+.Lcol_loop:
     # Column loop (iterate over all pixels in the row)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
@@ -1510,7 +1509,7 @@ imgproc_composite:
     jl      .Lprocess_pixel      # If x < width, process next pixel
 
     addl    $1, -12(%rbp)        # Increment row index (y)
-.Lrow_loop:
+.Lrows_loop:
     # Row loop (iterate over all rows)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    4(%rax), %eax        # Load height of base image
@@ -1519,7 +1518,7 @@ imgproc_composite:
 
     movl    $1, %eax             # Set return value to 1 (success)
 
-.Lreturn:
+.Lret:
     movq    -8(%rbp), %rbx       # Restore %rbx
     leave                        # Restore base pointer and stack
     ret                          # Return to caller
