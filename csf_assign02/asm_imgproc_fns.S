@@ -706,11 +706,11 @@ make_pixel:
  *   %rbp - base pointer for the stack frame
  *   %rsp - stack pointer, used for adjusting the stack
  *   %edi - holds the input pixel argument (32-bit value)
- *   %r12d - holds the original pixel value (callee-saved)
- *   %r13d - holds the red component and later the grayscale value
- *   %r14d - holds the green component
- *   %r15d - holds the blue component
- *   %ebx  - holds the alpha component
+ *   %ebx - holds the original pixel value (callee-saved)
+ *   %r12d - holds the red component and later the grayscale value
+ *   %r13d - holds the green component
+ *   %r14d - holds the blue component
+ *   %r15d  - holds the alpha component
  *   %eax  - used for temporary calculations (grayscale)
  *   %ecx  - used for combining color components into the final pixel
  *
