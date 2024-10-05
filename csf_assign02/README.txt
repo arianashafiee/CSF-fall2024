@@ -58,7 +58,7 @@ uint32_t make_pixel(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
 uint32_t to_grayscale(uint32_t pixel);
 
 
-Eric Guan: 
+Eric Guan:
 
 MS1:
 test_tile_basic(TestObjs *objs)
@@ -82,3 +82,9 @@ test_blend_colors(TestObjs *objs)
 MS2:
 added meaningful loop labels
 
+MS3:
+assembly implementations of:
+uint32_t to_grayscale(uint32_t pixel);
+uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha)
+uint32_t blend_colors(uint32_t fg, uint32_t bg)
+int imgproc_composite(struct Image *base_img, struct Image *overlay_img, struct Image *output_img);
