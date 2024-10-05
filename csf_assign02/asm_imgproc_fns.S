@@ -388,7 +388,6 @@ determine_tile_y_offset:
 .globl copy_tile
 copy_tile:
 .Ltop_copy:
-	.cfi_startproc
 	pushq	%rbp                  # Save base pointer
 	movq	%rsp, %rbp            # Set up stack frame
 	subq	$80, %rsp             # Allocate 80 bytes of stack space
@@ -407,6 +406,10 @@ copy_tile:
 	movl	4(%rax), %eax         # Load image height
 	testl	%eax, %eax            # Check if height > 0
 	jle	.Ltile_copy_invalid    # Jump to failure if invalid
+
+.Ltile_copy_invalid:
+	movl	$0, %eax              # Set return value to 0 (failure)
+	jmp	.Ltile_return:
 
 	# Calculate the width, height, x-offset, and y-offset of the tile
 	movq	-64(%rbp), %rax       # Load input image pointer
@@ -535,7 +538,6 @@ copy_tile:
 .Ltile_return:
 	leave                        # Restore base pointer and stack
 	ret                          # Return
-	.cfi_endproc
 
 /*
  * Register use:
