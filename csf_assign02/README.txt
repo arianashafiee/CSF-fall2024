@@ -91,5 +91,7 @@ added loop labels
 
 MS3:
 assembly implementations of:
+uint32_t to_grayscale(uint32_t pixel)
 uint32_t blend_components(uint32_t fg, uint32_t bg, uint32_t alpha)
 uint32_t blend_colors(uint32_t fg, uint32_t bg)
+int imgproc_composite(struct Image *base_img, struct Image *overlay_img, struct Image *output_img)
