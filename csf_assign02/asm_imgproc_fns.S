@@ -13,367 +13,528 @@
  * Helper functions for image processing
  */
 
-    .global all_tiles_nonempty
+/*
+ * all_tiles_nonempty
+ *
+ * Determines whether all tiles in the grid are non-empty (i.e., none have 0 width or height).
+ *
+ * Parameters:
+ *   %edi - width of the image
+ *   %esi - height of the image
+ *   %edx - tiling factor (n)
+ *
+ * Register usage:
+ *   %edi - image width
+ *   %esi - image height
+ *   %edx - tiling factor
+ *   %eax - used for storing the result of tile size calculations
+ *   %rbp - base pointer for the stack frame
+ *
+ * Memory use:
+ *   -4(%rbp)  - image width
+ *   -8(%rbp)  - image height
+ *   -12(%rbp) - tiling factor
+ */
+
+.global all_tiles_nonempty
 all_tiles_nonempty:
-.LFB6:
+.Ltop_tiles_nonempty:
 	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	movl	%edi, -4(%rbp)
-	movl	%esi, -8(%rbp)
-	movl	%edx, -12(%rbp)
-	cmpl	$0, -12(%rbp)
-	jle	.L2
-	cmpl	$0, -4(%rbp)
-	jle	.L2
-	cmpl	$0, -8(%rbp)
-	jg	.L3
-.L2:
-	movl	$0, %eax
-	jmp	.L4
-.L3:
-	movl	-4(%rbp), %eax
-	cltd
-	idivl	-12(%rbp)
-	testl	%eax, %eax
-	jle	.L5
-	movl	-8(%rbp), %eax
-	cltd
-	idivl	-12(%rbp)
-	testl	%eax, %eax
-	jle	.L5
-	movl	$1, %eax
-	jmp	.L4
-.L5:
-	movl	$0, %eax
-.L4:
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
+	pushq	%rbp                  # Save base pointer
+	movq	%rsp, %rbp            # Set up stack frame
+	movl	%edi, -4(%rbp)        # Store image width
+	movl	%esi, -8(%rbp)        # Store image height
+	movl	%edx, -12(%rbp)       # Store tiling factor
+	cmpl	$0, -12(%rbp)         # Check if tiling factor <= 0
+	jle	.Ltile_empty_exit      # Jump to failure if invalid
+	cmpl	$0, -4(%rbp)          # Check if width <= 0
+	jle	.Ltile_empty_exit      # Jump to failure if invalid
+	cmpl	$0, -8(%rbp)          # Check if height > 0
+	jg	.Ltiles_valid          # Continue if valid
+
+.Ltile_empty_exit:
+	movl	$0, %eax              # Set return value to 0 (failure)
+	jmp	.Ltile_exit
+
+.Ltiles_valid:
+	movl	-4(%rbp), %eax        # Load image width
+	cltd                        # Sign extend for division
+	idivl	-12(%rbp)             # Divide width by tiling factor
+	testl	%eax, %eax            # Test if result is 0 (empty tile)
+	jle	.Ltile_failure         # If result <= 0, failure
+
+	movl	-8(%rbp), %eax        # Load image height
+	cltd                        # Sign extend for division
+	idivl	-12(%rbp)             # Divide height by tiling factor
+	testl	%eax, %eax            # Test if result is 0 (empty tile)
+	jle	.Ltile_failure         # If result <= 0, failure
+
+	movl	$1, %eax              # Set return value to 1 (success)
+	jmp	.Ltile_exit
+
+.Ltile_failure:
+	movl	$0, %eax              # Set return value to 0 (failure)
+
+.Ltile_exit:
+	popq	%rbp                  # Restore base pointer
+	ret                         # Return
 	.cfi_endproc
 
-	.globl	determine_tile_w
+/*
+ * determine_tile_w
+ *
+ * Calculates the width of each tile when tiling the image.
+ *
+ * Parameters:
+ *   %edi - width of the image
+ *   %esi - tiling factor
+ *   %edx - width of the current tile
+ *
+ * Register usage:
+ *   %edi - image width
+ *   %esi - tiling factor
+ *   %edx - tile width
+ *   %eax - used for storing the calculated tile width
+ *   %rbp - base pointer for the stack frame
+ *
+ * Memory use:
+ *   -20(%rbp) - image width
+ *   -24(%rbp) - tiling factor
+ *   -28(%rbp) - tile width
+ */
+
+.globl determine_tile_w
 determine_tile_w:
-.LFB7:
+.Ltop_tile_w:
 	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	movl	%edi, -20(%rbp)
-	movl	%esi, -24(%rbp)
-	movl	%edx, -28(%rbp)
-	cmpl	$0, -24(%rbp)
-	jle	.L8
-	cmpl	$0, -20(%rbp)
-	jle	.L8
-	cmpl	$0, -28(%rbp)
-	js	.L8
-	movl	-28(%rbp), %eax
-	cmpl	-24(%rbp), %eax
-	jl	.L9
-.L8:
-	movl	$0, %eax
-	jmp	.L10
-.L9:
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%eax, -4(%rbp)
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%edx, -8(%rbp)
-	movl	-28(%rbp), %eax
-	cmpl	-8(%rbp), %eax
-	setl	%al
-	movzbl	%al, %edx
-	movl	-4(%rbp), %eax
-	addl	%edx, %eax
-.L10:
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
-	.cfi_endproc
-.LFE7:
+	pushq	%rbp                  # Save base pointer
+	movq	%rsp, %rbp            # Set up stack frame
+	movl	%edi, -20(%rbp)       # Store image width
+	movl	%esi, -24(%rbp)       # Store tiling factor
+	movl	%edx, -28(%rbp)       # Store tile width
+	cmpl	$0, -24(%rbp)         # Check if tiling factor <= 0
+	jle	.Ltile_w_invalid       # Jump to failure if invalid
+	cmpl	$0, -20(%rbp)         # Check if width <= 0
+	jle	.Ltile_w_invalid       # Jump to failure if invalid
+	cmpl	$0, -28(%rbp)         # Check if tile width < 0
+	js	.Ltile_w_invalid       # Jump to failure if invalid
+	movl	-28(%rbp), %eax       # Load tile width
+	cmpl	-24(%rbp), %eax       # Compare tile width with tiling factor
+	jl	.Ltile_w_valid         # If valid, proceed
 
-	.globl	determine_tile_x_offset
+.Ltile_w_invalid:
+	movl	$0, %eax              # Set return value to 0 (failure)
+	jmp	.Ltile_w_exit
+
+.Ltile_w_valid:
+	movl	-20(%rbp), %eax       # Load image width
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide width by tiling factor
+	movl	%eax, -4(%rbp)        # Store result (tile width)
+	movl	-20(%rbp), %eax       # Load image width again
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide width again
+	movl	%edx, -8(%rbp)        # Store remainder
+	movl	-28(%rbp), %eax       # Load tile width
+	cmpl	-8(%rbp), %eax        # Compare remainder with tile width
+	setl	%al                   # Set result based on comparison
+	movzbl	%al, %edx             # Zero-extend the result
+	movl	-4(%rbp), %eax        # Load tile width
+	addl	%edx, %eax            # Add to result
+
+.Ltile_w_exit:
+	popq	%rbp                  # Restore base pointer
+	ret                         # Return
+	.cfi_endproc
+
+/*
+ * determine_tile_x_offset
+ *
+ * Calculates the x-offset for a given tile in the grid.
+ *
+ * Parameters:
+ *   %edi - width of the image
+ *   %esi - tiling factor
+ *   %edx - x-offset of the current tile
+ *
+ * Register usage:
+ *   %edi - image width
+ *   %esi - tiling factor
+ *   %edx - x-offset of the current tile
+ *   %eax - used for storing the calculated x-offset
+ *   %rbp - base pointer for the stack frame
+ *
+ * Memory use:
+ *   -20(%rbp) - image width
+ *   -24(%rbp) - tiling factor
+ *   -28(%rbp) - tile x-offset
+ */
+
+.globl determine_tile_x_offset
 determine_tile_x_offset:
-.LFB8:
+.Ltop_x_offset:
 	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	movl	%edi, -20(%rbp)
-	movl	%esi, -24(%rbp)
-	movl	%edx, -28(%rbp)
-	cmpl	$0, -24(%rbp)
-	jle	.L12
-	cmpl	$0, -20(%rbp)
-	jle	.L12
-	cmpl	$0, -28(%rbp)
-	js	.L12
-	movl	-28(%rbp), %eax
-	cmpl	-24(%rbp), %eax
-	jl	.L13
-.L12:
-	movl	$0, %eax
-	jmp	.L14
-.L13:
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%eax, -4(%rbp)
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%edx, -8(%rbp)
-	movl	-28(%rbp), %eax
-	imull	-4(%rbp), %eax
-	movl	%eax, %ecx
-	movl	-8(%rbp), %edx
-	movl	-28(%rbp), %eax
-	cmpl	%eax, %edx
-	cmovle	%edx, %eax
-	addl	%ecx, %eax
-.L14:
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
+	pushq	%rbp                  # Save base pointer
+	movq	%rsp, %rbp            # Set up stack frame
+	movl	%edi, -20(%rbp)       # Store image width
+	movl	%esi, -24(%rbp)       # Store tiling factor
+	movl	%edx, -28(%rbp)       # Store x-offset
+	cmpl	$0, -24(%rbp)         # Check if tiling factor <= 0
+	jle	.Ltile_x_offset_invalid # Jump to failure if invalid
+	cmpl	$0, -20(%rbp)         # Check if width <= 0
+	jle	.Ltile_x_offset_invalid # Jump to failure if invalid
+	cmpl	$0, -28(%rbp)         # Check if x-offset < 0
+	js	.Ltile_x_offset_invalid # Jump to failure if invalid
+	movl	-28(%rbp), %eax       # Load x-offset
+	cmpl	-24(%rbp), %eax       # Compare x-offset with tiling factor
+	jl	.Ltile_x_offset_valid   # If valid, proceed
+
+.Ltile_x_offset_invalid:
+	movl	$0, %eax              # Set return value to 0 (failure)
+	jmp	.Ltile_x_offset_exit
+
+.Ltile_x_offset_valid:
+	movl	-20(%rbp), %eax       # Load image width
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide width by tiling factor
+	movl	%eax, -4(%rbp)        # Store result (x-offset)
+	movl	-20(%rbp), %eax       # Load image width again
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide width again
+	movl	%edx, -8(%rbp)        # Store remainder
+	movl	-28(%rbp), %eax       # Load x-offset
+	imull	-4(%rbp), %eax        # Multiply result with x-offset
+	movl	%eax, %ecx            # Store result in %ecx
+	movl	-8(%rbp), %edx        # Load remainder
+	movl	-28(%rbp), %eax       # Load x-offset
+	cmpl	%eax, %edx            # Compare with remainder
+	cmovle	%edx, %eax            # Move remainder to %eax if less than or equal
+	addl	%ecx, %eax            # Add to result
+
+.Ltile_x_offset_exit:
+	popq	%rbp                  # Restore base pointer
+	ret                         # Return
 	.cfi_endproc
 
-	.globl	determine_tile_h
+/*
+ * determine_tile_h
+ *
+ * Calculates the height of each tile when tiling the image.
+ *
+ * Parameters:
+ *   %edi - height of the image
+ *   %esi - tiling factor
+ *   %edx - height of the current tile
+ *
+ * Register usage:
+ *   %edi - image height
+ *   %esi - tiling factor
+ *   %edx - tile height
+ *   %eax - used for storing the calculated tile height
+ *   %rbp - base pointer for the stack frame
+ *
+ * Memory use:
+ *   -20(%rbp) - image height
+ *   -24(%rbp) - tiling factor
+ *   -28(%rbp) - tile height
+ */
+
+.globl determine_tile_h
 determine_tile_h:
-.LFB9:
+.Ltop_tile_h:
 	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	movl	%edi, -20(%rbp)
-	movl	%esi, -24(%rbp)
-	movl	%edx, -28(%rbp)
-	cmpl	$0, -24(%rbp)
-	jle	.L16
-	cmpl	$0, -20(%rbp)
-	jle	.L16
-	cmpl	$0, -28(%rbp)
-	js	.L16
-	movl	-28(%rbp), %eax
-	cmpl	-24(%rbp), %eax
-	jl	.L17
-.L16:
-	movl	$0, %eax
-	jmp	.L18
-.L17:
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%eax, -4(%rbp)
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%edx, -8(%rbp)
-	movl	-28(%rbp), %eax
-	cmpl	-8(%rbp), %eax
-	setl	%al
-	movzbl	%al, %edx
-	movl	-4(%rbp), %eax
-	addl	%edx, %eax
-.L18:
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
+	pushq	%rbp                  # Save base pointer
+	movq	%rsp, %rbp            # Set up stack frame
+	movl	%edi, -20(%rbp)       # Store image height
+	movl	%esi, -24(%rbp)       # Store tiling factor
+	movl	%edx, -28(%rbp)       # Store tile height
+	cmpl	$0, -24(%rbp)         # Check if tiling factor <= 0
+	jle	.Ltile_h_invalid       # Jump to failure if invalid
+	cmpl	$0, -20(%rbp)         # Check if height <= 0
+	jle	.Ltile_h_invalid       # Jump to failure if invalid
+	cmpl	$0, -28(%rbp)         # Check if tile height < 0
+	js	.Ltile_h_invalid       # Jump to failure if invalid
+	movl	-28(%rbp), %eax       # Load tile height
+	cmpl	-24(%rbp), %eax       # Compare tile height with tiling factor
+	jl	.Ltile_h_valid         # If valid, proceed
+
+.Ltile_h_invalid:
+	movl	$0, %eax              # Set return value to 0 (failure)
+	jmp	.Ltile_h_exit
+
+.Ltile_h_valid:
+	movl	-20(%rbp), %eax       # Load image height
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide height by tiling factor
+	movl	%eax, -4(%rbp)        # Store result (tile height)
+	movl	-20(%rbp), %eax       # Load image height again
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide height again
+	movl	%edx, -8(%rbp)        # Store remainder
+	movl	-28(%rbp), %eax       # Load tile height
+	cmpl	-8(%rbp), %eax        # Compare remainder with tile height
+	setl	%al                   # Set result based on comparison
+	movzbl	%al, %edx             # Zero-extend the result
+	movl	-4(%rbp), %eax        # Load tile height
+	addl	%edx, %eax            # Add to result
+
+.Ltile_h_exit:
+	popq	%rbp                  # Restore base pointer
+	ret                         # Return
 	.cfi_endproc
 
-	.globl	determine_tile_y_offset
+/*
+ * determine_tile_y_offset
+ *
+ * Calculates the y-offset for a given tile in the grid.
+ *
+ * Parameters:
+ *   %edi - height of the image
+ *   %esi - tiling factor
+ *   %edx - y-offset of the current tile
+ *
+ * Register usage:
+ *   %edi - image height
+ *   %esi - tiling factor
+ *   %edx - y-offset of the current tile
+ *   %eax - used for storing the calculated y-offset
+ *   %rbp - base pointer for the stack frame
+ *
+ * Memory use:
+ *   -20(%rbp) - image height
+ *   -24(%rbp) - tiling factor
+ *   -28(%rbp) - tile y-offset
+ */
+
+.globl determine_tile_y_offset
 determine_tile_y_offset:
-.LFB10:
+.Ltop_y_offset:
 	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	movl	%edi, -20(%rbp)
-	movl	%esi, -24(%rbp)
-	movl	%edx, -28(%rbp)
-	cmpl	$0, -24(%rbp)
-	jle	.L20
-	cmpl	$0, -20(%rbp)
-	jle	.L20
-	cmpl	$0, -28(%rbp)
-	js	.L20
-	movl	-28(%rbp), %eax
-	cmpl	-24(%rbp), %eax
-	jl	.L21
-.L20:
-	movl	$0, %eax
-	jmp	.L22
-.L21:
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%eax, -4(%rbp)
-	movl	-20(%rbp), %eax
-	cltd
-	idivl	-24(%rbp)
-	movl	%edx, -8(%rbp)
-	movl	-28(%rbp), %eax
-	imull	-4(%rbp), %eax
-	movl	%eax, %ecx
-	movl	-8(%rbp), %edx
-	movl	-28(%rbp), %eax
-	cmpl	%eax, %edx
-	cmovle	%edx, %eax
-	addl	%ecx, %eax
-.L22:
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
+	pushq	%rbp                  # Save base pointer
+	movq	%rsp, %rbp            # Set up stack frame
+	movl	%edi, -20(%rbp)       # Store image height
+	movl	%esi, -24(%rbp)       # Store tiling factor
+	movl	%edx, -28(%rbp)       # Store y-offset
+	cmpl	$0, -24(%rbp)         # Check if tiling factor <= 0
+	jle	.Ltile_y_offset_invalid # Jump to failure if invalid
+	cmpl	$0, -20(%rbp)         # Check if height <= 0
+	jle	.Ltile_y_offset_invalid # Jump to failure if invalid
+	cmpl	$0, -28(%rbp)         # Check if y-offset < 0
+	js	.Ltile_y_offset_invalid # Jump to failure if invalid
+	movl	-28(%rbp), %eax       # Load y-offset
+	cmpl	-24(%rbp), %eax       # Compare y-offset with tiling factor
+	jl	.Ltile_y_offset_valid   # If valid, proceed
+
+.Ltile_y_offset_invalid:
+	movl	$0, %eax              # Set return value to 0 (failure)
+	jmp	.Ltile_y_offset_exit
+
+.Ltile_y_offset_valid:
+	movl	-20(%rbp), %eax       # Load image height
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide height by tiling factor
+	movl	%eax, -4(%rbp)        # Store result (y-offset)
+	movl	-20(%rbp), %eax       # Load image height again
+	cltd                        # Sign extend for division
+	idivl	-24(%rbp)             # Divide height again
+	movl	%edx, -8(%rbp)        # Store remainder
+	movl	-28(%rbp), %eax       # Load y-offset
+	imull	-4(%rbp), %eax        # Multiply result with y-offset
+	movl	%eax, %ecx            # Store result in %ecx
+	movl	-8(%rbp), %edx        # Load remainder
+	movl	-28(%rbp), %eax       # Load y-offset
+	cmpl	%eax, %edx            # Compare with remainder
+	cmovle	%edx, %eax            # Move remainder to %eax if less than or equal
+	addl	%ecx, %eax            # Add to result
+
+.Ltile_y_offset_exit:
+	popq	%rbp                  # Restore base pointer
+	ret                         # Return
 	.cfi_endproc
-    
-    .global copy_tile
+
+/*
+ * copy_tile
+ *
+ * Copies a tile from the input image to the output image.
+ *
+ * Parameters:
+ *   %rdi - pointer to the output image
+ *   %rsi - pointer to the input image
+ *   %edx - y-offset of the tile
+ *   %ecx - x-offset of the tile
+ *   %r8d - tiling factor
+ *
+ * Register usage:
+ *   %rdi - output image pointer
+ *   %rsi - input image pointer
+ *   %edx - y-offset of the tile
+ *   %ecx - x-offset of the tile
+ *   %r8d - tiling factor
+ *   %rbp - base pointer for the stack frame
+ *   %rax, %rdx, %eax - temporary registers for pixel manipulation
+ *
+ * Memory use:
+ *   -56(%rbp) - output image pointer
+ *   -64(%rbp) - input image pointer
+ *   -68(%rbp) - y-offset
+ *   -72(%rbp) - x-offset
+ *   -76(%rbp) - tiling factor
+ *   -12(%rbp) - tile width
+ *   -16(%rbp) - tile height
+ *   -20(%rbp) - tile x-offset
+ *   -24(%rbp) - tile y-offset
+ */
+
+.globl copy_tile
 copy_tile:
-.LFB11:
+.Ltop_copy:
 	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	subq	$80, %rsp
-	movq	%rdi, -56(%rbp)
-	movq	%rsi, -64(%rbp)
-	movl	%edx, -68(%rbp)
-	movl	%ecx, -72(%rbp)
-	movl	%r8d, -76(%rbp)
-	cmpl	$0, -76(%rbp)
-	jle	.L34
-	movq	-64(%rbp), %rax
-	movl	(%rax), %eax
-	testl	%eax, %eax
-	jle	.L34
-	movq	-64(%rbp), %rax
-	movl	4(%rax), %eax
-	testl	%eax, %eax
-	jle	.L34
-	movq	-64(%rbp), %rax
-	movl	(%rax), %eax
-	movl	-72(%rbp), %edx
-	movl	-76(%rbp), %ecx
-	movl	%ecx, %esi
-	movl	%eax, %edi
-	call	determine_tile_w
-	movl	%eax, -12(%rbp)
-	movq	-64(%rbp), %rax
-	movl	4(%rax), %eax
-	movl	-68(%rbp), %edx
-	movl	-76(%rbp), %ecx
-	movl	%ecx, %esi
-	movl	%eax, %edi
-	call	determine_tile_h
-	movl	%eax, -16(%rbp)
-	movq	-64(%rbp), %rax
-	movl	(%rax), %eax
-	movl	-72(%rbp), %edx
-	movl	-76(%rbp), %ecx
-	movl	%ecx, %esi
-	movl	%eax, %edi
-	call	determine_tile_x_offset
-	movl	%eax, -20(%rbp)
-	movq	-64(%rbp), %rax
-	movl	4(%rax), %eax
-	movl	-68(%rbp), %edx
-	movl	-76(%rbp), %ecx
-	movl	%ecx, %esi
-	movl	%eax, %edi
-	call	determine_tile_y_offset
-	movl	%eax, -24(%rbp)
-	movl	$0, -4(%rbp)
-	jmp	.L27
-.L33:
-	movl	$0, -8(%rbp)
-	jmp	.L28
-.L32:
-	movl	-24(%rbp), %edx
-	movl	-4(%rbp), %eax
-	addl	%eax, %edx
-	movq	-64(%rbp), %rax
-	movl	4(%rax), %eax
-	cmpl	%eax, %edx
-	jge	.L35
-	movl	-20(%rbp), %edx
-	movl	-8(%rbp), %eax
-	addl	%eax, %edx
-	movq	-64(%rbp), %rax
-	movl	(%rax), %eax
-	cmpl	%eax, %edx
-	jge	.L35
-	movl	-8(%rbp), %eax
-	imull	-76(%rbp), %eax
-	movl	%eax, -28(%rbp)
-	movl	-4(%rbp), %eax
-	imull	-76(%rbp), %eax
-	movl	%eax, -32(%rbp)
-	movq	-64(%rbp), %rax
-	movq	8(%rax), %rdx
-	movq	-64(%rbp), %rax
-	movl	(%rax), %eax
-	imull	-32(%rbp), %eax
-	movl	%eax, %ecx
-	movl	-28(%rbp), %eax
-	addl	%ecx, %eax
-	cltq
-	salq	$2, %rax
-	addq	%rdx, %rax
-	movl	(%rax), %eax
-	movl	%eax, -36(%rbp)
-	movq	-56(%rbp), %rax
-	movq	8(%rax), %rdx
-	movl	-24(%rbp), %ecx
-	movl	-4(%rbp), %eax
-	addl	%eax, %ecx
-	movq	-56(%rbp), %rax
-	movl	(%rax), %eax
-	imull	%ecx, %eax
-	movl	-20(%rbp), %esi
-	movl	-8(%rbp), %ecx
-	addl	%esi, %ecx
-	addl	%ecx, %eax
-	cltq
-	salq	$2, %rax
-	addq	%rax, %rdx
-	movl	-36(%rbp), %eax
-	movl	%eax, (%rdx)
-	jmp	.L31
-.L35:
+	pushq	%rbp                  # Save base pointer
+	movq	%rsp, %rbp            # Set up stack frame
+	subq	$80, %rsp             # Allocate 80 bytes of stack space
+	movq	%rdi, -56(%rbp)       # Store output image pointer
+	movq	%rsi, -64(%rbp)       # Store input image pointer
+	movl	%edx, -68(%rbp)       # Store y-offset
+	movl	%ecx, -72(%rbp)       # Store x-offset
+	movl	%r8d, -76(%rbp)       # Store tiling factor
+	cmpl	$0, -76(%rbp)         # Check if tiling factor <= 0
+	jle	.Ltile_copy_invalid    # Jump to failure if invalid
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	(%rax), %eax          # Load image width
+	testl	%eax, %eax            # Check if width > 0
+	jle	.Ltile_copy_invalid    # Jump to failure if invalid
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	4(%rax), %eax         # Load image height
+	testl	%eax, %eax            # Check if height > 0
+	jle	.Ltile_copy_invalid    # Jump to failure if invalid
+
+	# Calculate the width, height, x-offset, and y-offset of the tile
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	(%rax), %eax          # Load image width
+	movl	-72(%rbp), %edx       # Load x-offset
+	movl	-76(%rbp), %ecx       # Load tiling factor
+	movl	%ecx, %esi            # Move tiling factor to %esi
+	movl	%eax, %edi            # Move image width to %edi
+	call	determine_tile_w       # Calculate tile width
+	movl	%eax, -12(%rbp)       # Store tile width
+
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	4(%rax), %eax         # Load image height
+	movl	-68(%rbp), %edx       # Load y-offset
+	movl	-76(%rbp), %ecx       # Load tiling factor
+	movl	%ecx, %esi            # Move tiling factor to %esi
+	movl	%eax, %edi            # Move image height to %edi
+	call	determine_tile_h       # Calculate tile height
+	movl	%eax, -16(%rbp)       # Store tile height
+
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	(%rax), %eax          # Load image width
+	movl	-72(%rbp), %edx       # Load x-offset
+	movl	-76(%rbp), %ecx       # Load tiling factor
+	movl	%ecx, %esi            # Move tiling factor to %esi
+	movl	%eax, %edi            # Move image width to %edi
+	call	determine_tile_x_offset # Calculate x-offset
+	movl	%eax, -20(%rbp)       # Store tile x-offset
+
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	4(%rax), %eax         # Load image height
+	movl	-68(%rbp), %edx       # Load y-offset
+	movl	-76(%rbp), %ecx       # Load tiling factor
+	movl	%ecx, %esi            # Move tiling factor to %esi
+	movl	%eax, %edi            # Move image height to %edi
+	call	determine_tile_y_offset # Calculate y-offset
+	movl	%eax, -24(%rbp)       # Store tile y-offset
+
+	# Start copying tiles
+	movl	$0, -4(%rbp)          # Initialize row index to 0
+	jmp	.Ltile_row_loop
+
+.Ltile_row_copy_start:
+	movl	$0, -8(%rbp)          # Initialize column index to 0
+	jmp	.Ltile_col_loop
+
+.Ltile_process_pixel:
+	# Process a single pixel in the tile
+	movl	-24(%rbp), %edx       # Load y-offset
+	movl	-4(%rbp), %eax        # Load row index
+	addl	%eax, %edx            # Calculate y position
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	4(%rax), %eax         # Load image height
+	cmpl	%eax, %edx            # Check if y position is valid
+	jge	.Ltile_copy_done       # Jump to done if invalid
+
+	movl	-20(%rbp), %edx       # Load x-offset
+	movl	-8(%rbp), %eax        # Load column index
+	addl	%eax, %edx            # Calculate x position
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	(%rax), %eax          # Load image width
+	cmpl	%eax, %edx            # Check if x position is valid
+	jge	.Ltile_copy_done       # Jump to done if invalid
+
+	movl	-8(%rbp), %eax        # Load column index
+	imull	-76(%rbp), %eax       # Multiply by tiling factor
+	movl	%eax, -28(%rbp)       # Store result (column offset)
+
+	movl	-4(%rbp), %eax        # Load row index
+	imull	-76(%rbp), %eax       # Multiply by tiling factor
+	movl	%eax, -32(%rbp)       # Store result (row offset)
+
+	# Copy pixel from input image to output image
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movq	8(%rax), %rdx         # Load pixel data pointer
+	movq	-64(%rbp), %rax       # Load input image pointer
+	movl	(%rax), %eax          # Load image width
+	imull	-32(%rbp), %eax       # Multiply width by row offset
+	movl	%eax, %ecx            # Store result
+	movl	-28(%rbp), %eax       # Load column offset
+	addl	%ecx, %eax            # Add row and column offsets
+	cltq                        # Sign-extend to 64 bits
+	salq	$2, %rax              # Multiply by 4 (pixel size)
+	addq	%rdx, %rax            # Add to pixel data pointer
+	movl	(%rax), %eax          # Load pixel value
+	movl	%eax, -36(%rbp)       # Store pixel value
+
+	movq	-56(%rbp), %rax       # Load output image pointer
+	movq	8(%rax), %rdx         # Load pixel data pointer
+	movl	-24(%rbp), %ecx       # Load y-offset
+	movl	-4(%rbp), %eax        # Load row index
+	addl	%eax, %ecx            # Add row index to y-offset
+	movq	-56(%rbp), %rax       # Load output image pointer
+	movl	(%rax), %eax          # Load image width
+	imull	%ecx, %eax            # Multiply width by y-offset
+	movl	-20(%rbp), %esi       # Load x-offset
+	movl	-8(%rbp), %ecx        # Load column index
+	addl	%esi, %ecx            # Add column index to x-offset
+	addl	%ecx, %eax            # Add x-offset to total
+	cltq                        # Sign-extend to 64 bits
+	salq	$2, %rax              # Multiply by 4 (pixel size)
+	addq	%rax, %rdx            # Add to pixel data pointer
+	movl	-36(%rbp), %eax       # Load pixel value
+	movl	%eax, (%rdx)          # Store pixel value in output image
+
+	jmp	.Ltile_pixel_done
+
+.Ltile_copy_done:
 	nop
-.L31:
-	addl	$1, -8(%rbp)
-.L28:
-	movl	-8(%rbp), %eax
-	cmpl	-12(%rbp), %eax
-	jl	.L32
-	addl	$1, -4(%rbp)
-.L27:
-	movl	-4(%rbp), %eax
-	cmpl	-16(%rbp), %eax
-	jl	.L33
-	jmp	.L23
-.L34:
-	nop
-.L23:
-	leave
-	.cfi_def_cfa 7, 8
-	ret
+
+.Ltile_pixel_done:
+	addl	$1, -8(%rbp)          # Increment column index
+
+.Ltile_col_loop:
+	movl	-8(%rbp), %eax        # Load column index
+	cmpl	-12(%rbp), %eax       # Compare with tile width
+	jl	.Ltile_process_pixel   # If column index < tile width, continue
+
+	addl	$1, -4(%rbp)          # Increment row index
+
+.Ltile_row_loop:
+	movl	-4(%rbp), %eax        # Load row index
+	cmpl	-16(%rbp), %eax       # Compare with tile height
+	jl	.Ltile_row_copy_start  # If row index < tile height, continue
+
+.Ltile_return:
+	leave                        # Restore base pointer and stack
+	ret                          # Return
 	.cfi_endproc
 
 /*
@@ -638,19 +799,6 @@ blend_components:
     cltq
     cqto
     idivl   %ecx
-
-    // movq    %rdi, %r12          # Move fg to %r12
-    // movq    %rsi, %r13          # Move bg to %r13
-    // movq    %rdx, %r14          # Move alpha to %r14
-    // movq    $255, %r15          # Store 255 constant to %r15
-
-    // imulq   %r14, %r12          # Multiply alpha by fg
-    // subq    %r14, %r15          # Subtract alpha from 255
-    // imulq   %r14, %r13          # Multiply prev. result by bg
-    // addq    %r12, %r13          # Add 1st product w/ 2nd product
-    // movq    %r13, %rax          # Move sum to %rax
-    // cqto                        # Convert quad in %rax to octo in %rdx:%rax
-    // divq    %r15                # Divide sum in %rdx:%rax by 255
 
     popq    %rbp
     ret
@@ -1009,87 +1157,106 @@ imgproc_mirror_v:
  * sampling every n'th pixel from the original image.
  *
  * Parameters:
- *   %rdi - pointer to original struct Image
- *   %esi - tiling factor (how many rows and columns of tiles to generate)
- *   %rdx - pointer to the output Image (in which the transformed
- *          pixels should be stored)
+ *   %rdi - pointer to original struct Image (input image)
+ *   %esi - tiling factor (n), how many rows and columns of tiles to generate
+ *   %rdx - pointer to output struct Image (resulting tiled image)
  *
  * Returns (in %eax):
- *   1 if successful, or 0 if either
- *     - n is less than 1, or
- *     - the output can't be generated because at least one tile would
- *       be empty (i.e., have 0 width or height)
+ *   1 if successful, or 0 if the transformation fails because n is less than 1,
+ *   or because the resulting tiles would have 0 width or height.
+ *
+ * Memory use:
+ *   -24(%rbp) - input image pointer
+ *   -28(%rbp) - tiling factor (n)
+ *   -40(%rbp) - output image pointer
+ *   -4(%rbp)  - current row index (y)
+ *   -8(%rbp)  - current column index (x)
  */
 	.globl imgproc_tile
 imgproc_tile:
-.LFB22:
-	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	subq	$40, %rsp
-	movq	%rdi, -24(%rbp)
-	movl	%esi, -28(%rbp)
-	movq	%rdx, -40(%rbp)
-	cmpl	$0, -28(%rbp)
-	jle	.L71
-	movq	-24(%rbp), %rax
-	movl	(%rax), %eax
-	testl	%eax, %eax
-	jle	.L71
-	movq	-24(%rbp), %rax
-	movl	4(%rax), %eax
-	testl	%eax, %eax
-	jg	.L72
-.L71:
-	movl	$0, %eax
-	jmp	.L73
-.L72:
-	movq	-24(%rbp), %rax
-	movl	4(%rax), %ecx
-	movq	-24(%rbp), %rax
-	movl	(%rax), %eax
-	movl	-28(%rbp), %edx
-	movl	%ecx, %esi
-	movl	%eax, %edi
-	call	all_tiles_nonempty
-	testl	%eax, %eax
-	jne	.L74
-	movl	$0, %eax
-	jmp	.L73
-.L74:
-	movl	$0, -4(%rbp)
-	jmp	.L75
-.L78:
-	movl	$0, -8(%rbp)
-	jmp	.L76
-.L77:
-	movl	-28(%rbp), %edi
-	movl	-8(%rbp), %ecx
-	movl	-4(%rbp), %edx
-	movq	-24(%rbp), %rsi
-	movq	-40(%rbp), %rax
-	movl	%edi, %r8d
-	movq	%rax, %rdi
-	call	copy_tile
-	addl	$1, -8(%rbp)
-.L76:
-	movl	-8(%rbp), %eax
-	cmpl	-28(%rbp), %eax
-	jl	.L77
-	addl	$1, -4(%rbp)
-.L75:
-	movl	-4(%rbp), %eax
-	cmpl	-28(%rbp), %eax
-	jl	.L78
-	movl	$1, %eax
-.L73:
-	leave
-	.cfi_def_cfa 7, 8
-	ret
+	# Prologue: set up the stack frame
+	pushq	%rbp                      # Save base pointer
+	movq	%rsp, %rbp                # Set up new base pointer
+	subq	$40, %rsp                 # Allocate space on the stack
+
+	# Store function parameters in local variables
+	movq	%rdi, -24(%rbp)           # Store input image pointer
+	movl	%esi, -28(%rbp)           # Store tiling factor (n)
+	movq	%rdx, -40(%rbp)           # Store output image pointer
+
+	# Check if tiling factor n is valid (n > 0)
+	cmpl	$0, -28(%rbp)             # Compare n with 0
+	jle	.Linvalid_tiling_factor    # If n <= 0, jump to failure
+
+	# Check if input image has valid dimensions (width and height > 0)
+	movq	-24(%rbp), %rax           # Load input image pointer
+	movl	(%rax), %eax              # Load image width
+	testl	%eax, %eax                # Check if width > 0
+	jle	.Linvalid_tiling_factor    # If width <= 0, jump to failure
+	movq	-24(%rbp), %rax           # Load input image pointer
+	movl	4(%rax), %eax             # Load image height
+	testl	%eax, %eax                # Check if height > 0
+	jg	.Lvalid_image_dimensions   # If height > 0, continue processing
+
+.Linvalid_tiling_factor:
+	movl	$0, %eax                  # Set return value to 0 (failure)
+	jmp	.Lreturn                   # Jump to return
+
+.Lvalid_image_dimensions:
+	# Check if all tiles have non-zero dimensions
+	movq	-24(%rbp), %rax           # Load input image pointer
+	movl	4(%rax), %ecx             # Load image height
+	movq	-24(%rbp), %rax           # Load input image pointer
+	movl	(%rax), %eax              # Load image width
+	movl	-28(%rbp), %edx           # Load tiling factor (n)
+	movl	%ecx, %esi                # Move height to %esi
+	movl	%eax, %edi                # Move width to %edi
+	call	all_tiles_nonempty         # Check if all tiles are non-empty
+	testl	%eax, %eax                # Check result of the call
+	jne	.Ltiles_valid              # If tiles are valid, continue
+	movl	$0, %eax                  # Set return value to 0 (failure)
+	jmp	.Lreturn                   # Jump to return
+
+.Ltiles_valid:
+	movl	$0, -4(%rbp)              # Initialize row index (y) to 0
+	jmp	.Lrow_loop                 # Jump to row loop
+
+.Lrow_loop_start:
+	movl	$0, -8(%rbp)              # Initialize column index (x) to 0
+	jmp	.Lcolumn_loop              # Jump to column loop
+
+.Lprocess_tile:
+	# Copy the tile from input image to output image
+	movl	-28(%rbp), %edi           # Load tiling factor (n)
+	movl	-8(%rbp), %ecx            # Load column index (x)
+	movl	-4(%rbp), %edx            # Load row index (y)
+	movq	-24(%rbp), %rsi           # Load input image pointer
+	movq	-40(%rbp), %rax           # Load output image pointer
+	movl	%edi, %r8d                # Move tiling factor (n) to %r8d
+	movq	%rax, %rdi                # Move output image pointer to %rdi
+	call	copy_tile                 # Call copy_tile to process the current tile
+	addl	$1, -8(%rbp)              # Increment column index (x)
+
+.Lcolumn_loop:
+	# Column loop: iterate through all columns in the current row
+	movl	-8(%rbp), %eax            # Load column index (x)
+	cmpl	-28(%rbp), %eax           # Compare x with tiling factor (n)
+	jl	.Lprocess_tile             # If x < n, process the next tile in the row
+	addl	$1, -4(%rbp)              # Increment row index (y)
+
+.Lrow_loop:
+	# Row loop: iterate through all rows
+	movl	-4(%rbp), %eax            # Load row index (y)
+	cmpl	-28(%rbp), %eax           # Compare y with tiling factor (n)
+	jl	.Lrow_loop_start           # If y < n, process the next row
+
+	movl	$1, %eax                  # Set return value to 1 (success)
+
+.Lreturn:
+	leave                          # Restore base pointer and stack
+	ret                            # Return from function
 	.cfi_endproc
+
 
 /*
  * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
@@ -1195,8 +1362,9 @@ imgproc_grayscale:
 	leave                        # Restore stack and base pointer
 	ret                          # Return to caller
 
+
 /*
- * int imgproc_composite( struct Image *base_img, struct Image *overlay_img );
+ * int imgproc_composite( struct Image *base_img, struct Image *overlay_img, struct Image *output_img );
  *
  * Overlay a foreground image on a background image, using each foreground
  * pixel's alpha value to determine its degree of opacity in order to blend
@@ -1204,125 +1372,157 @@ imgproc_grayscale:
  *
  * Parameters:
  *   %rdi - pointer to base (background) image
- *   %rsi - pointer to overlaid (foreground) image
- *   %rdx - pointer to output Image
+ *   %rsi - pointer to overlay (foreground) image
+ *   %rdx - pointer to output image (result of blending)
  *
  * Returns:
  *   1 if successful, or 0 if the transformation fails because the base
- *   and overlay image do not have the same dimensions
+ *   and overlay images do not have the same dimensions.
+ *
+ * Memory use:
+ *   -48(%rbp) - base image pointer
+ *   -56(%rbp) - overlay image pointer
+ *   -64(%rbp) - output image pointer
+ *   -12(%rbp) - row index (y)
+ *   -16(%rbp) - column index (x)
+ *   -20(%rbp) - pixel index (1D)
+ *   -24(%rbp) - foreground (overlay) pixel
+ *   -28(%rbp) - background (base) pixel
  */
-	.globl imgproc_composite
+    .globl imgproc_composite
 imgproc_composite:
-imgproc_composite:
-.LFB24:
-	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	pushq	%rbx
-	subq	$56, %rsp
-	.cfi_offset 3, -24
-	movq	%rdi, -48(%rbp)
-	movq	%rsi, -56(%rbp)
-	movq	%rdx, -64(%rbp)
-	movq	-48(%rbp), %rax
-	movl	(%rax), %edx
-	movq	-56(%rbp), %rax
-	movl	(%rax), %eax
-	cmpl	%eax, %edx
-	jne	.L89
-	movq	-48(%rbp), %rax
-	movl	4(%rax), %edx
-	movq	-56(%rbp), %rax
-	movl	4(%rax), %eax
-	cmpl	%eax, %edx
-	je	.L90
-.L89:
-	movl	$0, %eax
-	jmp	.L91
-.L90:
-	movq	-48(%rbp), %rax
-	movl	(%rax), %eax
-	testl	%eax, %eax
-	jle	.L92
-	movq	-48(%rbp), %rax
-	movl	4(%rax), %eax
-	testl	%eax, %eax
-	jg	.L93
-.L92:
-	movl	$1, %eax
-	jmp	.L91
-.L93:
-	movq	-48(%rbp), %rax
-	movl	(%rax), %edx
-	movq	-64(%rbp), %rax
-	movl	%edx, (%rax)
-	movq	-48(%rbp), %rax
-	movl	4(%rax), %edx
-	movq	-64(%rbp), %rax
-	movl	%edx, 4(%rax)
-	movl	$0, -12(%rbp)
-	jmp	.L94
-.L97:
-	movl	$0, -16(%rbp)
-	jmp	.L95
-.L96:
-	movq	-48(%rbp), %rax
-	movl	(%rax), %eax
-	imull	-12(%rbp), %eax
-	movl	%eax, %edx
-	movl	-16(%rbp), %eax
-	addl	%edx, %eax
-	movl	%eax, -20(%rbp)
-	movq	-56(%rbp), %rax
-	movq	8(%rax), %rax
-	movl	-20(%rbp), %edx
-	movslq	%edx, %rdx
-	salq	$2, %rdx
-	addq	%rdx, %rax
-	movl	(%rax), %eax
-	movl	%eax, -24(%rbp)
-	movq	-48(%rbp), %rax
-	movq	8(%rax), %rax
-	movl	-20(%rbp), %edx
-	movslq	%edx, %rdx
-	salq	$2, %rdx
-	addq	%rdx, %rax
-	movl	(%rax), %eax
-	movl	%eax, -28(%rbp)
-	movq	-64(%rbp), %rax
-	movq	8(%rax), %rax
-	movl	-20(%rbp), %edx
-	movslq	%edx, %rdx
-	salq	$2, %rdx
-	leaq	(%rax,%rdx), %rbx
-	movl	-28(%rbp), %edx
-	movl	-24(%rbp), %eax
-	movl	%edx, %esi
-	movl	%eax, %edi
-	call	blend_colors
-	movl	%eax, (%rbx)
-	addl	$1, -16(%rbp)
-.L95:
-	movq	-48(%rbp), %rax
-	movl	(%rax), %eax
-	cmpl	%eax, -16(%rbp)
-	jl	.L96
-	addl	$1, -12(%rbp)
-.L94:
-	movq	-48(%rbp), %rax
-	movl	4(%rax), %eax
-	cmpl	%eax, -12(%rbp)
-	jl	.L97
-	movl	$1, %eax
-.L91:
-	movq	-8(%rbp), %rbx
-	leave
-	.cfi_def_cfa 7, 8
-	ret
-	.cfi_endproc
+    # Prologue: set up stack frame
+    pushq   %rbp                 # Save base pointer
+    movq    %rsp, %rbp           # Set up new base pointer
+    pushq   %rbx                 # Save %rbx for later use
+    subq    $56, %rsp            # Allocate space on the stack
+
+    # Store parameters (input images and output image) in local variables
+    movq    %rdi, -48(%rbp)      # Store base image pointer in local variable
+    movq    %rsi, -56(%rbp)      # Store overlay image pointer in local variable
+    movq    %rdx, -64(%rbp)      # Store output image pointer in local variable
+
+    # Check if the base and overlay images have the same width
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    (%rax), %edx         # Load width of base image
+    movq    -56(%rbp), %rax      # Load overlay image pointer
+    movl    (%rax), %eax         # Load width of overlay image
+    cmpl    %eax, %edx           # Compare base and overlay widths
+    jne     .Lsize_mismatch      # Jump to failure if widths do not match
+
+    # Check if the base and overlay images have the same height
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    4(%rax), %edx        # Load height of base image
+    movq    -56(%rbp), %rax      # Load overlay image pointer
+    movl    4(%rax), %eax        # Load height of overlay image
+    cmpl    %eax, %edx           # Compare base and overlay heights
+    je      .Lsize_match         # If height matches, continue processing
+
+.Lsize_mismatch:
+    movl    $0, %eax             # Set return value to 0 (failure)
+    jmp     .Lreturn             # Jump to return
+
+.Lsize_match:
+    # Ensure valid dimensions (both width and height > 0)
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    (%rax), %eax         # Load width of base image
+    testl   %eax, %eax           # Check if width > 0
+    jle     .Linvalid_dimensions # Jump to failure if width <= 0
+
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    4(%rax), %eax        # Load height of base image
+    testl   %eax, %eax           # Check if height > 0
+    jg      .Lprocess_images     # If height > 0, continue processing
+
+.Linvalid_dimensions:
+    movl    $1, %eax             # Set return value to 1 (failure due to invalid dimensions)
+    jmp     .Lreturn             # Jump to return
+
+.Lprocess_images:
+    # Copy dimensions to output image (width and height)
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    (%rax), %edx         # Load width of base image
+    movq    -64(%rbp), %rax      # Load output image pointer
+    movl    %edx, (%rax)         # Copy width to output image
+
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    4(%rax), %edx        # Load height of base image
+    movq    -64(%rbp), %rax      # Load output image pointer
+    movl    %edx, 4(%rax)        # Copy height to output image
+
+    movl    $0, -12(%rbp)        # Initialize row index (y) to 0
+    jmp     .Lrow_loop           # Jump to row loop
+
+.Lrow_done:
+    movl    $0, -16(%rbp)        # Initialize column index (x) to 0
+    jmp     .Lcolumn_loop        # Jump to pixel processing loop
+
+.Lprocess_pixel:
+    # Calculate the 1D index of the current pixel in the image arrays
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    (%rax), %eax         # Load width of base image
+    imull   -12(%rbp), %eax      # Multiply width by row index (y)
+    movl    %eax, %edx           # Store result (row offset)
+    movl    -16(%rbp), %eax      # Load column index (x)
+    addl    %edx, %eax           # Add column index to row offset
+    movl    %eax, -20(%rbp)      # Store pixel index (1D)
+
+    # Load overlay pixel (foreground)
+    movq    -56(%rbp), %rax      # Load overlay image pointer
+    movq    8(%rax), %rax        # Load pixel data pointer
+    movl    -20(%rbp), %edx      # Load pixel index
+    movslq  %edx, %rdx           # Convert pixel index to 64-bit
+    salq    $2, %rdx             # Multiply by 4 (pixel size)
+    addq    %rdx, %rax           # Add to base address of pixel data
+    movl    (%rax), %eax         # Load pixel value (foreground)
+    movl    %eax, -24(%rbp)      # Store foreground pixel
+
+    # Load base pixel (background)
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movq    8(%rax), %rax        # Load pixel data pointer
+    movl    -20(%rbp), %edx      # Load pixel index
+    movslq  %edx, %rdx           # Convert pixel index to 64-bit
+    salq    $2, %rdx             # Multiply by 4 (pixel size)
+    addq    %rdx, %rax           # Add to base address of pixel data
+    movl    (%rax), %eax         # Load pixel value (background)
+    movl    %eax, -28(%rbp)      # Store background pixel
+
+    # Perform pixel blending (using alpha channel)
+    movq    -64(%rbp), %rax      # Load output image pointer
+    movq    8(%rax), %rax        # Load pixel data pointer
+    movl    -20(%rbp), %edx      # Load pixel index
+    movslq  %edx, %rdx           # Convert pixel index to 64-bit
+    salq    $2, %rdx             # Multiply by 4 (pixel size)
+    leaq    (%rax,%rdx), %rbx    # Calculate pixel memory address in output image
+    movl    -28(%rbp), %edx      # Load background pixel
+    movl    -24(%rbp), %eax      # Load foreground pixel
+    movl    %edx, %esi           # Move background pixel to %esi
+    movl    %eax, %edi           # Move foreground pixel to %edi
+    call    blend_colors         # Call blend_colors function to blend pixels
+    movl    %eax, (%rbx)         # Store blended pixel in output image
+
+    addl    $1, -16(%rbp)        # Increment column index (x)
+.Lcolumn_loop:
+    # Column loop (iterate over all pixels in the row)
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    (%rax), %eax         # Load width of base image
+    cmpl    %eax, -16(%rbp)      # Compare column index (x) with width
+    jl      .Lprocess_pixel      # If x < width, process next pixel
+
+    addl    $1, -12(%rbp)        # Increment row index (y)
+.Lrow_loop:
+    # Row loop (iterate over all rows)
+    movq    -48(%rbp), %rax      # Load base image pointer
+    movl    4(%rax), %eax        # Load height of base image
+    cmpl    %eax, -12(%rbp)      # Compare row index (y) with height
+    jl      .Lrow_done           # If y < height, process next row
+
+    movl    $1, %eax             # Set return value to 1 (success)
+
+.Lreturn:
+    movq    -8(%rbp), %rbx       # Restore %rbx
+    leave                        # Restore base pointer and stack
+    ret                          # Return to caller
 
 /*
 vim:ft=gas:
