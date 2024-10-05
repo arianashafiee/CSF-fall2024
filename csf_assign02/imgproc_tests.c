@@ -98,7 +98,7 @@ void destroy_img( struct Image *img );
 // Test functions
 void test_mirror_h_basic( TestObjs *objs );
 void test_mirror_v_basic( TestObjs *objs );
-//void test_tile_basic( TestObjs *objs );
+void test_tile_basic( TestObjs *objs );
 void test_grayscale_basic( TestObjs *objs );
 void test_composite_basic( TestObjs *objs );
 // TODO: add prototypes for additional test functions

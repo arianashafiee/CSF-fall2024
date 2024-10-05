@@ -1194,90 +1194,74 @@ imgproc_mirror_v:
  *   -4(%rbp)  - current row index (y)
  *   -8(%rbp)  - current column index (x)
  */
-	.globl imgproc_tile
-imgproc_tile:
-	# Prologue: set up the stack frame
-	pushq	%rbp                      # Save base pointer
-	movq	%rsp, %rbp                # Set up new base pointer
-	subq	$40, %rsp                 # Allocate space on the stack
-
-	# Store function parameters in local variables
-	movq	%rdi, -24(%rbp)           # Store input image pointer
-	movl	%esi, -28(%rbp)           # Store tiling factor (n)
-	movq	%rdx, -40(%rbp)           # Store output image pointer
-
-	# Check if tiling factor n is valid (n > 0)
-	cmpl	$0, -28(%rbp)             # Compare n with 0
-	jle	.Linvalid_tiling_factor    # If n <= 0, jump to failure
-
-	# Check if input image has valid dimensions (width and height > 0)
-	movq	-24(%rbp), %rax           # Load input image pointer
-	movl	(%rax), %eax              # Load image width
-	testl	%eax, %eax                # Check if width > 0
-	jle	.Linvalid_tiling_factor    # If width <= 0, jump to failure
-	movq	-24(%rbp), %rax           # Load input image pointer
-	movl	4(%rax), %eax             # Load image height
-	testl	%eax, %eax                # Check if height > 0
-	jg	.Lvalid_image_dimensions   # If height > 0, continue processing
-
-.Linvalid_tiling_factor:
-	movl	$0, %eax                  # Set return value to 0 (failure)
-	jmp	.Lreturn                   # Jump to return
-
-.Lvalid_image_dimensions:
-	# Check if all tiles have non-zero dimensions
-	movq	-24(%rbp), %rax           # Load input image pointer
-	movl	4(%rax), %ecx             # Load image height
-	movq	-24(%rbp), %rax           # Load input image pointer
-	movl	(%rax), %eax              # Load image width
-	movl	-28(%rbp), %edx           # Load tiling factor (n)
-	movl	%ecx, %esi                # Move height to %esi
-	movl	%eax, %edi                # Move width to %edi
-	call	all_tiles_nonempty         # Check if all tiles are non-empty
-	testl	%eax, %eax                # Check result of the call
-	jne	.Ltiles_valid              # If tiles are valid, continue
-	movl	$0, %eax                  # Set return value to 0 (failure)
-	jmp	.Lreturn                   # Jump to return
-
-.Ltiles_valid:
-	movl	$0, -4(%rbp)              # Initialize row index (y) to 0
-	jmp	.Lrow_loop                 # Jump to row loop
-
-.Lrow_loop_start:
-	movl	$0, -8(%rbp)              # Initialize column index (x) to 0
-	jmp	.Lcolumn_loop              # Jump to column loop
-
-.Lprocess_tile:
-	# Copy the tile from input image to output image
-	movl	-28(%rbp), %edi           # Load tiling factor (n)
-	movl	-8(%rbp), %ecx            # Load column index (x)
-	movl	-4(%rbp), %edx            # Load row index (y)
-	movq	-24(%rbp), %rsi           # Load input image pointer
-	movq	-40(%rbp), %rax           # Load output image pointer
-	movl	%edi, %r8d                # Move tiling factor (n) to %r8d
-	movq	%rax, %rdi                # Move output image pointer to %rdi
-	call	copy_tile                 # Call copy_tile to process the current tile
-	addl	$1, -8(%rbp)              # Increment column index (x)
-
-.Lcolumn_loop:
-	# Column loop: iterate through all columns in the current row
-	movl	-8(%rbp), %eax            # Load column index (x)
-	cmpl	-28(%rbp), %eax           # Compare x with tiling factor (n)
-	jl	.Lprocess_tile             # If x < n, process the next tile in the row
-	addl	$1, -4(%rbp)              # Increment row index (y)
-
-.Lrow_loop:
-	# Row loop: iterate through all rows
-	movl	-4(%rbp), %eax            # Load row index (y)
-	cmpl	-28(%rbp), %eax           # Compare y with tiling factor (n)
-	jl	.Lrow_loop_start           # If y < n, process the next row
-
-	movl	$1, %eax                  # Set return value to 1 (success)
-
-.Lreturn:
-	leave                          # Restore base pointer and stack
-	ret                            # Return from function
-
+	.LFB22:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$40, %rsp
+	movq	%rdi, -24(%rbp)
+	movl	%esi, -28(%rbp)
+	movq	%rdx, -40(%rbp)
+	cmpl	$0, -28(%rbp)
+	jle	.L71
+	movq	-24(%rbp), %rax
+	movl	(%rax), %eax
+	testl	%eax, %eax
+	jle	.L71
+	movq	-24(%rbp), %rax
+	movl	4(%rax), %eax
+	testl	%eax, %eax
+	jg	.L72
+.L71:
+	movl	$0, %eax
+	jmp	.L73
+.L72:
+	movq	-24(%rbp), %rax
+	movl	4(%rax), %ecx
+	movq	-24(%rbp), %rax
+	movl	(%rax), %eax
+	movl	-28(%rbp), %edx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	all_tiles_nonempty
+	testl	%eax, %eax
+	jne	.L74
+	movl	$0, %eax
+	jmp	.L73
+.L74:
+	movl	$0, -4(%rbp)
+	jmp	.L75
+.L78:
+	movl	$0, -8(%rbp)
+	jmp	.L76
+.L77:
+	movl	-28(%rbp), %edi
+	movl	-8(%rbp), %ecx
+	movl	-4(%rbp), %edx
+	movq	-24(%rbp), %rsi
+	movq	-40(%rbp), %rax
+	movl	%edi, %r8d
+	movq	%rax, %rdi
+	call	copy_tile
+	addl	$1, -8(%rbp)
+.L76:
+	movl	-8(%rbp), %eax
+	cmpl	-28(%rbp), %eax
+	jl	.L77
+	addl	$1, -4(%rbp)
+.L75:
+	movl	-4(%rbp), %eax
+	cmpl	-28(%rbp), %eax
+	jl	.L78
+	movl	$1, %eax
+.L73:
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
 /*
  * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
