@@ -1194,6 +1194,8 @@ imgproc_mirror_v:
  *   -4(%rbp)  - current row index (y)
  *   -8(%rbp)  - current column index (x)
  */
+	.globl imgproc_tile
+imgproc_tile:
 	.LFB22:
 	.cfi_startproc
 	pushq	%rbp
