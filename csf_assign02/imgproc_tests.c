@@ -103,12 +103,12 @@ void test_grayscale_basic( TestObjs *objs );
 void test_composite_basic( TestObjs *objs );
 // TODO: add prototypes for additional test functions
 
-//void test_all_tiles_nonempty(TestObjs *objs);
-//void test_determine_tile_w(TestObjs *objs);
-//void test_determine_tile_x_offset(TestObjs *objs);
-//void test_determine_tile_h(TestObjs *objs);
-//void test_determine_tile_y_offset(TestObjs *objs);
-//void test_copy_tile(TestObjs *objs);
+void test_all_tiles_nonempty(TestObjs *objs);
+void test_determine_tile_w(TestObjs *objs);
+void test_determine_tile_x_offset(TestObjs *objs);
+void test_determine_tile_h(TestObjs *objs);
+void test_determine_tile_y_offset(TestObjs *objs);
+void test_copy_tile(TestObjs *objs);
 void test_get_r(TestObjs *objs);
 void test_get_g(TestObjs *objs);
 void test_get_b(TestObjs *objs);
@@ -406,7 +406,7 @@ void test_composite_basic( TestObjs *objs ) {
   ASSERT( 0x0000FFFF == objs->smiley_out->data[86] );
   ASSERT( 0x000080FF == objs->smiley_out->data[87] );
 }
-/*
+
 void test_all_tiles_nonempty(TestObjs *objs) {
   // Test 1: Basic case - perfectly divisible dimensions
   ASSERT(all_tiles_nonempty(objs->smiley->width, objs->smiley->height, 2) == 1); // Should return true (1)
