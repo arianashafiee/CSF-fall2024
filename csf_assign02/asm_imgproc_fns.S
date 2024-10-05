@@ -388,6 +388,7 @@ determine_tile_y_offset:
 .globl copy_tile
 copy_tile:
 .Ltop_copy:
+	.cfi_startproc
 	pushq	%rbp                  # Save base pointer
 	movq	%rsp, %rbp            # Set up stack frame
 	subq	$80, %rsp             # Allocate 80 bytes of stack space
