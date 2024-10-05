@@ -397,15 +397,15 @@ copy_tile:
 	movl	%ecx, -72(%rbp)       # Store x-offset
 	movl	%r8d, -76(%rbp)       # Store tiling factor
 	cmpl	$0, -76(%rbp)         # Check if tiling factor <= 0
-	jle	.Ltile_return             # Jump to failure if invalid
+	jle	.Ltile_copy_invalid    # Jump to failure if invalid
 	movq	-64(%rbp), %rax       # Load input image pointer
 	movl	(%rax), %eax          # Load image width
 	testl	%eax, %eax            # Check if width > 0
-	jle	.Ltile_return             # Jump to failure if invalid
+	jle	.Ltile_copy_invalid    # Jump to failure if invalid
 	movq	-64(%rbp), %rax       # Load input image pointer
 	movl	4(%rax), %eax         # Load image height
 	testl	%eax, %eax            # Check if height > 0
-	jle	.Ltile_return             # Jump to failure if invalid
+	jle	.Ltile_copy_invalid    # Jump to failure if invalid
 
 	# Calculate the width, height, x-offset, and y-offset of the tile
 	movq	-64(%rbp), %rax       # Load input image pointer
@@ -530,9 +530,11 @@ copy_tile:
 	movl	-4(%rbp), %eax        # Load row index
 	cmpl	-16(%rbp), %eax       # Compare with tile height
 	jl	.Ltile_row_copy_start  # If row index < tile height, continue
+
 .Ltile_return:
 	leave                        # Restore base pointer and stack
 	ret                          # Return
+	.cfi_endproc
 
 /*
  * Register use:
