@@ -845,101 +845,248 @@ imgproc_grayscale:
  *   and overlay image do not have the same dimensions
  */
 	.globl imgproc_composite
+// imgproc_composite:
+// 	/* TODO: implement (this stub implementation just returns 0) */
+//     # Arguments:
+//     # rdi = base_img
+//     # rsi = overlay_img
+//     # rdx = output_img
+
+//     pushq	%rbp
+//     movq    %rsp, %rbp
+//     subq    $32, %rsp
+
+//     pushq   %rbx
+//     pushq   %r12
+//     pushq   %r13
+//     pushq   %r14
+//     pushq   %r15
+
+//     movq    %rdi, -8(%rbp) # Move base_img pointer into stack
+//     movq    %rsi, -16(%rbp) # Move overlay_img pointer into stack
+//     movq    %rdx, -24(%rbp) # Move output_img pointer into stack
+
+//     movq    -8(%rbp), %rcx # Move base_img pointer to %rcx
+//     movl    0(%rcx), %r13d # Move base_img->width to %r13d
+//     movl    4(%rcx), %r12d # Move base_img->height to %r12d
+
+//     movq    -16(%rbp), %rcx
+//     movl    0(%rcx), %r15d
+//     movl    4(%rcx), %r14d
+
+//     cmpl    %r13d, %r15d
+//     jne     .Lcomposite_return_fail
+
+//     cmpl    %r12d, %r14d
+//     jne     .Lcomposite_return_fail
+
+//     testl   %r13d, %r13d
+//     jle     .Lcomposite_return_success
+
+//     testl   %r12d, %r12d
+//     jle     .Lcomposite_return_success
+
+//     movq    -24(%rbp), %rbx
+//     movl    %r8d, 0(%rbx)
+//     movl    %r9d, 4(%rbx)
+
+//     movl    $0, %r14d
+
+// .Lcomposite_y_loop:
+//     // pushq   %r14
+
+//     movq    -8(%rbp), %rax
+//     movl    4(%rax), %r12d
+
+//     cmpl    %r12d, %r14d
+//     jge     .Lcomposite_return_success
+
+//     movl    $0, %r15d
+
+// .Lcomposite_x_loop:
+//     // pushq   %r15
+
+//     movq    -8(%rbp), %rax
+//     movl    0(%rax), %r13d
+
+//     cmpl    %r13d, %r15d
+//     jge     .Lcomposite_y_loop_incr
+
+//     movl    8(%rbx), %r10d
+//     movl    %r10d, -28(%rbp)
+
+//     movl    %r14d, %ecx
+//     imull   %r13d, %ecx
+//     addl    %r15d, %ecx
+//     movl    %ecx, -32(%rbp)
+
+//     movq    -16(%rbp), %r8
+//     movq    8(%r8), %r9
+//     movq    (%r9, %rcx, 4), %rdi
+
+//     movq    -8(%rbp), %r8
+//     movq    8(%r8), %r9
+//     movq    (%r9, %rcx, 4), %rsi
+
+//     call    blend_colors
+
+//     movl    -28(%rbp), %r10d
+//     movl    -32(%rbp), %r11d
+//     movl    %eax, (%r10, %r11, 4)
+
+//     // popq    %r15
+//     // popq    %r14
+//     incl    %r15d
+//     jmp     .Lcomposite_x_loop
+
+// .Lcomposite_y_loop_incr:
+//     incl    %r14d
+//     jmp     .Lcomposite_y_loop
+
+// .Lcomposite_return_fail:
+//     popq    %rbx
+//     popq    %r12
+//     popq    %r13
+//     popq    %r14
+//     popq    %r15
+
+//     movl    $0, %eax
+//     addq    $32, %rsp
+//     popq    %rbp
+//     ret
+
+// .Lcomposite_return_success:
+//     popq    %rbx
+//     popq    %r12
+//     popq    %r13
+//     popq    %r14
+
+//     movl    $1, %eax               # Return 1 (success)
+//     addq    $32, %rsp
+//     popq    %rbp
+//     ret
+
 imgproc_composite:
-	/* TODO: implement (this stub implementation just returns 0) */
-    # Arguments:
-    # rdi = base_img
-    # rsi = overlay_img
-    # rdx = output_img
-
-    pushq	%rbp
-    movq    %rsp, %rbp
-    subq    $32, %rsp
-
-    movq    %rdi, -8(%rbp) # Move base_img pointer into stack
-    movq    %rsi, -16(%rbp) # Move overlay_img pointer into stack
-    movq    %rdx, -24(%rbp) # Move output_img pointer into stack
-
-    movq    -8(%rbp), %rcx # Move base_img pointer to %rcx
-    movl    0(%rcx), %r13d # Move base_img->width to %r13d
-    movl    4(%rcx), %r12d # Move base_img-> height to %r12d
-
-    movq    -16(%rbp), %rcx
-    movl    0(%rcx), %r15d
-    movl    4(%rcx), %r14d
-
-    cmpl    %r13d, %r15d
-    jne     .Lcomposite_return_fail
-
-    cmpl    %r12d, %r14d
-    jne     .Lcomposite_return_fail
-
-    testl   %r13d, %r13d
-    jle     .Lcomposite_return_success
-
-    testl   %r12d, %r12d
-    jle     .Lcomposite_return_success
-
-    movq    -24(%rbp), %rbx
-    movl    %r8d, 0(%rbx)
-    movl    %r9d, 4(%rbx)
-    // movq    %rbx, -24(%rbp)
-
-    movl    $0, %r14d
+    # Prologue
+    pushq   %rbp               # Save base pointer
+    movq    %rsp, %rbp          # Set new base pointer
+    pushq   %rbx               # Save caller-saved registers (rbx for loops)
+    pushq   %r12
+    pushq   %r13
     pushq   %r14
-
-.Lcomposite_y_loop:
-    cmpl    %r12d, %r14d
-    jge     .Lcomposite_return_success
-
-    movl    $0, %r15d
     pushq   %r15
 
-.Lcomposite_x_loop:
-    cmpl    %r13d, %r15d
-    jge     .Lcomposite_y_loop_incr
+    # Function arguments: base_img (rdi), overlay_img (rsi), output_img (rdx)
+    movq    %rdi, %r13          # base_img -> r13
+    movq    %rsi, %r14          # overlay_img -> r14
+    movq    %rdx, %r15          # output_img -> r15
 
-    // movq    -24(%rbp), %r10
-    movl    8(%rbx), %r10d
-    movl    %r10d, -28(%rbp)
+    # Check if base_img->width != overlay_img->width
+    movl    (%r13), %eax        # base_img->width -> eax
+    cmpl    (%r14), %eax        # compare with overlay_img->width
+    jne     .Lcomposite_fail_dimensions     # Jump if not equal
 
-    movl    %r14d, %ecx
-    imull   %r13d, %ecx
-    addl    %r15d, %ecx
-    movl    %ecx, -32(%rbp)
+    # Check if base_img->height != overlay_img->height
+    movl    4(%r13), %eax       # base_img->height -> eax
+    cmpl    4(%r14), %eax       # compare with overlay_img->height
+    jne     .Lcomposite_fail_dimensions     # Jump if not equal
 
-    movq    -16(%rbp), %r8
-    movq    8(%r8), %r9
-    movq    (%r9, %rcx, 4), %rdi
+    # Check if base_img->width <= 0
+    cmpl    $0, (%r13)          # Compare base_img->width with 0
+    jle     .Lcomposite_no_operation        # Jump if base_img->width <= 0
 
-    movq    -8(%rbp), %r8
-    movq    8(%r8), %r9
-    movq    (%r9, %rcx, 4), %rsi
+    # Check if base_img->height <= 0
+    cmpl    $0, 4(%r13)         # Compare base_img->height with 0
+    jle     .Lcomposite_no_operation        # Jump if base_img->height <= 0
 
-    call    blend_colors
+    # Set output_img->width = base_img->width
+    movl    (%r13), %eax        # base_img->width -> eax
+    movl    %eax, (%r15)        # output_img->width = eax
 
-    movl    -28(%rbp), %r10d
-    movl    -32(%rbp), %r11d
-    movl    %eax, (%r10, %r11, 4)
+    # Set output_img->height = base_img->height
+    movl    4(%r13), %eax       # base_img->height -> eax
+    movl    %eax, 4(%r15)       # output_img->height = eax
 
-    incl    %r15d
-    jmp     .Lcomposite_x_loop
+    # Outer loop over height (y)
+    movl    4(%r13), %r12d      # r12d = base_img->height
+    xorl    %ebx, %ebx          # Set y = 0
 
-.Lcomposite_y_loop_incr:
+.Lcomposite_outer_loop:
+    cmpl    %r12d, %ebx         # Compare y with height
+    jge     .Lcomposite_success             # If y >= height, we're done
+
+    # Inner loop over width (x)
+    movl    (%r13), %r11d       # r11d = base_img->width
+    xorl    %r10d, %r10d          # Set x = 0
+
+.Lcomposite_inner_loop:
+    cmpl    %r11d, %r10d         # Compare x with width
+    jge     .Lcomposite_end_inner_loop      # If x >= width, exit inner loop
+
+    # Calculate index idx = y * base_img->width + x
+    movl    %r11d, %edx
+    imull   %ebx, %edx
+    addl    %r10d, %edx
+
+    // imull   (%r13), %ebx, %edx  # edx = y * base_img->width
+    // addl    %r10d, %edx          # idx = y * width + x
+
+    # Load fg_pixel = overlay_img->data[idx]
+    movq    8(%r14), %rcx       # Load overlay_img->data pointer
+    movl    (%rcx,%rdx,4), %r8d # Load overlay_img->data[idx]
+
+    # Load bg_pixel = base_img->data[idx]
+    movq    8(%r13), %rcx       # Load base_img->data pointer
+    movl    (%rcx,%rdx,4), %r9d # Load base_img->data[idx]
+
+    # Preserve %rdx across the blend_colors call
+    pushq   %rdx                # Save %rdx before calling blend_colors
+    pushq   %r15
+
+    # Call blend_colors(fg_pixel, bg_pixel)
+    movl    %r8d, %edi          # Set first argument fg_pixel (edi)
+    movl    %r9d, %esi          # Set second argument bg_pixel (esi)
+    call    blend_colors        # Call blend_colors
+
+    # Restore %rdx after the blend_colors call
+    popq    %r15
+    popq    %rdx                # Restore %rdx after blend_colors
+
+    # Store result in output_img->data[idx]
+    movq    8(%r15), %rcx       # Load output_img->data pointer
+    movl    %eax, (%rcx,%rdx,4) # Store result at output_img->data[idx]
+
+    # Increment x and continue inner loop
+    incl    %r10d                # x++
+    jmp     .Lcomposite_inner_loop          # Jump to inner loop
+
+.Lcomposite_end_inner_loop:
+    # Increment y and continue outer loop
+    incl    %ebx                # y++
+    jmp     .Lcomposite_outer_loop          # Jump to outer loop
+
+# Success return
+.Lcomposite_success:
+    movl    $1, %eax            # Return 1 (Success)
+    jmp     .Lcomposite_epilogue
+
+# Fail if dimensions don't match
+.Lcomposite_fail_dimensions:
+    xorl    %eax, %eax          # Return 0 (Failure)
+    jmp     .Lcomposite_epilogue
+
+# No operation case when width/height <= 0
+.Lcomposite_no_operation:
+    movl    $1, %eax            # Return 1 (No operation)
+    jmp     .Lcomposite_epilogue
+
+# Epilogue
+.Lcomposite_epilogue:
     popq    %r15
     popq    %r14
-    incl    %r14d
-    jmp     .Lcomposite_y_loop
-
-.Lcomposite_return_fail:
-    movl    $0, %eax
-    addq    $32, %rsp
-    popq    %rbp
-    ret
-
-.Lcomposite_return_success:
-    movl    $1, %eax               # Return 1 (success)
-    addq    $32, %rsp
+    popq    %r13
+    popq    %r12
+    popq    %rbx
     popq    %rbp
     ret
 
