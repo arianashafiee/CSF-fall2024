@@ -1083,9 +1083,74 @@ imgproc_mirror_v:
  */
 	.globl imgproc_tile
 imgproc_tile:
-	/* TODO: implement (this stub implementation just returns 0) */
-	xorl %eax, %eax
+.LFB22:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$40, %rsp
+	movq	%rdi, -24(%rbp)
+	movl	%esi, -28(%rbp)
+	movq	%rdx, -40(%rbp)
+	cmpl	$0, -28(%rbp)
+	jle	.L71
+	movq	-24(%rbp), %rax
+	movl	(%rax), %eax
+	testl	%eax, %eax
+	jle	.L71
+	movq	-24(%rbp), %rax
+	movl	4(%rax), %eax
+	testl	%eax, %eax
+	jg	.L72
+.L71:
+	movl	$0, %eax
+	jmp	.L73
+.L72:
+	movq	-24(%rbp), %rax
+	movl	4(%rax), %ecx
+	movq	-24(%rbp), %rax
+	movl	(%rax), %eax
+	movl	-28(%rbp), %edx
+	movl	%ecx, %esi
+	movl	%eax, %edi
+	call	all_tiles_nonempty
+	testl	%eax, %eax
+	jne	.L74
+	movl	$0, %eax
+	jmp	.L73
+.L74:
+	movl	$0, -4(%rbp)
+	jmp	.L75
+.L78:
+	movl	$0, -8(%rbp)
+	jmp	.L76
+.L77:
+	movl	-28(%rbp), %edi
+	movl	-8(%rbp), %ecx
+	movl	-4(%rbp), %edx
+	movq	-24(%rbp), %rsi
+	movq	-40(%rbp), %rax
+	movl	%edi, %r8d
+	movq	%rax, %rdi
+	call	copy_tile
+	addl	$1, -8(%rbp)
+.L76:
+	movl	-8(%rbp), %eax
+	cmpl	-28(%rbp), %eax
+	jl	.L77
+	addl	$1, -4(%rbp)
+.L75:
+	movl	-4(%rbp), %eax
+	cmpl	-28(%rbp), %eax
+	jl	.L78
+	movl	$1, %eax
+.L73:
+	leave
+	.cfi_def_cfa 7, 8
 	ret
+	.cfi_endproc
 
 /*
  * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
@@ -1208,250 +1273,117 @@ imgproc_grayscale:
  *   and overlay image do not have the same dimensions
  */
 	.globl imgproc_composite
-// imgproc_composite:
-// 	/* TODO: implement (this stub implementation just returns 0) */
-//     # Arguments:
-//     # rdi = base_img
-//     # rsi = overlay_img
-//     # rdx = output_img
-
-//     pushq	%rbp
-//     movq    %rsp, %rbp
-//     subq    $32, %rsp
-
-//     pushq   %rbx
-//     pushq   %r12
-//     pushq   %r13
-//     pushq   %r14
-//     pushq   %r15
-
-//     movq    %rdi, -8(%rbp) # Move base_img pointer into stack
-//     movq    %rsi, -16(%rbp) # Move overlay_img pointer into stack
-//     movq    %rdx, -24(%rbp) # Move output_img pointer into stack
-
-//     movq    -8(%rbp), %rcx # Move base_img pointer to %rcx
-//     movl    0(%rcx), %r13d # Move base_img->width to %r13d
-//     movl    4(%rcx), %r12d # Move base_img->height to %r12d
-
-//     movq    -16(%rbp), %rcx
-//     movl    0(%rcx), %r15d
-//     movl    4(%rcx), %r14d
-
-//     cmpl    %r13d, %r15d
-//     jne     .Lcomposite_return_fail
-
-//     cmpl    %r12d, %r14d
-//     jne     .Lcomposite_return_fail
-
-//     testl   %r13d, %r13d
-//     jle     .Lcomposite_return_success
-
-//     testl   %r12d, %r12d
-//     jle     .Lcomposite_return_success
-
-//     movq    -24(%rbp), %rbx
-//     movl    %r8d, 0(%rbx)
-//     movl    %r9d, 4(%rbx)
-
-//     movl    $0, %r14d
-
-// .Lcomposite_y_loop:
-//     // pushq   %r14
-
-//     movq    -8(%rbp), %rax
-//     movl    4(%rax), %r12d
-
-//     cmpl    %r12d, %r14d
-//     jge     .Lcomposite_return_success
-
-//     movl    $0, %r15d
-
-// .Lcomposite_x_loop:
-//     // pushq   %r15
-
-//     movq    -8(%rbp), %rax
-//     movl    0(%rax), %r13d
-
-//     cmpl    %r13d, %r15d
-//     jge     .Lcomposite_y_loop_incr
-
-//     movl    8(%rbx), %r10d
-//     movl    %r10d, -28(%rbp)
-
-//     movl    %r14d, %ecx
-//     imull   %r13d, %ecx
-//     addl    %r15d, %ecx
-//     movl    %ecx, -32(%rbp)
-
-//     movq    -16(%rbp), %r8
-//     movq    8(%r8), %r9
-//     movq    (%r9, %rcx, 4), %rdi
-
-//     movq    -8(%rbp), %r8
-//     movq    8(%r8), %r9
-//     movq    (%r9, %rcx, 4), %rsi
-
-//     call    blend_colors
-
-//     movl    -28(%rbp), %r10d
-//     movl    -32(%rbp), %r11d
-//     movl    %eax, (%r10, %r11, 4)
-
-//     // popq    %r15
-//     // popq    %r14
-//     incl    %r15d
-//     jmp     .Lcomposite_x_loop
-
-// .Lcomposite_y_loop_incr:
-//     incl    %r14d
-//     jmp     .Lcomposite_y_loop
-
-// .Lcomposite_return_fail:
-//     popq    %rbx
-//     popq    %r12
-//     popq    %r13
-//     popq    %r14
-//     popq    %r15
-
-//     movl    $0, %eax
-//     addq    $32, %rsp
-//     popq    %rbp
-//     ret
-
-// .Lcomposite_return_success:
-//     popq    %rbx
-//     popq    %r12
-//     popq    %r13
-//     popq    %r14
-
-//     movl    $1, %eax               # Return 1 (success)
-//     addq    $32, %rsp
-//     popq    %rbp
-//     ret
-
 imgproc_composite:
-    # Prologue
-    pushq   %rbp               # Save base pointer
-    movq    %rsp, %rbp          # Set new base pointer
-    pushq   %rbx               # Save caller-saved registers (rbx for loops)
-    pushq   %r12
-    pushq   %r13
-    pushq   %r14
-    pushq   %r15
-
-    # Function arguments: base_img (rdi), overlay_img (rsi), output_img (rdx)
-    movq    %rdi, %r13          # base_img -> r13
-    movq    %rsi, %r14          # overlay_img -> r14
-    movq    %rdx, %r15          # output_img -> r15
-
-    # Check if base_img->width != overlay_img->width
-    movl    (%r13), %eax        # base_img->width -> eax
-    cmpl    (%r14), %eax        # compare with overlay_img->width
-    jne     .Lcomposite_fail_dimensions     # Jump if not equal
-
-    # Check if base_img->height != overlay_img->height
-    movl    4(%r13), %eax       # base_img->height -> eax
-    cmpl    4(%r14), %eax       # compare with overlay_img->height
-    jne     .Lcomposite_fail_dimensions     # Jump if not equal
-
-    # Check if base_img->width <= 0
-    cmpl    $0, (%r13)          # Compare base_img->width with 0
-    jle     .Lcomposite_no_operation        # Jump if base_img->width <= 0
-
-    # Check if base_img->height <= 0
-    cmpl    $0, 4(%r13)         # Compare base_img->height with 0
-    jle     .Lcomposite_no_operation        # Jump if base_img->height <= 0
-
-    # Set output_img->width = base_img->width
-    movl    (%r13), %eax        # base_img->width -> eax
-    movl    %eax, (%r15)        # output_img->width = eax
-
-    # Set output_img->height = base_img->height
-    movl    4(%r13), %eax       # base_img->height -> eax
-    movl    %eax, 4(%r15)       # output_img->height = eax
-
-    # Outer loop over height (y)
-    movl    4(%r13), %r12d      # r12d = base_img->height
-    xorl    %ebx, %ebx          # Set y = 0
-
-.Lcomposite_outer_loop:
-    cmpl    %r12d, %ebx         # Compare y with height
-    jge     .Lcomposite_success             # If y >= height, we're done
-
-    # Inner loop over width (x)
-    movl    (%r13), %r11d       # r11d = base_img->width
-    xorl    %r10d, %r10d          # Set x = 0
-
-.Lcomposite_inner_loop:
-    cmpl    %r11d, %r10d         # Compare x with width
-    jge     .Lcomposite_end_inner_loop      # If x >= width, exit inner loop
-
-    # Calculate index idx = y * base_img->width + x
-    movl    %r11d, %edx
-    imull   %ebx, %edx
-    addl    %r10d, %edx
-
-    // imull   (%r13), %ebx, %edx  # edx = y * base_img->width
-    // addl    %r10d, %edx          # idx = y * width + x
-
-    # Load fg_pixel = overlay_img->data[idx]
-    movq    8(%r14), %rcx       # Load overlay_img->data pointer
-    movl    (%rcx,%rdx,4), %r8d # Load overlay_img->data[idx]
-
-    # Load bg_pixel = base_img->data[idx]
-    movq    8(%r13), %rcx       # Load base_img->data pointer
-    movl    (%rcx,%rdx,4), %r9d # Load base_img->data[idx]
-
-    # Preserve %rdx across the blend_colors call
-    pushq   %rdx                # Save %rdx before calling blend_colors
-    pushq   %r15
-
-    # Call blend_colors(fg_pixel, bg_pixel)
-    movl    %r8d, %edi          # Set first argument fg_pixel (edi)
-    movl    %r9d, %esi          # Set second argument bg_pixel (esi)
-    call    blend_colors        # Call blend_colors
-
-    # Restore %rdx after the blend_colors call
-    popq    %r15
-    popq    %rdx                # Restore %rdx after blend_colors
-
-    # Store result in output_img->data[idx]
-    movq    8(%r15), %rcx       # Load output_img->data pointer
-    movl    %eax, (%rcx,%rdx,4) # Store result at output_img->data[idx]
-
-    # Increment x and continue inner loop
-    incl    %r10d                # x++
-    jmp     .Lcomposite_inner_loop          # Jump to inner loop
-
-.Lcomposite_end_inner_loop:
-    # Increment y and continue outer loop
-    incl    %ebx                # y++
-    jmp     .Lcomposite_outer_loop          # Jump to outer loop
-
-# Success return
-.Lcomposite_success:
-    movl    $1, %eax            # Return 1 (Success)
-    jmp     .Lcomposite_epilogue
-
-# Fail if dimensions don't match
-.Lcomposite_fail_dimensions:
-    xorl    %eax, %eax          # Return 0 (Failure)
-    jmp     .Lcomposite_epilogue
-
-# No operation case when width/height <= 0
-.Lcomposite_no_operation:
-    movl    $1, %eax            # Return 1 (No operation)
-    jmp     .Lcomposite_epilogue
-
-# Epilogue
-.Lcomposite_epilogue:
-    popq    %r15
-    popq    %r14
-    popq    %r13
-    popq    %r12
-    popq    %rbx
-    popq    %rbp
-    ret
+imgproc_composite:
+.LFB24:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	pushq	%rbx
+	subq	$56, %rsp
+	.cfi_offset 3, -24
+	movq	%rdi, -48(%rbp)
+	movq	%rsi, -56(%rbp)
+	movq	%rdx, -64(%rbp)
+	movq	-48(%rbp), %rax
+	movl	(%rax), %edx
+	movq	-56(%rbp), %rax
+	movl	(%rax), %eax
+	cmpl	%eax, %edx
+	jne	.L89
+	movq	-48(%rbp), %rax
+	movl	4(%rax), %edx
+	movq	-56(%rbp), %rax
+	movl	4(%rax), %eax
+	cmpl	%eax, %edx
+	je	.L90
+.L89:
+	movl	$0, %eax
+	jmp	.L91
+.L90:
+	movq	-48(%rbp), %rax
+	movl	(%rax), %eax
+	testl	%eax, %eax
+	jle	.L92
+	movq	-48(%rbp), %rax
+	movl	4(%rax), %eax
+	testl	%eax, %eax
+	jg	.L93
+.L92:
+	movl	$1, %eax
+	jmp	.L91
+.L93:
+	movq	-48(%rbp), %rax
+	movl	(%rax), %edx
+	movq	-64(%rbp), %rax
+	movl	%edx, (%rax)
+	movq	-48(%rbp), %rax
+	movl	4(%rax), %edx
+	movq	-64(%rbp), %rax
+	movl	%edx, 4(%rax)
+	movl	$0, -12(%rbp)
+	jmp	.L94
+.L97:
+	movl	$0, -16(%rbp)
+	jmp	.L95
+.L96:
+	movq	-48(%rbp), %rax
+	movl	(%rax), %eax
+	imull	-12(%rbp), %eax
+	movl	%eax, %edx
+	movl	-16(%rbp), %eax
+	addl	%edx, %eax
+	movl	%eax, -20(%rbp)
+	movq	-56(%rbp), %rax
+	movq	8(%rax), %rax
+	movl	-20(%rbp), %edx
+	movslq	%edx, %rdx
+	salq	$2, %rdx
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -24(%rbp)
+	movq	-48(%rbp), %rax
+	movq	8(%rax), %rax
+	movl	-20(%rbp), %edx
+	movslq	%edx, %rdx
+	salq	$2, %rdx
+	addq	%rdx, %rax
+	movl	(%rax), %eax
+	movl	%eax, -28(%rbp)
+	movq	-64(%rbp), %rax
+	movq	8(%rax), %rax
+	movl	-20(%rbp), %edx
+	movslq	%edx, %rdx
+	salq	$2, %rdx
+	leaq	(%rax,%rdx), %rbx
+	movl	-28(%rbp), %edx
+	movl	-24(%rbp), %eax
+	movl	%edx, %esi
+	movl	%eax, %edi
+	call	blend_colors
+	movl	%eax, (%rbx)
+	addl	$1, -16(%rbp)
+.L95:
+	movq	-48(%rbp), %rax
+	movl	(%rax), %eax
+	cmpl	%eax, -16(%rbp)
+	jl	.L96
+	addl	$1, -12(%rbp)
+.L94:
+	movq	-48(%rbp), %rax
+	movl	4(%rax), %eax
+	cmpl	%eax, -12(%rbp)
+	jl	.L97
+	movl	$1, %eax
+.L91:
+	movq	-8(%rbp), %rbx
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
 
 /*
 vim:ft=gas:
