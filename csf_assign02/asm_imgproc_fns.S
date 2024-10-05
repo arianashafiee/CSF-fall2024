@@ -1261,7 +1261,7 @@ imgproc_tile:
 	# Row loop: iterate over rows
 	movl	-4(%rbp), %eax          # Load row index (y)
 	cmpl	-28(%rbp), %eax         # Compare row index with tiling factor (n)
-	jl	.Lrow_loop_starting      # If y < n, process the next row
+	jl	.Lcolumn_loop      # If y < n, process the next row
 
 	movl	$1, %eax                # Set return value to 1 (success)
 
