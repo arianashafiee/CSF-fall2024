@@ -135,12 +135,12 @@ int main( int argc, char **argv ) {
   TEST( test_grayscale_basic );
   TEST( test_composite_basic );
 
-  //TEST(test_all_tiles_nonempty);
-  //TEST(test_determine_tile_w);
-  //TEST(test_determine_tile_x_offset);
-  //TEST(test_determine_tile_h);
-  //TEST(test_determine_tile_y_offset);
-  //TEST(test_copy_tile);
+  TEST(test_all_tiles_nonempty);
+  TEST(test_determine_tile_w);
+  TEST(test_determine_tile_x_offset);
+  TEST(test_determine_tile_h);
+  TEST(test_determine_tile_y_offset);
+  TEST(test_copy_tile);
   TEST(test_get_r);
   TEST(test_get_g);
   TEST(test_get_b);
@@ -325,7 +325,7 @@ void print_image(struct Image *img) {
         printf("\n");
     }
 }
-/*void test_tile_basic(TestObjs *objs) {
+void test_tile_basic(TestObjs *objs) {
     Picture smiley_tile_3_pic = {
         TEST_COLORS,
         16, 10,
@@ -359,7 +359,7 @@ void print_image(struct Image *img) {
 
     destroy_img(smiley_tile_3_expected);
 }
-*/
+
 void test_grayscale_basic( TestObjs *objs ) {
   Picture smiley_grayscale_pic = {
     TEST_COLORS_GRAYSCALE,
