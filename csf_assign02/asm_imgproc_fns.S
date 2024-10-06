@@ -386,161 +386,159 @@ determine_tile_y_offset:
  *   -24(%rbp) - tile y-offset
  */
 
-    .globl copy_tile
+   .globl copy_tile
 copy_tile:
-    pushq   %rbp                   # Save the old base pointer
-    movq    %rsp, %rbp             # Set up stack frame
-    subq    $80, %rsp              # Allocate space on stack for local variables
+    pushq   %rbp                # Save base pointer
+    movq    %rsp, %rbp          # Set up stack frame
+    subq    $80, %rsp           # Allocate 80 bytes of stack space
 
-    # Store function parameters in local variables
-    movq    %rdi, -56(%rbp)        # Store output image pointer
-    movq    %rsi, -64(%rbp)        # Store input image pointer
-    movl    %edx, -68(%rbp)        # Store y-offset
-    movl    %ecx, -72(%rbp)        # Store x-offset
-    movl    %r8d, -76(%rbp)        # Store tiling factor
+    # Store input/output image pointers and offsets
+    movq    %rdi, -56(%rbp)     # Store output image pointer
+    movq    %rsi, -64(%rbp)     # Store input image pointer
+    movl    %edx, -68(%rbp)     # Store y-offset
+    movl    %ecx, -72(%rbp)     # Store x-offset
+    movl    %r8d, -76(%rbp)     # Store tiling factor
 
-    # Validate tiling factor and image dimensions
-    cmpl    $0, -76(%rbp)          # Check if tiling factor <= 0
-    jle     invalid_tile            # Jump to failure if invalid
+    # Check for invalid tiling factor or invalid image dimensions
+    cmpl    $0, -76(%rbp)       # Check if tiling factor <= 0
+    jle     error_invalid_tile
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    (%rax), %eax        # Load width
+    testl   %eax, %eax          # Check if width > 0
+    jle     error_invalid_tile
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    4(%rax), %eax       # Load height
+    testl   %eax, %eax          # Check if height > 0
+    jle     error_invalid_tile
 
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    (%rax), %eax           # Load image width
-    testl   %eax, %eax             # Check if width > 0
-    jle     invalid_tile            # Jump to failure if invalid
+    # Calculate tile width and height
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    (%rax), %eax        # Load image width
+    movl    -72(%rbp), %edx     # Load x-offset
+    movl    -76(%rbp), %ecx     # Load tiling factor
+    movl    %ecx, %esi          # Move tiling factor to %esi
+    movl    %eax, %edi          # Move image width to %edi
+    call    determine_tile_w    # Calculate tile width
+    movl    %eax, -12(%rbp)     # Store tile width
 
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    4(%rax), %eax          # Load image height
-    testl   %eax, %eax             # Check if height > 0
-    jle     invalid_tile            # Jump to failure if invalid
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    4(%rax), %eax       # Load image height
+    movl    -68(%rbp), %edx     # Load y-offset
+    movl    -76(%rbp), %ecx     # Load tiling factor
+    movl    %ecx, %esi          # Move tiling factor to %esi
+    movl    %eax, %edi          # Move image height to %edi
+    call    determine_tile_h    # Calculate tile height
+    movl    %eax, -16(%rbp)     # Store tile height
 
-    # Calculate tile width, height, x-offset, and y-offset
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    (%rax), %eax           # Load image width
-    movl    -72(%rbp), %edx        # Load x-offset
-    movl    -76(%rbp), %ecx        # Load tiling factor
-    movl    %ecx, %esi             # Move tiling factor to %esi
-    movl    %eax, %edi             # Move image width to %edi
-    call    determine_tile_w        # Calculate tile width
-    movl    %eax, -12(%rbp)        # Store tile width
+    # Calculate x and y offset
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    (%rax), %eax        # Load image width
+    movl    -72(%rbp), %edx     # Load x-offset
+    movl    -76(%rbp), %ecx     # Load tiling factor
+    movl    %ecx, %esi          # Move tiling factor to %esi
+    movl    %eax, %edi          # Move image width to %edi
+    call    determine_tile_x_offset
+    movl    %eax, -20(%rbp)     # Store tile x-offset
 
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    4(%rax), %eax          # Load image height
-    movl    -68(%rbp), %edx        # Load y-offset
-    movl    -76(%rbp), %ecx        # Load tiling factor
-    movl    %ecx, %esi             # Move tiling factor to %esi
-    movl    %eax, %edi             # Move image height to %edi
-    call    determine_tile_h        # Calculate tile height
-    movl    %eax, -16(%rbp)        # Store tile height
-
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    (%rax), %eax           # Load image width
-    movl    -72(%rbp), %edx        # Load x-offset
-    movl    -76(%rbp), %ecx        # Load tiling factor
-    movl    %ecx, %esi             # Move tiling factor to %esi
-    movl    %eax, %edi             # Move image width to %edi
-    call    determine_tile_x_offset # Calculate x-offset
-    movl    %eax, -20(%rbp)        # Store tile x-offset
-
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    4(%rax), %eax          # Load image height
-    movl    -68(%rbp), %edx        # Load y-offset
-    movl    -76(%rbp), %ecx        # Load tiling factor
-    movl    %ecx, %esi             # Move tiling factor to %esi
-    movl    %eax, %edi             # Move image height to %edi
-    call    determine_tile_y_offset # Calculate y-offset
-    movl    %eax, -24(%rbp)        # Store tile y-offset
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    4(%rax), %eax       # Load image height
+    movl    -68(%rbp), %edx     # Load y-offset
+    movl    -76(%rbp), %ecx     # Load tiling factor
+    movl    %ecx, %esi          # Move tiling factor to %esi
+    movl    %eax, %edi          # Move image height to %edi
+    call    determine_tile_y_offset
+    movl    %eax, -24(%rbp)     # Store tile y-offset
 
     # Start copying tiles
-    movl    $0, -4(%rbp)           # Initialize row index to 0
-    jmp     row_loop
+    movl    $0, -4(%rbp)        # Initialize row index to 0
+    jmp     tile_row_loop
 
-col_loop_start:
-    movl    $0, -8(%rbp)           # Initialize column index to 0
-    jmp     col_loop
+tile_row_copy_start:
+    movl    $0, -8(%rbp)        # Initialize column index to 0
+    jmp     tile_col_loop
 
-process_pixel:
-    # Process a single pixel in the tile
-    movl    -24(%rbp), %edx        # Load y-offset
-    movl    -4(%rbp), %eax         # Load row index
-    addl    %eax, %edx             # Calculate y position
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    4(%rax), %eax          # Load image height
-    cmpl    %eax, %edx             # Check if y position is valid
-    jge     tile_done              # Jump to done if invalid
+tile_process_pixel:
+    movl    -24(%rbp), %edx     # Load y-offset
+    movl    -4(%rbp), %eax      # Load row index
+    addl    %eax, %edx          # Calculate y position
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    4(%rax), %eax       # Load image height
+    cmpl    %eax, %edx          # Check if y position is valid
+    jge     tile_copy_done
 
-    movl    -20(%rbp), %edx        # Load x-offset
-    movl    -8(%rbp), %eax         # Load column index
-    addl    %eax, %edx             # Calculate x position
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    (%rax), %eax           # Load image width
-    cmpl    %eax, %edx             # Check if x position is valid
-    jge     tile_done              # Jump to done if invalid
+    movl    -20(%rbp), %edx     # Load x-offset
+    movl    -8(%rbp), %eax      # Load column index
+    addl    %eax, %edx          # Calculate x position
+    movq    -64(%rbp), %rax     # Load input image pointer
+    movl    (%rax), %eax        # Load image width
+    cmpl    %eax, %edx          # Check if x position is valid
+    jge     tile_copy_done
 
-    # Calculate row and column offsets
-    movl    -8(%rbp), %eax         # Load column index
-    imull   -76(%rbp), %eax        # Multiply by tiling factor
-    movl    %eax, -28(%rbp)        # Store column offset
+    # Copy pixel from input to output image
+    movl    -8(%rbp), %eax
+    imull   -76(%rbp), %eax
+    movl    %eax, -28(%rbp)
+    movl    -4(%rbp), %eax
+    imull   -76(%rbp), %eax
+    movl    %eax, -32(%rbp)
 
-    movl    -4(%rbp), %eax         # Load row index
-    imull   -76(%rbp), %eax        # Multiply by tiling factor
-    movl    %eax, -32(%rbp)        # Store row offset
+    movq    -64(%rbp), %rax
+    movq    8(%rax), %rdx
+    movq    -64(%rbp), %rax
+    movl    (%rax), %eax
+    imull   -32(%rbp), %eax
+    movl    %eax, %ecx
+    movl    -28(%rbp), %eax
+    addl    %ecx, %eax
+    cltq
+    salq    $2, %rax
+    addq    %rdx, %rax
+    movl    (%rax), %eax
+    movl    %eax, -36(%rbp)
 
-    # Copy pixel from input image to output image
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movq    8(%rax), %rdx          # Load pixel data pointer
-    movq    -64(%rbp), %rax        # Load input image pointer
-    movl    (%rax), %eax           # Load image width
-    imull   -32(%rbp), %eax        # Multiply width by row offset
-    movl    %eax, %ecx             # Store result
-    movl    -28(%rbp), %eax        # Load column offset
-    addl    %ecx, %eax             # Add row and column offsets
-    cltq                           # Sign-extend to 64 bits
-    salq    $2, %rax               # Multiply by 4 (pixel size)
-    addq    %rdx, %rax             # Add to pixel data pointer
-    movl    (%rax), %eax           # Load pixel value
-    movl    %eax, -36(%rbp)        # Store pixel value
+    movq    -56(%rbp), %rax
+    movq    8(%rax), %rdx
+    movl    -24(%rbp), %ecx
+    movl    -4(%rbp), %eax
+    addl    %eax, %ecx
+    movq    -56(%rbp), %rax
+    movl    (%rax), %eax
+    imull   %ecx, %eax
+    movl    -20(%rbp), %esi
+    movl    -8(%rbp), %ecx
+    addl    %esi, %ecx
+    addl    %ecx, %eax
+    cltq
+    salq    $2, %rax
+    addq    %rax, %rdx
+    movl    -36(%rbp), %eax
+    movl    %eax, (%rdx)
+    jmp     tile_pixel_done
 
-    movq    -56(%rbp), %rax        # Load output image pointer
-    movq    8(%rax), %rdx          # Load pixel data pointer
-    movl    -24(%rbp), %ecx        # Load y-offset
-    movl    -4(%rbp), %eax         # Load row index
-    addl    %eax, %ecx             # Add row index to y-offset
-    movq    -56(%rbp), %rax        # Load output image pointer
-    movl    (%rax), %eax           # Load image width
-    imull   %ecx, %eax             # Multiply width by y-offset
-    movl    -20(%rbp), %esi        # Load x-offset
-    movl    -8(%rbp), %ecx         # Load column index
-    addl    %esi, %ecx             # Add column index to x-offset
-    addl    %ecx, %eax             # Add x-offset to total
-    cltq                           # Sign-extend to 64 bits
-    salq    $2, %rax               # Multiply by 4 (pixel size)
-    addq    %rax, %rdx             # Add to pixel data pointer
-    movl    -36(%rbp), %eax        # Load pixel value
-    movl    %eax, (%rdx)           # Store pixel value in output image
-
-    jmp     pixel_done
-
-tile_done:
+tile_copy_done:
     nop
 
-pixel_done:
-    addl    $1, -8(%rbp)           # Increment column index
+tile_pixel_done:
+    addl    $1, -8(%rbp)
 
-col_loop:
-    movl    -8(%rbp), %eax         # Load column index
-    cmpl    -12(%rbp), %eax        # Compare with tile width
-    jl      process_pixel          # If column index < tile width, continue
+tile_col_loop:
+    movl    -8(%rbp), %eax
+    cmpl    -12(%rbp), %eax
+    jl      tile_process_pixel
 
-    addl    $1, -4(%rbp)           # Increment row index
+    addl    $1, -4(%rbp)
 
-row_loop:
-    movl    -4(%rbp), %eax         # Load row index
-    cmpl    -16(%rbp), %eax        # Compare with tile height
-    jl      col_loop_start         # If row index < tile height, continue
+tile_row_loop:
+    movl    -4(%rbp), %eax
+    cmpl    -16(%rbp), %eax
+    jl      tile_row_copy_start
 
-invalid_tile:
-    leave
-    ret
+error_invalid_tile:
+    nop
+
+end_tile_copy:
+    leave                         # Restore stack frame
+    ret                           # Return from the function
 
 /*
  * Register use:
@@ -1192,92 +1190,85 @@ imgproc_mirror_v:
 #define IMAGE_WIDTH_OFFSET   0
 #define IMAGE_HEIGHT_OFFSET  4
 #define IMAGE_DATA_OFFSET    8
-
-    .globl imgproc_tile
+.globl imgproc_tile
 imgproc_tile:
-    pushq   %rbp                      # Save base pointer
-    movq    %rsp, %rbp                # Set up new base pointer
-    subq    $40, %rsp                 # Allocate space on the stack
+    pushq   %rbp                # Save base pointer
+    movq    %rsp, %rbp          # Set up stack frame
+    subq    $40, %rsp           # Allocate space on the stack (40 bytes)
 
-    # Store function parameters in local variables
-    movq    %rdi, -24(%rbp)           # Store input image pointer
-    movl    %esi, -28(%rbp)           # Store tiling factor (n)
-    movq    %rdx, -40(%rbp)           # Store output image pointer
+    movq    %rdi, -24(%rbp)     # Store input image pointer in local variable
+    movl    %esi, -28(%rbp)     # Store tiling factor (n) in local variable
+    movq    %rdx, -40(%rbp)     # Store output image pointer in local variable
 
-    # Check if tiling factor n is valid (n > 0)
-    cmpl    $0, -28(%rbp)             # Compare n with 0
-    jle     invalid_tiling_factor      # If n <= 0, jump to failure
+    cmpl    $0, -28(%rbp)       # Check if tiling factor n > 0
+    jle     invalid_tiling_factor  # If n <= 0, jump to error handling
 
-    # Check if input image has valid dimensions (width and height > 0)
-    movq    -24(%rbp), %rax           # Load input image pointer
-    movl    IMAGE_WIDTH_OFFSET(%rax), %eax  # Load image width
-    testl   %eax, %eax                # Check if width > 0
-    jle     invalid_tiling_factor      # If width <= 0, jump to failure
+    movq    -24(%rbp), %rax     # Load input image pointer
+    movl    (%rax), %eax        # Load input image width
+    testl   %eax, %eax          # Check if width > 0
+    jle     invalid_tiling_factor  # If width <= 0, jump to error handling
 
-    movq    -24(%rbp), %rax           # Load input image pointer
-    movl    IMAGE_HEIGHT_OFFSET(%rax), %eax # Load image height
-    testl   %eax, %eax                # Check if height > 0
-    jg      valid_image_dimensions    # If height > 0, continue processing
+    movq    -24(%rbp), %rax     # Load input image pointer
+    movl    4(%rax), %eax       # Load input image height
+    testl   %eax, %eax          # Check if height > 0
+    jg      check_tile_nonempty  # If height > 0, proceed
 
 invalid_tiling_factor:
-    movl    $0, %eax                  # Set return value to 0 (failure)
-    jmp     return_tile
+    movl    $0, %eax            # Return 0 for failure
+    jmp     return_function
 
-valid_image_dimensions:
-    # Check if all tiles have non-zero dimensions
-    movq    -24(%rbp), %rax           # Load input image pointer
-    movl    IMAGE_HEIGHT_OFFSET(%rax), %ecx # Load image height
-    movq    -24(%rbp), %rax           # Load input image pointer
-    movl    IMAGE_WIDTH_OFFSET(%rax), %eax  # Load image width
-    movl    -28(%rbp), %edx           # Load tiling factor (n)
-    movl    %ecx, %esi                # Move height to %esi
-    movl    %eax, %edi                # Move width to %edi
-    call    all_tiles_nonempty         # Check if all tiles are non-empty
-    testl   %eax, %eax                # Check result of the call
-    jne     tiles_valid                # If tiles are valid, continue
+check_tile_nonempty:
+    movq    -24(%rbp), %rax     # Load input image pointer
+    movl    4(%rax), %ecx       # Load input image height
+    movq    -24(%rbp), %rax     # Load input image pointer
+    movl    (%rax), %eax        # Load input image width
+    movl    -28(%rbp), %edx     # Load tiling factor (n)
+    movl    %ecx, %esi          # Move image height to %esi
+    movl    %eax, %edi          # Move image width to %edi
+    call    all_tiles_nonempty   # Check if all tiles are non-empty
+    testl   %eax, %eax          # Test if the tiles are non-empty
+    jne     process_tiles        # If non-empty, continue processing
 
-    movl    $0, %eax                  # Set return value to 0 (failure)
-    jmp     return_tile               # Jump to return
+    movl    $0, %eax            # Return 0 for failure
+    jmp     return_function
 
-tiles_valid:
-    movl    $0, -4(%rbp)              # Initialize row index (y) to 0
-    jmp     row_loop
+process_tiles:
+    movl    $0, -4(%rbp)        # Initialize row index (y) to 0
+    jmp     row_loop_start
 
 row_loop_start:
-    movl    $0, -8(%rbp)              # Initialize column index (x) to 0
+    movl    $0, -8(%rbp)        # Initialize column index (x) to 0
     jmp     column_loop
 
 process_tile:
-    # Copy the tile from input image to output image
-    movl    -28(%rbp), %edi           # Load tiling factor (n)
-    movl    -8(%rbp), %ecx            # Load column index (x)
-    movl    -4(%rbp), %edx            # Load row index (y)
-    movq    -24(%rbp), %rsi           # Load input image pointer
-    movq    -40(%rbp), %rax           # Load output image pointer
-    movl    %edi, %r8d                # Move tiling factor (n) to %r8d
-    movq    %rax, %rdi                # Move output image pointer to %rdi
-    call    copy_tile                 # Call copy_tile to process the current tile
-    addl    $1, -8(%rbp)              # Increment column index (x)
+    movl    -28(%rbp), %edi     # Load tiling factor (n)
+    movl    -8(%rbp), %ecx      # Load column index (x)
+    movl    -4(%rbp), %edx      # Load row index (y)
+    movq    -24(%rbp), %rsi     # Load input image pointer
+    movq    -40(%rbp), %rax     # Load output image pointer
+    movl    %edi, %r8d          # Move tiling factor to %r8d
+    movq    %rax, %rdi          # Move output image pointer to %rdi
+    call    copy_tile            # Call copy_tile to process the tile
+    addl    $1, -8(%rbp)        # Increment column index (x)
 
 column_loop:
-    # Column loop: iterate through all columns in the current row
-    movl    -8(%rbp), %eax            # Load column index (x)
-    cmpl    -28(%rbp), %eax           # Compare x with tiling factor (n)
-    jl      process_tile              # If x < n, process the next tile in the row
-    addl    $1, -4(%rbp)              # Increment row index (y)
+    movl    -8(%rbp), %eax      # Load column index (x)
+    cmpl    -28(%rbp), %eax     # Compare x with tiling factor (n)
+    jl      process_tile        # If x < n, process the next tile
+
+    addl    $1, -4(%rbp)        # Increment row index (y)
 
 row_loop:
-    # Row loop: iterate through all rows
-    movl    -4(%rbp), %eax            # Load row index (y)
-    cmpl    -28(%rbp), %eax           # Compare y with tiling factor (n)
-    jl      row_loop_start            # If y < n, process the next row
+    movl    -4(%rbp), %eax      # Load row index (y)
+    cmpl    -28(%rbp), %eax     # Compare y with tiling factor (n)
+    jl      row_loop_start      # If y < n, process the next row
 
-    movl    $1, %eax                  # Set return value to 1 (success)
+    movl    $1, %eax            # Return 1 for success
 
-return_tile:
-    leave                             # Restore base pointer and stack
-    ret                               # Return from function
-/*
+return_function:
+    leave                       # Restore stack frame
+    ret                         # Return from function
+
  * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
  *
  * Transform image by converting each pixel to grayscale.
