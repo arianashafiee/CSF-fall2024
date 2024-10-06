@@ -40,46 +40,53 @@
 .global all_tiles_nonempty
 all_tiles_nonempty:
 .Ltop_tiles_nonempty:
-	.cfi_startproc
-	pushq	%rbp                  # Save base pointer
-	movq	%rsp, %rbp            # Set up stack frame
-	movl	%edi, -4(%rbp)        # Store image width
-	movl	%esi, -8(%rbp)        # Store image height
-	movl	%edx, -12(%rbp)       # Store tiling factor
-	cmpl	$0, -12(%rbp)         # Check if tiling factor <= 0
-	jle	.Ltile_empty_exit      # Jump to failure if invalid
-	cmpl	$0, -4(%rbp)          # Check if width <= 0
-	jle	.Ltile_empty_exit      # Jump to failure if invalid
-	cmpl	$0, -8(%rbp)          # Check if height > 0
-	jg	.Ltiles_are_valid          # Continue if valid
+    pushq   %rbp                  # Save base pointer
+    movq    %rsp, %rbp            # Set up stack frame
+    movl    %edi, -4(%rbp)        # Store image width
+    movl    %esi, -8(%rbp)        # Store image height
+    movl    %edx, -12(%rbp)       # Store tiling factor
+
+    # Check if tiling factor <= 0
+    cmpl    $0, -12(%rbp)         # Compare tiling factor with 0
+    jle     .Ltile_empty_exit     # Jump to failure if tiling factor <= 0
+
+    # Check if width <= 0
+    cmpl    $0, -4(%rbp)          # Compare width with 0
+    jle     .Ltile_empty_exit     # Jump to failure if width <= 0
+
+    # Check if height > 0
+    cmpl    $0, -8(%rbp)          # Compare height with 0
+    jg      .Ltiles_are_valid     # Jump to success if height > 0
 
 .Ltile_empty_exit:
-	movl	$0, %eax              # Set return value to 0 (failure)
-	jmp	.Ltile_exit
+    movl    $0, %eax              # Set return value to 0 (failure)
+    jmp     .Ltile_exit
 
 .Ltiles_are_valid:
-	movl	-4(%rbp), %eax        # Load image width
-	cltd                        # Sign extend for division
-	idivl	-12(%rbp)             # Divide width by tiling factor
-	testl	%eax, %eax            # Test if result is 0 (empty tile)
-	jle	.Ltile_failure         # If result <= 0, failure
+    # Check if width divided by tiling factor results in a valid tile
+    movl    -4(%rbp), %eax        # Load image width
+    cltd                         # Sign extend %eax to %edx for division
+    idivl   -12(%rbp)             # Divide width by tiling factor
+    testl   %eax, %eax            # Test if result is 0 (empty tile)
+    jle     .Ltile_failure        # Jump to failure if result <= 0
 
-	movl	-8(%rbp), %eax        # Load image height
-	cltd                        # Sign extend for division
-	idivl	-12(%rbp)             # Divide height by tiling factor
-	testl	%eax, %eax            # Test if result is 0 (empty tile)
-	jle	.Ltile_failure         # If result <= 0, failure
+    # Check if height divided by tiling factor results in a valid tile
+    movl    -8(%rbp), %eax        # Load image height
+    cltd                         # Sign extend %eax to %edx for division
+    idivl   -12(%rbp)             # Divide height by tiling factor
+    testl   %eax, %eax            # Test if result is 0 (empty tile)
+    jle     .Ltile_failure        # Jump to failure if result <= 0
 
-	movl	$1, %eax              # Set return value to 1 (success)
-	jmp	.Ltile_exit
+    # Success
+    movl    $1, %eax              # Set return value to 1 (success)
+    jmp     .Ltile_exit
 
 .Ltile_failure:
-	movl	$0, %eax              # Set return value to 0 (failure)
+    movl    $0, %eax              # Set return value to 0 (failure)
 
 .Ltile_exit:
-	popq	%rbp                  # Restore base pointer
-	ret                         # Return
-	.cfi_endproc
+    popq    %rbp                  # Restore base pointer
+    ret                           # Return from function
 
 /*
  * determine_tile_w
@@ -107,46 +114,62 @@ all_tiles_nonempty:
 .globl determine_tile_w
 determine_tile_w:
 .Ltop_tile_w:
-	.cfi_startproc
-	pushq	%rbp                  # Save base pointer
-	movq	%rsp, %rbp            # Set up stack frame
-	movl	%edi, -20(%rbp)       # Store image width
-	movl	%esi, -24(%rbp)       # Store tiling factor
-	movl	%edx, -28(%rbp)       # Store tile width
-	cmpl	$0, -24(%rbp)         # Check if tiling factor <= 0
-	jle	.Ltile_w_invalid       # Jump to failure if invalid
-	cmpl	$0, -20(%rbp)         # Check if width <= 0
-	jle	.Ltile_w_invalid       # Jump to failure if invalid
-	cmpl	$0, -28(%rbp)         # Check if tile width < 0
-	js	.Ltile_w_invalid       # Jump to failure if invalid
-	movl	-28(%rbp), %eax       # Load tile width
-	cmpl	-24(%rbp), %eax       # Compare tile width with tiling factor
-	jl	.Ltile_w_valid         # If valid, proceed
+    pushq   %rbp                  # Save base pointer
+    movq    %rsp, %rbp            # Set up stack frame
+    subq    $16, %rsp             # Allocate space on the stack
+    movl    %edi, -20(%rbp)       # Store image width
+    movl    %esi, -24(%rbp)       # Store tiling factor
+    movl    %edx, -28(%rbp)       # Store tile width
+
+    # Check if tiling factor <= 0
+    cmpl    $0, -24(%rbp)         # Compare tiling factor with 0
+    jle     .Ltile_w_invalid      # Jump to failure if tiling factor <= 0
+
+    # Check if image width <= 0
+    cmpl    $0, -20(%rbp)         # Compare image width with 0
+    jle     .Ltile_w_invalid      # Jump to failure if width <= 0
+
+    # Check if tile width < 0
+    cmpl    $0, -28(%rbp)         # Compare tile width with 0
+    js      .Ltile_w_invalid      # Jump to failure if tile width < 0
+
+    # Compare tile width with tiling factor
+    movl    -28(%rbp), %eax       # Load tile width
+    cmpl    -24(%rbp), %eax       # Compare tile width with tiling factor
+    jl      .Ltile_w_valid        # Jump if tile width is less than tiling factor
 
 .Ltile_w_invalid:
-	movl	$0, %eax              # Set return value to 0 (failure)
-	jmp	.Ltile_w_exit
+    movl    $0, %eax              # Set return value to 0 (failure)
+    jmp     .Ltile_w_exit
 
 .Ltile_w_valid:
-	movl	-20(%rbp), %eax       # Load image width
-	cltd                        # Sign extend for division
-	idivl	-24(%rbp)             # Divide width by tiling factor
-	movl	%eax, -4(%rbp)        # Store result (tile width)
-	movl	-20(%rbp), %eax       # Load image width again
-	cltd                        # Sign extend for division
-	idivl	-24(%rbp)             # Divide width again
-	movl	%edx, -8(%rbp)        # Store remainder
-	movl	-28(%rbp), %eax       # Load tile width
-	cmpl	-8(%rbp), %eax        # Compare remainder with tile width
-	setl	%al                   # Set result based on comparison
-	movzbl	%al, %edx             # Zero-extend the result
-	movl	-4(%rbp), %eax        # Load tile width
-	addl	%edx, %eax            # Add to result
+    # Perform division: width / tiling factor
+    movl    -20(%rbp), %eax       # Load image width
+    cltd                         # Sign extend for division
+    idivl   -24(%rbp)             # Divide width by tiling factor
+    movl    %eax, -4(%rbp)        # Store quotient (tile width)
+
+    # Perform division again to get remainder
+    movl    -20(%rbp), %eax       # Load image width again
+    cltd                         # Sign extend for division
+    idivl   -24(%rbp)             # Divide width by tiling factor
+    movl    %edx, -8(%rbp)        # Store remainder
+
+    # Compare remainder with tile width
+    movl    -28(%rbp), %eax       # Load tile width
+    cmpl    -8(%rbp), %eax        # Compare remainder with tile width
+    setl    %al                   # Set result based on comparison
+    movzbl  %al, %edx             # Zero-extend the result into %edx
+
+    # Adjust tile width
+    movl    -4(%rbp), %eax        # Load quotient (tile width)
+    addl    %edx, %eax            # Add the comparison result to quotient
 
 .Ltile_w_exit:
-	popq	%rbp                  # Restore base pointer
-	ret                         # Return
-	.cfi_endproc
+    leave                        # Restore base pointer and stack
+    ret                          # Return from function
+
+
 
 /*
  * determine_tile_x_offset
@@ -174,48 +197,64 @@ determine_tile_w:
 .globl determine_tile_x_offset
 determine_tile_x_offset:
 .Ltop_x_offset:
-	.cfi_startproc
-	pushq	%rbp                  # Save base pointer
-	movq	%rsp, %rbp            # Set up stack frame
-	movl	%edi, -20(%rbp)       # Store image width
-	movl	%esi, -24(%rbp)       # Store tiling factor
-	movl	%edx, -28(%rbp)       # Store x-offset
-	cmpl	$0, -24(%rbp)         # Check if tiling factor <= 0
-	jle	.Ltile_x_offset_invalid # Jump to failure if invalid
-	cmpl	$0, -20(%rbp)         # Check if width <= 0
-	jle	.Ltile_x_offset_invalid # Jump to failure if invalid
-	cmpl	$0, -28(%rbp)         # Check if x-offset < 0
-	js	.Ltile_x_offset_invalid # Jump to failure if invalid
-	movl	-28(%rbp), %eax       # Load x-offset
-	cmpl	-24(%rbp), %eax       # Compare x-offset with tiling factor
-	jl	.Ltile_x_offset_valid   # If valid, proceed
+    pushq   %rbp                  # Save base pointer
+    movq    %rsp, %rbp            # Set up stack frame
+    subq    $16, %rsp             # Allocate space on the stack
+
+    movl    %edi, -20(%rbp)       # Store image width
+    movl    %esi, -24(%rbp)       # Store tiling factor
+    movl    %edx, -28(%rbp)       # Store x-offset
+
+    # Check if tiling factor <= 0
+    cmpl    $0, -24(%rbp)         # Compare tiling factor with 0
+    jle     .Ltile_x_offset_invalid # Jump to failure if tiling factor <= 0
+
+    # Check if image width <= 0
+    cmpl    $0, -20(%rbp)         # Compare image width with 0
+    jle     .Ltile_x_offset_invalid # Jump to failure if width <= 0
+
+    # Check if x-offset < 0
+    cmpl    $0, -28(%rbp)         # Compare x-offset with 0
+    js      .Ltile_x_offset_invalid # Jump to failure if x-offset < 0
+
+    # Compare x-offset with tiling factor
+    movl    -28(%rbp), %eax       # Load x-offset
+    cmpl    -24(%rbp), %eax       # Compare x-offset with tiling factor
+    jl      .Ltile_x_offset_valid  # Jump if x-offset is less than tiling factor
 
 .Ltile_x_offset_invalid:
-	movl	$0, %eax              # Set return value to 0 (failure)
-	jmp	.Ltile_x_offset_exit
+    movl    $0, %eax              # Set return value to 0 (failure)
+    jmp     .Ltile_x_offset_exit
 
 .Ltile_x_offset_valid:
-	movl	-20(%rbp), %eax       # Load image width
-	cltd                        # Sign extend for division
-	idivl	-24(%rbp)             # Divide width by tiling factor
-	movl	%eax, -4(%rbp)        # Store result (x-offset)
-	movl	-20(%rbp), %eax       # Load image width again
-	cltd                        # Sign extend for division
-	idivl	-24(%rbp)             # Divide width again
-	movl	%edx, -8(%rbp)        # Store remainder
-	movl	-28(%rbp), %eax       # Load x-offset
-	imull	-4(%rbp), %eax        # Multiply result with x-offset
-	movl	%eax, %ecx            # Store result in %ecx
-	movl	-8(%rbp), %edx        # Load remainder
-	movl	-28(%rbp), %eax       # Load x-offset
-	cmpl	%eax, %edx            # Compare with remainder
-	cmovle	%edx, %eax            # Move remainder to %eax if less than or equal
-	addl	%ecx, %eax            # Add to result
+    # Perform division: width / tiling factor
+    movl    -20(%rbp), %eax       # Load image width
+    cltd                         # Sign extend for division
+    idivl   -24(%rbp)             # Divide width by tiling factor
+    movl    %eax, -4(%rbp)        # Store quotient (x-offset)
+
+    # Perform division again to get remainder
+    movl    -20(%rbp), %eax       # Load image width again
+    cltd                         # Sign extend for division
+    idivl   -24(%rbp)             # Divide width by tiling factor
+    movl    %edx, -8(%rbp)        # Store remainder
+
+    # Calculate final x-offset
+    movl    -28(%rbp), %eax       # Load x-offset
+    imull   -4(%rbp), %eax        # Multiply quotient by x-offset
+    movl    %eax, %ecx            # Store result in %ecx
+
+    # Compare remainder and adjust x-offset
+    movl    -8(%rbp), %edx        # Load remainder
+    movl    -28(%rbp), %eax       # Load x-offset
+    cmpl    %eax, %edx            # Compare x-offset with remainder
+    cmovle  %edx, %eax            # Move remainder to %eax if less than or equal
+    addl    %ecx, %eax            # Add result to x-offset
 
 .Ltile_x_offset_exit:
-	popq	%rbp                  # Restore base pointer
-	ret                         # Return
-	.cfi_endproc
+    leave                        # Restore base pointer and stack
+    ret                          # Return from function
+
 
 /*
  * determine_tile_h
