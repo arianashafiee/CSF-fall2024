@@ -1409,6 +1409,111 @@ imgproc_grayscale:
  *   -24(%rbp) - foreground (overlay) pixel
  *   -28(%rbp) - background (base) pixel
  */
+    
+    .globl imgproc_grayscale
+imgproc_grayscale:
+	pushq	%rbp                # Save the base pointer
+	movq	%rsp, %rbp          # Set up the new stack frame
+	subq	$48, %rsp           # Allocate 48 bytes of stack space
+	movq	%rdi, -40(%rbp)     # Store input image pointer in stack
+	movq	%rsi, -48(%rbp)     # Store output image pointer in stack
+	movq	-40(%rbp), %rax     # Load input image pointer into %rax
+	movl	(%rax), %eax        # Load image width from input image structure
+	movl	%eax, -12(%rbp)     # Store image width in stack variable
+	movq	-40(%rbp), %rax     # Load input image pointer again into %rax
+	movl	4(%rax), %eax       # Load image height from input image structure
+	movl	%eax, -16(%rbp)     # Store image height in stack variable
+	cmpl	$0, -12(%rbp)       # Compare image width with 0
+	jle	    .Lgrayscale_exit    # Exit if width <= 0
+	cmpl	$0, -16(%rbp)       # Compare image height with 0
+	jle	    .Lgrayscale_exit    # Exit if height <= 0
+	movl	$0, -4(%rbp)        # Initialize row index (y) to 0
+	jmp	    .Lgrayscale_y_loop  # Jump to the start of the row loop
+
+.Lgrayscale_x_loop:               # Start of the column loop
+	movl	$0, -8(%rbp)        # Initialize column index (x) to 0
+	jmp	    .Lgrayscale_process_pixel # Jump to pixel processing
+
+.Lgrayscale_pixel_processing:     # Begin pixel processing
+	movq	-40(%rbp), %rax     # Load input image pointer into %rax
+	movq	8(%rax), %rdx       # Load pixel array pointer from input image
+	movl	-4(%rbp), %eax      # Load current row index (y)
+	imull	-12(%rbp), %eax     # Multiply by image width to get row offset
+	movl	%eax, %ecx          # Store row offset in %ecx
+	movl	-8(%rbp), %eax      # Load current column index (x)
+	addl	%ecx, %eax          # Add column index to row offset
+	cltq                     # Convert to 64-bit value
+	salq	$2, %rax            # Multiply by 4 (pixel size)
+	addq	%rdx, %rax          # Add to pixel array base address
+	movl	(%rax), %eax        # Load pixel value from input image
+	movl	%eax, -20(%rbp)     # Store current pixel value in stack
+
+	movl	-20(%rbp), %eax     # Load current pixel value
+	movl	%eax, %edi          # Move pixel value to %edi for the to_grayscale call
+	call	to_grayscale        # Call to_grayscale function
+	movl	%eax, -24(%rbp)     # Store grayscale value in stack
+
+	movq	-48(%rbp), %rax     # Load output image pointer into %rax
+	movq	8(%rax), %rdx       # Load pixel array pointer from output image
+	movl	-4(%rbp), %eax      # Load current row index (y)
+	imull	-12(%rbp), %eax     # Multiply by image width to get row offset
+	movl	%eax, %ecx          # Store row offset in %ecx
+	movl	-8(%rbp), %eax      # Load current column index (x)
+	addl	%ecx, %eax          # Add column index to row offset
+	cltq                     # Convert to 64-bit value
+	salq	$2, %rax            # Multiply by 4 (pixel size)
+	addq	%rax, %rdx          # Add to pixel array base address
+	movl	-24(%rbp), %eax     # Load grayscale pixel value
+	movl	%eax, (%rdx)        # Store grayscale pixel in output image
+
+	addl	$1, -8(%rbp)        # Increment column index (x)
+.Lgrayscale_process_pixel:        # Continue processing pixels in the row
+	movl	-8(%rbp), %eax      # Load current column index (x)
+	cmpl	-12(%rbp), %eax     # Compare x with image width
+	jl	    .Lgrayscale_pixel_processing # Jump to pixel processing if x < width
+
+	addl	$1, -4(%rbp)        # Increment row index (y)
+.Lgrayscale_y_loop:               # Continue processing rows
+	movl	-4(%rbp), %eax      # Load current row index (y)
+	cmpl	-16(%rbp), %eax     # Compare y with image height
+	jl	    .Lgrayscale_x_loop  # Jump to column loop if y < height
+
+	jmp	    .Lgrayscale_return  # Jump to return section
+
+.Lgrayscale_exit:                 # Exit if invalid image dimensions
+	nop                          # No operation
+
+.Lgrayscale_return:               # Return from the function
+	leave                        # Restore stack and base pointer
+	ret                          # Return to caller
+
+
+/*
+ * int imgproc_composite( struct Image *base_img, struct Image *overlay_img, struct Image *output_img );
+ *
+ * Overlay a foreground image on a background image, using each foreground
+ * pixel's alpha value to determine its degree of opacity in order to blend
+ * it with the corresponding background pixel.
+ *
+ * Parameters:
+ *   %rdi - pointer to base (background) image
+ *   %rsi - pointer to overlay (foreground) image
+ *   %rdx - pointer to output image (result of blending)
+ *
+ * Returns:
+ *   1 if successful, or 0 if the transformation fails because the base
+ *   and overlay images do not have the same dimensions.
+ *
+ * Memory use:
+ *   -48(%rbp) - base image pointer
+ *   -56(%rbp) - overlay image pointer
+ *   -64(%rbp) - output image pointer
+ *   -12(%rbp) - row index (y)
+ *   -16(%rbp) - column index (x)
+ *   -20(%rbp) - pixel index (1D)
+ *   -24(%rbp) - foreground (overlay) pixel
+ *   -28(%rbp) - background (base) pixel
+ */
     .globl imgproc_composite
 imgproc_composite:
     # Prologue: set up stack frame
@@ -1428,7 +1533,7 @@ imgproc_composite:
     movq    -56(%rbp), %rax      # Load overlay image pointer
     movl    (%rax), %eax         # Load width of overlay image
     cmpl    %eax, %edx           # Compare base and overlay widths
-    jne     .Lcomposite_size_mismatch      # Jump to failure if widths do not match
+    jne     .Lsize_mismatch      # Jump to failure if widths do not match
 
     # Check if the base and overlay images have the same height
     movq    -48(%rbp), %rax      # Load base image pointer
@@ -1436,29 +1541,29 @@ imgproc_composite:
     movq    -56(%rbp), %rax      # Load overlay image pointer
     movl    4(%rax), %eax        # Load height of overlay image
     cmpl    %eax, %edx           # Compare base and overlay heights
-    je      .Lcomposite_size_match         # If height matches, continue processing
+    je      .Lsize_match         # If height matches, continue processing
 
-.Lcomposite_size_mismatch:
+.Lsize_mismatch:
     movl    $0, %eax             # Set return value to 0 (failure)
-    jmp     .Lcomposite_ret             # Jump to return
+    jmp     .Lret             # Jump to return
 
-.Lcomposite_size_match:
+.Lsize_match:
     # Ensure valid dimensions (both width and height > 0)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
     testl   %eax, %eax           # Check if width > 0
-    jle     .Lcomposite_invalid_dimensions # Jump to failure if width <= 0
+    jle     .Linvalid_dimensions # Jump to failure if width <= 0
 
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    4(%rax), %eax        # Load height of base image
     testl   %eax, %eax           # Check if height > 0
-    jg      .Lcomposite_process_images     # If height > 0, continue processing
+    jg      .Lprocess_images     # If height > 0, continue processing
 
-.Lcomposite_invalid_dimensions:
+.Linvalid_dimensions:
     movl    $1, %eax             # Set return value to 1 (failure due to invalid dimensions)
-    jmp     .Lcomposite_ret             # Jump to return
+    jmp     .Lret             # Jump to return
 
-.Lcomposite_process_images:
+.Lprocess_images:
     # Copy dimensions to output image (width and height)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %edx         # Load width of base image
@@ -1471,21 +1576,13 @@ imgproc_composite:
     movl    %edx, 4(%rax)        # Copy height to output image
 
     movl    $0, -12(%rbp)        # Initialize row index (y) to 0
-    jmp     .Lcomposite_rows_loop           # Jump to row loop
+    jmp     .Lrows_loop           # Jump to row loop
 
-.Lcomposite_row_done:
+.Lrow_done:
     movl    $0, -16(%rbp)        # Initialize column index (x) to 0
-<<<<<<< HEAD
     jmp     .Lcol_loop        # Jump to pixel processing loop
-=======
-    jmp     .Lcomposite_cols_loop        # Jump to pixel processing loop
->>>>>>> c0a99142cf5547821b84ce803feb04ad8efce9f2
 
-<<<<<<< HEAD
 .Lprocess_pixel:
-=======
-.Lcomposite_processing_pixel:
->>>>>>> c0a99142cf5547821b84ce803feb04ad8efce9f2
     # Calculate the 1D index of the current pixel in the image arrays
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
@@ -1530,32 +1627,24 @@ imgproc_composite:
     movl    %eax, (%rbx)         # Store blended pixel in output image
 
     addl    $1, -16(%rbp)        # Increment column index (x)
-<<<<<<< HEAD
 .Lcol_loop:
-=======
-.Lcomposite_cols_loop:
->>>>>>> c0a99142cf5547821b84ce803feb04ad8efce9f2
     # Column loop (iterate over all pixels in the row)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
     cmpl    %eax, -16(%rbp)      # Compare column index (x) with width
-<<<<<<< HEAD
     jl      .Lprocess_pixel      # If x < width, process next pixel
-=======
-    jl      .Lcomposite_processing_pixel      # If x < width, process next pixel
->>>>>>> c0a99142cf5547821b84ce803feb04ad8efce9f2
 
     addl    $1, -12(%rbp)        # Increment row index (y)
-.Lcomposite_rows_loop:
+.Lrows_loop:
     # Row loop (iterate over all rows)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    4(%rax), %eax        # Load height of base image
     cmpl    %eax, -12(%rbp)      # Compare row index (y) with height
-    jl      .Lcomposite_row_done           # If y < height, process next row
+    jl      .Lrow_done           # If y < height, process next row
 
     movl    $1, %eax             # Set return value to 1 (success)
 
-.Lcomposite_ret:
+.Lret:
     movq    -8(%rbp), %rbx       # Restore %rbx
     leave                        # Restore base pointer and stack
     ret                          # Return to caller
