@@ -1269,7 +1269,7 @@ return_function:
     leave                       # Restore stack frame
     ret                         # Return from function
 
- * void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
+ /* void imgproc_grayscale( struct Image *input_img, struct Image *output_img );
  *
  * Transform image by converting each pixel to grayscale.
  * This transformation always succeeds.
