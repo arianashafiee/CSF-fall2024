@@ -1188,24 +1188,24 @@ imgproc_tile:
 
 	# Check if tiling factor n is valid
 	cmpl	$0, -28(%rbp)           # Compare tiling factor (n) with 0
-	jle	.Linvalid_tile_dimensions           # Jump to failure if n <= 0
+	jle	.Ltile_invalid_dimensions           # Jump to failure if n <= 0
 
 	# Check if input image has valid dimensions (width > 0, height > 0)
 	movq	-24(%rbp), %rax         # Load input image pointer
 	movl	(%rax), %eax            # Load width of input image
 	testl	%eax, %eax              # Check if width > 0
-	jle	.Linvalid_tile_dimensions           # Jump to failure if width <= 0
+	jle	.Ltile_invalid_dimensions           # Jump to failure if width <= 0
 
 	movq	-24(%rbp), %rax         # Load input image pointer
 	movl	4(%rax), %eax           # Load height of input image
 	testl	%eax, %eax              # Check if height > 0
-	jg	.Lvalid_tile_dimensions  # Jump if height > 0
+	jg	.Ltile_valid_dimensions  # Jump if height > 0
 
-.Linvalid_tile_dimensions:
+.Ltile_invalid_dimensions:
 	movl	$0, %eax                # Set return value to 0 (failure)
-	jmp	.Lreturn                 # Jump to return
+	jmp	.Ltile_return                 # Jump to return
 
-.Lvalid_tile_dimensions:
+.Ltile_valid_dimensions:
 	# Check if all tiles are non-empty
 	movq	-24(%rbp), %rax         # Load input image pointer
 	movl	4(%rax), %ecx           # Load height of input image
@@ -1216,20 +1216,20 @@ imgproc_tile:
 	movl	%eax, %edi              # Move width to %edi
 	call	all_tiles_nonempty       # Check if all tiles are non-empty
 	testl	%eax, %eax              # Test if result is true
-	jne	.Lprocess_tiles          # Jump to process tiles if true
+	jne	.Ltile_process_tiles          # Jump to process tiles if true
 
 	movl	$0, %eax                # Set return value to 0 (failure)
-	jmp	.Lreturn                 # Jump to return
+	jmp	.Ltile_return                 # Jump to return
 
-.Lprocess_tiles:
+.Ltile_process_tiles:
 	movl	$0, -4(%rbp)            # Initialize row index (y) to 0
-	jmp	.Lrow_loop_starting         # Jump to row loop
+	jmp	.Ltile_row_loop_starting         # Jump to row loop
 
-.Lcolumn_loop_start:
+.Ltile_column_loop_start:
 	movl	$0, -8(%rbp)            # Initialize column index (x) to 0
-	jmp	.Lcolumn_loop            # Jump to column loop
+	jmp	.Ltile_column_loop            # Jump to column loop
 
-.Lprocess_tile:
+.Ltile_process_tile:
 	# Process a single tile
 	movl	-28(%rbp), %edi         # Load tiling factor (n)
 	movl	-8(%rbp), %ecx          # Load column index (x)
@@ -1241,23 +1241,23 @@ imgproc_tile:
 	call	copy_tile               # Call copy_tile to process the current tile
 	addl	$1, -8(%rbp)            # Increment column index (x)
 
-.Lcolumn_loop:
+.Ltile_column_loop:
 	# Column loop: iterate over columns in the current row
 	movl	-8(%rbp), %eax          # Load column index (x)
 	cmpl	-28(%rbp), %eax         # Compare column index with tiling factor (n)
-	jl	.Lprocess_tile           # If x < n, process the next tile
+	jl	.Ltile_process_tile           # If x < n, process the next tile
 
 	addl	$1, -4(%rbp)            # Increment row index (y)
 
-.Lrow_loop_starting:
+.Ltile_row_loop_starting:
 	# Row loop: iterate over rows
 	movl	-4(%rbp), %eax          # Load row index (y)
 	cmpl	-28(%rbp), %eax         # Compare row index with tiling factor (n)
-	jl	.Lcolumn_loop      # If y < n, process the next row
+	jl	.Ltile_column_loop      # If y < n, process the next row
 
 	movl	$1, %eax                # Set return value to 1 (success)
 
-.Lreturn:
+.Ltile_return:
 	leave                          # Restore base pointer and stack
 	ret                            # Return from function
 
@@ -1413,7 +1413,7 @@ imgproc_composite:
     movq    -56(%rbp), %rax      # Load overlay image pointer
     movl    (%rax), %eax         # Load width of overlay image
     cmpl    %eax, %edx           # Compare base and overlay widths
-    jne     .Lsize_mismatch      # Jump to failure if widths do not match
+    jne     .Lcomposite_size_mismatch      # Jump to failure if widths do not match
 
     # Check if the base and overlay images have the same height
     movq    -48(%rbp), %rax      # Load base image pointer
@@ -1421,29 +1421,29 @@ imgproc_composite:
     movq    -56(%rbp), %rax      # Load overlay image pointer
     movl    4(%rax), %eax        # Load height of overlay image
     cmpl    %eax, %edx           # Compare base and overlay heights
-    je      .Lsize_match         # If height matches, continue processing
+    je      .Lcomposite_size_match         # If height matches, continue processing
 
-.Lsize_mismatch:
+.Lcomposite_size_mismatch:
     movl    $0, %eax             # Set return value to 0 (failure)
-    jmp     .Lret             # Jump to return
+    jmp     .Lcomposite_ret             # Jump to return
 
-.Lsize_match:
+.Lcomposite_size_match:
     # Ensure valid dimensions (both width and height > 0)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
     testl   %eax, %eax           # Check if width > 0
-    jle     .Linvalid_dimensions # Jump to failure if width <= 0
+    jle     .Lcomposite_invalid_dimensions # Jump to failure if width <= 0
 
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    4(%rax), %eax        # Load height of base image
     testl   %eax, %eax           # Check if height > 0
-    jg      .Lprocess_images     # If height > 0, continue processing
+    jg      .Lcomposite_process_images     # If height > 0, continue processing
 
-.Linvalid_dimensions:
+.Lcomposite_invalid_dimensions:
     movl    $1, %eax             # Set return value to 1 (failure due to invalid dimensions)
-    jmp     .Lret             # Jump to return
+    jmp     .Lcomposite_ret             # Jump to return
 
-.Lprocess_images:
+.Lcomposite_process_images:
     # Copy dimensions to output image (width and height)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %edx         # Load width of base image
@@ -1456,13 +1456,13 @@ imgproc_composite:
     movl    %edx, 4(%rax)        # Copy height to output image
 
     movl    $0, -12(%rbp)        # Initialize row index (y) to 0
-    jmp     .Lrows_loop           # Jump to row loop
+    jmp     .Lcomposite_rows_loop           # Jump to row loop
 
-.Lrow_done:
+.Lcomposite_row_done:
     movl    $0, -16(%rbp)        # Initialize column index (x) to 0
-    jmp     .Lcols_loop        # Jump to pixel processing loop
+    jmp     .Lcomposite_cols_loop        # Jump to pixel processing loop
 
-.Lprocessing_pixel:
+.Lcomposite_processing_pixel:
     # Calculate the 1D index of the current pixel in the image arrays
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
@@ -1507,24 +1507,24 @@ imgproc_composite:
     movl    %eax, (%rbx)         # Store blended pixel in output image
 
     addl    $1, -16(%rbp)        # Increment column index (x)
-.Lcols_loop:
+.Lcomposite_cols_loop:
     # Column loop (iterate over all pixels in the row)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    (%rax), %eax         # Load width of base image
     cmpl    %eax, -16(%rbp)      # Compare column index (x) with width
-    jl      .Lprocessing_pixel      # If x < width, process next pixel
+    jl      .Lcomposite_processing_pixel      # If x < width, process next pixel
 
     addl    $1, -12(%rbp)        # Increment row index (y)
-.Lrows_loop:
+.Lcomposite_rows_loop:
     # Row loop (iterate over all rows)
     movq    -48(%rbp), %rax      # Load base image pointer
     movl    4(%rax), %eax        # Load height of base image
     cmpl    %eax, -12(%rbp)      # Compare row index (y) with height
-    jl      .Lrow_done           # If y < height, process next row
+    jl      .Lcomposite_row_done           # If y < height, process next row
 
     movl    $1, %eax             # Set return value to 1 (success)
 
-.Lret:
+.Lcomposite_ret:
     movq    -8(%rbp), %rbx       # Restore %rbx
     leave                        # Restore base pointer and stack
     ret                          # Return to caller
