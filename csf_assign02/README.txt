@@ -71,23 +71,10 @@ void copy_tile(struct Image *out_img, struct Image *img, int tile_row, int tile_
 Eric Guan:
 
 MS1:
-test_all_tiles_nonempty(TestObjs *objs)
-test_determine_tile_w(TestObjs *objs)
-test_determine_tile_x_offset(TestObjs *objs)
-test_determine_tile_h(TestObjs *objs)
-test_determine_tile_y_offset(TestObjs *objs)
-test_copy_tile(TestObjs *objs)
-test_get_r(TestObjs *objs)
-test_get_g(TestObjs *objs)
-test_get_b(TestObjs *objs)
-test_get_a(TestObjs *objs)
-test_make_pixel(TestObjs *objs)
-test_to_grayscale(TestObjs *objs)
-test_blend_components(TestObjs *objs)
-test_blend_colors(TestObjs *objs)
+nothing
 
 MS2:
-added loop labels
+edited labels to mean something in context of fn
 
 MS3:
 assembly implementations of:
